@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GALERÍA DE ARTE AUDIOVISUAL &bull; Instituto Quimera</title>
+    <title>GALERÍA DE ARTE AUDIOVISUAL &bull; Ecosistema Quimera</title>
     
     <style>
         :root {
@@ -41,59 +41,85 @@
             opacity: 0.7;
         }
 
-        /* PANTALLA DE FACHADA (ENTRADA AL CASTILLO) */
+        /* PANTALLA DE FACHADA (ENTRADA AL CASTILLO REDISEÑADA) */
         #castle-entrance {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.8), #000000), url('Quimeratrix.webp') center/cover;
+            background: radial-gradient(circle at center, rgba(11, 19, 41, 0.85), #000000 85%), url('Quimeratrix.webp') center/cover;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             transition: opacity 1.2s ease, filter 1.2s ease;
+            padding: 2rem;
+        }
+
+        /* PORTÓN / MARCO DE PIEDRA Y LUZ */
+        .castle-portico {
+            position: relative;
+            border: 2px solid rgba(200, 139, 50, 0.4);
+            border-radius: 20px;
+            padding: 3rem 4rem;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(56, 189, 248, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            animation: porticoGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes porticoGlow {
+            0% { border-color: rgba(200, 139, 50, 0.4); box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(56, 189, 248, 0.1); }
+            100% { border-color: rgba(56, 189, 248, 0.7); box-shadow: 0 0 60px rgba(56, 189, 248, 0.25), inset 0 0 40px rgba(200, 139, 50, 0.2); }
         }
 
         .emblem-container {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .emblem-title {
             font-family: Georgia, serif;
-            font-size: clamp(2rem, 5vw, 4rem);
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
             color: var(--accent-gold);
             -webkit-text-stroke: 1px #ffffff;
-            text-shadow: 0 0 20px rgba(200, 139, 50, 0.8), 0 0 40px rgba(56, 189, 248, 0.5);
-            letter-spacing: 0.1em;
+            text-shadow: 0 0 25px rgba(200, 139, 50, 0.9), 0 0 50px rgba(56, 189, 248, 0.6);
+            letter-spacing: 0.08em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
         }
 
         .emblem-subtitle {
             font-family: monospace;
             color: var(--accent-blue);
-            font-size: clamp(0.9rem, 2vw, 1.3rem);
-            margin-top: 0.5rem;
-            letter-spacing: 0.2em;
+            font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
         }
 
         .btn-enter {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             border: 2px solid var(--accent-gold);
             color: #ffffff;
-            padding: 0.8rem 2.5rem;
+            padding: 0.9rem 3rem;
             border-radius: 30px;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(200, 139, 50, 0.4);
+            box-shadow: 0 0 20px rgba(200, 139, 50, 0.5);
             transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
 
         .btn-enter:hover {
             background: var(--accent-gold);
             color: #000000;
-            box-shadow: 0 0 35px var(--accent-gold);
-            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-gold), 0 0 60px var(--accent-blue);
+            transform: scale(1.06);
         }
 
         /* ENTORNOS Y PASILLO 3D */
@@ -260,13 +286,15 @@
 
     <div class="crt-scanlines"></div>
 
-    <!-- FACHADA DEL CASTILLO / PORTÓN DE ENTRADA -->
+    <!-- FACHADA DEL CASTILLO / PORTÓN DE ENTRADA REDISEÑADO -->
     <div id="castle-entrance">
-        <div class="emblem-container">
-            <div class="emblem-title">GALERÍA DE ARTE AUDIOVISUAL</div>
-            <div class="emblem-subtitle">DEL ECOSISTEMA QUIMERA</div>
+        <div class="castle-portico">
+            <div class="emblem-container">
+                <div class="emblem-title">GALERÍA DE ARTE AUDIOVISUAL</div>
+                <div class="emblem-subtitle">DEL ECOSISTEMA QUIMERA</div>
+            </div>
+            <button class="btn-enter" onclick="enterGallery()">ENTRAR A LA GALERÍA</button>
         </div>
-        <button class="btn-enter" onclick="enterGallery()">ENTRAR A LA GALERÍA</button>
     </div>
 
     <!-- HUD INDICADOR DE POSICIÓN -->
@@ -347,10 +375,10 @@
                     if (posZ > 0) posZ -= stepZ;
                     break;
                 case 'left':
-                    rotY += stepRot;
+                    rotY -= stepRot;
                     break;
                 case 'right':
-                    rotY -= stepRot;
+                    rotY += stepRot;
                     break;
                 case 'enter':
                     checkRoomEntry();
@@ -413,7 +441,7 @@
             isModalOpen = false;
         }
 
-        // CAPTURA DE EVENTOS DE TECLADO
+        // CAPTURA DE EVENTOS DE TECLADO (CORREGIDAS LAS DIRECCIONES)
         document.addEventListener('keydown', (e) => {
             switch (e.key) {
                 case 'ArrowUp':
@@ -423,10 +451,10 @@
                     movePlayer('down');
                     break;
                 case 'ArrowLeft':
-                    movePlayer('right');
+                    movePlayer('left');
                     break;
                 case 'ArrowRight':
-                    movePlayer('left');
+                    movePlayer('right');
                     break;
                 case 'Enter':
                     movePlayer('enter');
