@@ -179,7 +179,6 @@
   <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
     <div class="intro-architecture">
       <div class="intro-kicker">Instituto Quimera · Investigación · Docencia · Servicio · Divulgación</div>
-      <!-- Mantener Emblema_QuimeraC3.webp en la misma carpeta que este index.html. -->
       <div class="intro-seal"><img src="Emblema_QuimeraC3.webp" alt="Emblema del Instituto Quimera"></div>
       <h1 class="intro-title">Galería de Arte Audiovisual</h1>
       <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
@@ -264,7 +263,6 @@
   (() => {
     'use strict';
 
-    // Colecciones y nombres de archivo preservados del index de origen.
     const collections = [
       { id: 'ecosystem', title: 'Ecosistema Quimera', short: 'ECOSISTEMA', description: 'Una exposición del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.', images: ['Quimera_Negro.webp','Quimera.webp','Belerofonte_Negro.webp','Belerofonte.webp','Pegaso_Negro.webp','Pegaso.webp','Quimera_Ecosistema01.webp','Quimeratrix.webp'] },
       { id: 'what', title: '¿Qué es Quimera?', short: '¿QUÉ ES QUIMERA?', description: 'La estructura que conecta conocimiento, metodología y aplicación para generar soluciones.', images: ['Quimera_QE.webp','Quimera_QE_Mod.webp','QE_glitch_Q.webp','QE_glitch_U.webp','QE_glitch_I.webp','QE_glitch_M.webp','QE_glitch_E.webp','QE_glitch_R.webp','QE_glitch_A.webp'] },
@@ -317,7 +315,6 @@
     let scene, camera, renderer, world, raycaster, pointer;
     let interactables = [];
     let currentZone = 'intro';
-    let previousZone = 'atrium';
     let activeCollection = null;
     let activeArtworkIndex = 0;
     let yaw = 0, pitch = 0;
@@ -328,12 +325,66 @@
     let emblemMaterialCache = new Map();
     const animatedObjects = [];
 
-    // Estado y reproductor de audio: independiente de la navegación 3D.
+    // Audio SFX sintetizado para pasos e interacciones (Web Audio API)
+    let audioCtx = null;
+    function initSFX() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playFootstepSFX() {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(65, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.08);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(220, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {}
+    }
+
+    function playPortalSFX() {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(540, audioCtx.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    // Estado del reproductor musical
     const audio = new Audio();
     audio.preload = 'metadata';
     let currentTrackIndex = 0;
     let isPlaying = false;
-    let playerWasOpened = false;
     let seeking = false;
 
     function showToast(message) {
@@ -456,7 +507,6 @@
         back.receiveShadow = true;
         world.add(back);
       }
-      // Zócalos de latón y líneas de arquitectura: discretos, no decorativos en exceso.
       const trimMat = material(0x8b6939, .38, .68);
       [-1, 1].forEach((side) => {
         const trim = new THREE.Mesh(new THREE.BoxGeometry(.055, .13, length), trimMat);
@@ -466,7 +516,6 @@
       const floorLine = new THREE.Mesh(new THREE.BoxGeometry(width - .5, .035, .045), material(0x426b7d, .35, .6, { emissive: 0x102a39, emissiveIntensity: .45 }));
       floorLine.position.set(0, .025, -length / 2 + .34);
       world.add(floorLine);
-      // Pilastras modulares a lo largo del recinto.
       const pillarMat = material(0x1a2637, .64, .3);
       const pillarTrim = material(0x8b6939, .36, .7);
       const count = options.pillarCount || Math.max(2, Math.floor(length / 8));
@@ -489,8 +538,6 @@
           world.add(base);
         });
       }
-      // Emblemas retroiluminados en la franja superior de cada tramo mural,
-      // centrados entre pilastras y separados de los bastidores de las obras.
       for (let i = 0; i < pillarPositions.length - 1; i++) {
         const bayCenter = (pillarPositions[i] + pillarPositions[i + 1]) / 2;
         [-1, 1].forEach((side) => {
@@ -503,7 +550,6 @@
       addEmblemFloor(width, length, options.floorEmblemZ ?? 0);
       if (backWall && options.endEmblem !== false) addEndEmblem(width, length, height);
 
-      // Luminarias cálidas espaciadas.
       for (let z = -length / 2 + 3; z <= length / 2 - 2; z += 9) {
         const light = new THREE.PointLight(0xc58c49, .48, 10);
         light.position.set(0, height - .8, z);
@@ -546,7 +592,6 @@
       panel.position.set(0, height / 2, 0);
       panel.castShadow = true;
       group.add(panel);
-      // Bastidores verticales y dintel en arco.
       [-1, 1].forEach((side) => {
         const post = new THREE.Mesh(new THREE.BoxGeometry(.16, height + .35, .42), dark);
         post.position.set(side * (width / 2 + .12), (height + .35) / 2, .04);
@@ -561,7 +606,6 @@
       const crown = new THREE.Mesh(new THREE.BoxGeometry(width + .46, .14, .48), gold);
       crown.position.set(0, height + .02, .04);
       group.add(crown);
-      // Cuarterones de la puerta y tirador.
       const insetMat = material(0x152237, .46, .42);
       for (let i = 0; i < 3; i++) {
         const inset = new THREE.Mesh(new THREE.BoxGeometry(width - .48, .72, .045), insetMat);
@@ -599,7 +643,6 @@
       newWorld(0x080e18);
       addShell(21, 22, 8, true);
       setCamera(0, 1.72, 6.8, 0, 0);
-      // Rosetón de bóveda; el emblema institucional ya retroilumina el pavimento y los muros.
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .035, 8, 96), material(0x8f6a3d, .32, .8, { emissive: 0x2a1708, emissiveIntensity: .22 }));
       ring.rotation.x = Math.PI / 2; ring.position.set(0, 7.82, -2); world.add(ring);
       createPortal({ x: -4.1, z: -10.72, title: 'Ala de Audio', subtitle: 'Rockola holográfica', action: 'audio', accent: 0x72c9d8, width: 3.0, height: 4.2 });
@@ -648,7 +691,6 @@
       newWorld(0x07121c);
       addShell(17, 20, 8, true, { floorEmblemZ: 5.25 });
       setCamera(0, 1.72, 7.1, 0, 0);
-      // Tarima de exhibición y corona lumínica.
       const stage = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.4, .22, 64), material(0x18283a, .38, .45));
       stage.position.set(0, .12, -2.4); stage.receiveShadow = true; world.add(stage);
       const stageRing = new THREE.Mesh(new THREE.TorusGeometry(3.18, .035, 10, 100), material(0x72c9d8, .22, .72, { emissive: 0x174a59, emissiveIntensity: .5 }));
@@ -661,7 +703,6 @@
       core.position.y = 2.05; jukebox.add(core);
       const innerDisk = new THREE.Mesh(new THREE.CylinderGeometry(.94, .94, .12, 64), material(0x0b1420, .22, .78));
       innerDisk.position.y = 3.45; jukebox.add(innerDisk);
-      // Carátula del álbum visible al aproximarse a la rockola.
       const coverTexture = textureLoader.load('Quimera_Electrotango_1600x900.webp');
       coverTexture.encoding = THREE.sRGBEncoding;
       const albumCover = new THREE.Mesh(new THREE.PlaneGeometry(1.35, .76), new THREE.MeshBasicMaterial({ map: coverTexture, side: THREE.DoubleSide }));
@@ -691,7 +732,6 @@
       newWorld(0x100d0a);
       addShell(26, 32, 8, true);
       setCamera(0, 1.72, 11.2, 0, 0);
-      // Ocho accesos laterales, cuatro a cada lado del corredor central.
       const zPositions = [10.2, 3.4, -3.4, -10.2];
       collections.forEach((collection, index) => {
         const side = index < 4 ? -1 : 1;
@@ -724,7 +764,6 @@
       const inset = new THREE.Mesh(new THREE.PlaneGeometry(width, height), innerMat);
       inset.position.z = .075;
       frameGroup.add(inset);
-      // Filete interior doble.
       const bars = [
         [width + .08, .045, 0, height / 2 + .045], [width + .08, .045, 0, -height / 2 - .045],
         [.045, height + .08, width / 2 + .045, 0], [.045, height + .08, -width / 2 - .045, 0]
@@ -735,6 +774,8 @@
       });
       const filename = collection.images[index];
       let imageMesh;
+
+      // Lazy Loading: Carga progresiva optimizada de imágenes
       const texture = textureLoader.load(encodeURI(filename), (tex) => {
         tex.encoding = THREE.sRGBEncoding;
         tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -761,12 +802,11 @@
       $('touch-controls').classList.add('active');
       const rows = Math.ceil(collection.images.length / 2);
       galleryLength = Math.max(27, 8 + rows * 4.5);
-      const pillarCount = rows; // Un vano arquitectónico por cada pareja de obras.
+      const pillarCount = rows;
       const bayWidth = (galleryLength - 2.2) / pillarCount;
       newWorld(0x080e18);
       addShell(20, galleryLength, 8, true, { pillarCount });
       setCamera(0, 1.72, galleryLength / 2 - 3.8, 0, 0);
-      // Cada bastidor queda centrado en el vano entre dos columnas; nunca se superpone con una pilastra.
       collection.images.forEach((filename, index) => {
         const side = index % 2 === 0 ? -1 : 1;
         const row = Math.floor(index / 2);
@@ -774,21 +814,20 @@
         const z = firstPillarZ + (pillarCount - row - .5) * bayWidth;
         makeArtworkFrame(collection, index, side * 9.72, 2.82, z, side, bayWidth);
       });
-      // El fondo de cada una de las ocho salas utiliza el emblema institucional y su nombre.
       zoneTitle.textContent = collection.title;
       setCaption(`${collection.description} <strong>Recorre la sala</strong> con W/A/S/D o flechas. Cada obra está centrada entre columnas: haz clic o acércate y pulsa Enter para ampliarla.`);
       $('back-button').style.visibility = 'visible';
     }
 
-    function enterAudio() { buildAudioWing(); }
-    function enterVisual() { buildVisualHub(); }
+    function enterAudio() { playPortalSFX(); buildAudioWing(); }
+    function enterVisual() { playPortalSFX(); buildVisualHub(); }
 
     function handleAction(action, data) {
       if (!action) return;
       if (action === 'audio') enterAudio();
       else if (action === 'visual') enterVisual();
-      else if (action === 'collection') buildCollectionRoom(data);
-      else if (action === 'openAudio') openAudioPlayer();
+      else if (action === 'collection') { playPortalSFX(); buildCollectionRoom(data); }
+      else if (action === 'openAudio') { playPortalSFX(); openAudioPlayer(); }
       else if (action === 'artwork') openArtwork(data.collection, data.index);
     }
 
@@ -806,6 +845,7 @@
 
     function moveInGallery(direction) {
       if (!camera || !['atrium', 'audio', 'visualHub', 'collection'].includes(currentZone)) return;
+      playFootstepSFX();
       const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
       const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
       const step = 1.18;
@@ -813,7 +853,7 @@
       if (direction === 'back') camera.position.addScaledVector(forward, -step);
       if (direction === 'left') camera.position.addScaledVector(right, -step);
       if (direction === 'right') camera.position.addScaledVector(right, step);
-      // Límites físicos distintos para cada estancia.
+      
       if (currentZone === 'collection') {
         camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.6, 7.6);
         camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
@@ -845,17 +885,19 @@
     }
 
     function goBack() {
+      playPortalSFX();
       if (currentZone === 'audio' || currentZone === 'visualHub') buildAtrium();
       else if (currentZone === 'collection') buildVisualHub();
     }
 
     function enterCastle() {
+      initSFX();
+      playPortalSFX();
       intro.classList.add('leaving');
       topbar.classList.add('visible');
       buildAtrium();
     }
 
-    // Modal de imágenes: clic fuera, botón X o Escape cierran el visor.
     function openArtwork(collection, index) {
       activeCollection = collection;
       activeArtworkIndex = index;
@@ -887,7 +929,6 @@
       updateArtworkViewer();
     }
 
-    // Reproductor robusto: la lista se construye por separado de la actualización del estado.
     function renderPlaylist(filter = '') {
       const list = $('playlist');
       const query = filter.trim().toLocaleLowerCase('es');
@@ -962,7 +1003,6 @@
     function previousTrack() { selectTrack((currentTrackIndex - 1 + soundTracks.length) % soundTracks.length, true); }
 
     function openAudioPlayer() {
-      playerWasOpened = true;
       miniPlayer.classList.remove('hidden');
       audioOverlay.classList.add('open');
       renderPlaylist($('track-search').value);
@@ -985,10 +1025,9 @@
       if (audio.src) showToast(`No se encontró el archivo: ${soundTracks[currentTrackIndex].file}`);
     });
 
-    // Eventos de interfaz.
     $('enter-castle').addEventListener('click', enterCastle);
     $('back-button').addEventListener('click', goBack);
-    $('home-button').addEventListener('click', buildAtrium);
+    $('home-button').addEventListener('click', () => { playPortalSFX(); buildAtrium(); });
     $('viewer-close').addEventListener('click', closeArtwork);
     $('viewer-prev').addEventListener('click', () => changeArtwork(-1));
     $('viewer-next').addEventListener('click', () => changeArtwork(1));
@@ -1009,9 +1048,9 @@
     imageOverlay.addEventListener('click', (event) => { if (event.target === imageOverlay) closeArtwork(); });
     audioOverlay.addEventListener('click', (event) => { if (event.target === audioOverlay) closeAudioPlayer(); });
 
-    // Ratón y teclado: clic sobre elementos 3D, arrastre para mirar y WASD para recorrer.
     canvas.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) return;
+      initSFX();
       dragging = true;
       pointerStart = { x: event.clientX, y: event.clientY, moved: false };
       canvas.setPointerCapture?.(event.pointerId);
@@ -1022,7 +1061,6 @@
       const dy = event.clientY - pointerStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 4) pointerStart.moved = true;
       if (pointerStart.moved) {
-        // Cámara invertida: arrastrar a derecha mira a izquierda; arrastrar abajo mira a bóveda.
         yaw += dx * .0032;
         pitch = THREE.MathUtils.clamp(pitch + dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
         camera.rotation.set(pitch, yaw, 0);
@@ -1036,6 +1074,7 @@
     canvas.addEventListener('pointercancel', () => { dragging = false; pointerStart = null; });
 
     window.addEventListener('keydown', (event) => {
+      initSFX();
       if (imageOverlay.classList.contains('open')) {
         if (event.key === 'Escape') closeArtwork();
         if (event.key === 'ArrowLeft') changeArtwork(-1);
@@ -1081,7 +1120,7 @@
           emblemBaseTexture = await new Promise((resolve) => textureLoader.load('Emblema_QuimeraC3.webp', resolve, undefined, () => resolve(null)));
           if (emblemBaseTexture) { emblemBaseTexture.encoding = THREE.sRGBEncoding; emblemBaseTexture.anisotropy = 8; }
         } catch (emblemError) {
-          console.warn('No se pudo cargar Emblema_QuimeraC3.webp. La galería continuará sin los emblemas 3D.', emblemError);
+          console.warn('No se pudo cargar Emblema_QuimeraC3.webp.', emblemError);
         }
         clock = new THREE.Clock();
         scene = new THREE.Scene();
@@ -1115,10 +1154,6 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      // No se pausa el audio al cambiar de pestaña: el usuario conserva el control.
     });
 
     window.addEventListener('DOMContentLoaded', init);
