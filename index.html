@@ -35,13 +35,23 @@
     .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,.24) 100%); }
     .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
 
-    /* Umbral de entrada con animación inicial Blanco -> Negro -> Holograma */
-    @keyframes whiteToBlackFade {
-      0% { background-color: #ffffff; }
-      35% { background-color: #ffffff; }
-      100% { background: radial-gradient(ellipse at 50% 42%, #17243a 0%, #0a1220 44%, #03060c 100%); }
+    /* Capa de fundido inicial: Blanco Puro -> Desvanecimiento a Negro */
+    @keyframes flashFadeOut {
+      0% { opacity: 1; background-color: #ffffff; }
+      30% { opacity: 1; background-color: #ffffff; }
+      100% { opacity: 0; background-color: #ffffff; pointer-events: none; }
     }
 
+    #flash-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #ffffff;
+      pointer-events: none;
+      animation: flashFadeOut 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    /* Animación de construcción holográfica para la fachada */
     @keyframes holoBuildUp {
       0% { opacity: 0; transform: scale(0.94) translateY(20px); filter: blur(10px) brightness(2.2); }
       50% { opacity: 0.4; filter: blur(4px) brightness(1.6); }
@@ -49,9 +59,10 @@
       100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0) brightness(1); }
     }
 
+    /* Animación de ensamblaje para el emblema */
     @keyframes emblemHoloPulse {
-      0% { opacity: 0; transform: scale(0.8) rotate(-10deg); filter: drop-shadow(0 0 0px var(--cyan)); }
-      60% { opacity: 0.7; transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 25px var(--cyan)); }
+      0% { opacity: 0; transform: scale(0.7) rotate(-15deg); filter: drop-shadow(0 0 0px var(--cyan)); }
+      60% { opacity: 0.7; transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 30px var(--cyan)); }
       100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 18px rgba(199,154,85,.3)) drop-shadow(0 0 32px rgba(114,201,216,.15)); }
     }
 
@@ -63,7 +74,6 @@
       place-items: center; 
       padding: 28px; 
       background: radial-gradient(ellipse at 50% 42%, #17243a 0%, #0a1220 44%, #03060c 100%); 
-      animation: whiteToBlackFade 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
       transition: opacity 1s ease, visibility 1s ease; 
     }
     #intro-screen.leaving { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -84,7 +94,7 @@
       box-shadow: inset 0 0 100px rgba(92,154,180,.08), 0 0 100px rgba(0,0,0,.6); 
       overflow: hidden; 
       opacity: 0;
-      animation: holoBuildUp 1.4s ease 0.7s forwards;
+      animation: holoBuildUp 1.3s ease 0.4s forwards;
     }
     .intro-architecture::before { content: ""; position: absolute; inset: 15px 15px 0; border: 1px solid rgba(199,154,85,.2); border-bottom: 0; border-radius: 48% 48% 0 0 / 23% 23% 0 0; pointer-events: none; }
     .intro-architecture::after { content: ""; position: absolute; left: 50%; top: 16%; width: min(55vw, 510px); height: min(55vw, 510px); transform: translateX(-50%); border: 1px solid rgba(114,201,216,.12); border-radius: 50%; box-shadow: 0 0 80px rgba(114,201,216,.06), inset 0 0 80px rgba(114,201,216,.04); pointer-events: none; }
@@ -92,7 +102,7 @@
     .intro-title { z-index: 1; max-width: 760px; margin: 28px 0 10px; text-align: center; font: 500 clamp(1.55rem, 4vw, 3.2rem)/1.22 var(--serif); letter-spacing: .055em; color: var(--gold-light); text-shadow: 0 6px 28px rgba(0,0,0,.7); }
     .intro-subtitle { z-index: 1; max-width: 580px; text-align: center; color: #c3cbd5; font-size: clamp(.8rem, 1.5vw, .98rem); line-height: 1.8; letter-spacing: .04em; }
     .intro-seal { position: relative; z-index: 1; width: clamp(118px, 15vw, 178px); height: clamp(124px, 16vw, 188px); margin: 10px 0 0; display: grid; place-items: center; }
-    .intro-seal img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; animation: emblemHoloPulse 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s forwards; }
+    .intro-seal img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; animation: emblemHoloPulse 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s forwards; }
     .intro-button { position: relative; z-index: 1; margin-top: 34px; min-width: 230px; padding: 15px 26px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.18), rgba(199,154,85,.04)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
     .intro-button:hover { background: rgba(199,154,85,.24); box-shadow: 0 0 32px rgba(199,154,85,.18); transform: translateY(-2px); }
     .intro-foot { z-index: 1; margin-top: 24px; text-transform: uppercase; letter-spacing: .2em; font-size: .58rem; color: #778598; text-align: center; }
@@ -220,6 +230,9 @@
   </style>
 </head>
 <body>
+  <!-- Capa independiente de fundido Blanco a Negro -->
+  <div id="flash-overlay" aria-hidden="true"></div>
+
   <canvas id="world" aria-label="Recorrido tridimensional por la Galería de Arte Audiovisual del Ecosistema Quimera"></canvas>
   <div class="vignette"></div><div class="grain"></div>
 
@@ -386,8 +399,6 @@
       if (!audioCtx) return;
       try {
         const now = audioCtx.currentTime;
-        
-        // Impacto principal del paso sobre piedra
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         const filter = audioCtx.createBiquadFilter();
@@ -409,12 +420,11 @@
         osc.start(now);
         osc.stop(now + 0.22);
 
-        // Sistema de eco de galería real (Delay red para reverberación espacial)
         const delay = audioCtx.createDelay();
-        delay.delayTime.setValueAtTime(0.22, now); // Retardo del eco en pasillo
+        delay.delayTime.setValueAtTime(0.22, now);
 
         const feedback = audioCtx.createGain();
-        feedback.gain.setValueAtTime(0.55, now); // Retroalimentación rica para que resuene bien
+        feedback.gain.setValueAtTime(0.55, now);
 
         const echoFilter = audioCtx.createBiquadFilter();
         echoFilter.type = 'bandpass';
@@ -424,7 +434,7 @@
         osc.connect(delay);
         delay.connect(echoFilter);
         echoFilter.connect(feedback);
-        feedback.connect(delay); // Bucle de eco
+        feedback.connect(delay);
         delay.connect(audioCtx.destination);
       } catch (e) {}
     }
