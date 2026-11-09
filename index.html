@@ -203,7 +203,7 @@
             text-align: center;
         }
 
-        /* MINI-REPRODUCTOR FLOTANTE EN LA ESQUINA SUPERIOR IZQUIERDA */
+        /* MINI-REPRODUCTOR FLOTANTE (ESQUINA SUPERIOR IZQUIERDA) */
         #mini-player {
             position: fixed;
             top: 1.5rem; left: 1.5rem;
@@ -445,6 +445,15 @@
     <!-- HUD GUÍA EN PANTALLA -->
     <div id="hud-info">PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]</div>
 
+    <!-- MINI REPRODUCTOR PERSISTENTE (ESQUINA SUPERIOR IZQUIERDA) -->
+    <div id="mini-player">
+        <span style="color: var(--accent-gold);">🎵</span>
+        <div class="mini-track-title" id="mini-track-name">Selecciona música en la Rockola</div>
+        <button class="mini-btn" onclick="prevTrack()">◀</button>
+        <button class="mini-btn" id="mini-play-btn" onclick="togglePlay()">▶</button>
+        <button class="mini-btn" onclick="nextTrack()">▶</button>
+    </div>
+
     <!-- CONTENEDOR 3D WEBGL -->
     <canvas id="webgl-canvas"></canvas>
 
@@ -530,8 +539,7 @@
         let audioElement = new Audio();
         let isPlaying = false;
 
-        // 🖼️ LAS 8 SECCIONES VISUALES AMPLIADAS (CON SUS MÚLTIPLES FOTOS)
-        // Puedes agregar los nombres reales de tus archivos en cada arreglo 'images'
+        // 🖼️ TUS 8 SECCIONES VISUALES CON LAS 97 IMÁGENES INTEGRADAS
         const roomsData = [
             { id: 1, z: -15, type: "audio", title: "🎵 SALA DE AUDIO", desc: "Cabina acústica oficial del Instituto Quimera. Disfruta de las 24 pistas musicales del soundtrack oficial." },
             { id: 2, z: -30, type: "visual", title: "🖼️ 00 - ECOSISTEMA QUIMERA", desc: "Exposición visual del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.", images: ["Quimera_Negro.webp", "Quimera.webp", "Belerofonte_Negro.webp", "Belerofonte.webp", "Pegaso_Negro.webp", "Pegaso.webp", "Quimera_Ecosistema01.webp", "Quimeratrix.webp"] },
@@ -669,9 +677,10 @@
             animate();
         }
 
-        // FUNCIONES DE CONTROL DE AUDIO REAL
+        // FUNCIONES DE CONTROL DE AUDIO REAL Y SINCRONIZACIÓN DEL MINI-REPRODUCTOR
         function setupPlaylistUI() {
             const container = document.getElementById('playlist-container');
+            if (!container) return;
             container.innerHTML = '';
             soundTracks.forEach((track, index) => {
                 const div = document.createElement('div');
@@ -680,7 +689,7 @@
                 div.onclick = () => loadAndPlayTrack(index);
                 container.appendChild(div);
             });
-            updateTrackInfo();
+            updateAudioUI();
         }
 
         function loadAndPlayTrack(index) {
@@ -688,8 +697,7 @@
             audioElement.src = soundTracks[currentTrackIndex].file;
             audioElement.play().then(() => {
                 isPlaying = true;
-                updatePlayButton();
-                setupPlaylistUI();
+                updateAudioUI();
             }).catch(err => {
                 console.log("Esperando interacción del usuario:", err);
             });
@@ -707,7 +715,7 @@
                 audioElement.play();
                 isPlaying = true;
             }
-            updatePlayButton();
+            updateAudioUI();
         }
 
         function nextTrack() {
@@ -720,12 +728,28 @@
             loadAndPlayTrack(currentTrackIndex);
         }
 
-        function updatePlayButton() {
-            document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
-        }
+        function updateAudioUI() {
+            const track = soundTracks[currentTrackIndex];
+            
+            // Actualizar textos en la Rockola (Modal)
+            const trackNameEl = document.getElementById('current-track-name');
+            if (trackNameEl) trackNameEl.textContent = `🎵 REPRODUCIENDO: ${track.title}`;
+            
+            // Actualizar textos en el Mini-Reproductor Flotante
+            const miniNameEl = document.getElementById('mini-track-name');
+            if (miniNameEl) miniNameEl.textContent = track.title;
 
-        function updateTrackInfo() {
-            document.getElementById('current-track-name').textContent = `🎵 REPRODUCIENDO: ${soundTracks[currentTrackIndex].title}`;
+            // Actualizar botones de reproducción (Modal y Mini)
+            const playText = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
+            const miniPlayText = isPlaying ? '⏸' : '▶';
+
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            if (playPauseBtn) playPauseBtn.textContent = playText;
+
+            const miniPlayBtn = document.getElementById('mini-play-btn');
+            if (miniPlayBtn) miniPlayBtn.textContent = miniPlayText;
+
+            setupPlaylistUI();
         }
 
         audioElement.onended = () => { nextTrack(); };
