@@ -203,6 +203,68 @@
             text-align: center;
         }
 
+        /* MINI-REPRODUCTOR FLOTANTE CON CARÁTULA (ESQUINA SUPERIOR IZQUIERDA) */
+        #mini-player {
+            position: fixed;
+            top: 1.5rem; left: 1.5rem;
+            background: rgba(2, 6, 23, 0.92);
+            border: 1.5px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 0.5rem 0.8rem;
+            z-index: 1500;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            box-shadow: 0 0 20px rgba(200, 139, 50, 0.4);
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .mini-album-art {
+            width: 38px;
+            height: 38px;
+            border-radius: 6px;
+            border: 1px solid var(--accent-blue);
+            background-image: url('Quimera.webp');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .mini-track-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .mini-track-title {
+            color: var(--accent-blue);
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.8rem;
+        }
+
+        .mini-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .mini-btn {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: #ffffff;
+            border-radius: 4px;
+            padding: 0.15rem 0.45rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .mini-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+        }
+
         /* CONTROLES TÁCTILES MÓVILES */
         .dpad-container {
             position: fixed;
@@ -405,6 +467,19 @@
     <!-- HUD GUÍA EN PANTALLA -->
     <div id="hud-info">PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]</div>
 
+    <!-- MINI REPRODUCTOR FLOTANTE CON CARÁTULA (ESQUINA SUPERIOR IZQUIERDA) -->
+    <div id="mini-player">
+        <div class="mini-album-art"></div>
+        <div class="mini-track-info">
+            <div class="mini-track-title" id="mini-track-name">Reproductor Quimera</div>
+            <div class="mini-controls">
+                <button class="mini-btn" onclick="prevTrack()">◀</button>
+                <button class="mini-btn" id="mini-play-btn" onclick="togglePlay()">▶</button>
+                <button class="mini-btn" onclick="nextTrack()">▶</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CONTENEDOR 3D WEBGL -->
     <canvas id="webgl-canvas"></canvas>
 
@@ -491,7 +566,6 @@
         let isPlaying = false;
 
         // 🖼️ LAS 8 SECCIONES VISUALES AMPLIADAS (CON SUS MÚLTIPLES FOTOS)
-        // Puedes agregar los nombres reales de tus archivos en cada arreglo 'images'
         const roomsData = [
             { id: 1, z: -15, type: "audio", title: "🎵 SALA DE AUDIO", desc: "Cabina acústica oficial del Instituto Quimera. Disfruta de las 24 pistas musicales del soundtrack oficial." },
             { id: 2, z: -30, type: "visual", title: "🖼️ 00 - ECOSISTEMA QUIMERA", desc: "Exposición visual del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.", images: ["Quimera_Negro.webp", "Quimera.webp", "Belerofonte_Negro.webp", "Belerofonte.webp", "Pegaso_Negro.webp", "Pegaso.webp", "Quimera_Ecosistema01.webp", "Quimeratrix.webp"] },
@@ -629,9 +703,10 @@
             animate();
         }
 
-        // FUNCIONES DE CONTROL DE AUDIO REAL
+        // FUNCIONES DE CONTROL DE AUDIO REAL Y SINCRONIZACIÓN
         function setupPlaylistUI() {
             const container = document.getElementById('playlist-container');
+            if (!container) return;
             container.innerHTML = '';
             soundTracks.forEach((track, index) => {
                 const div = document.createElement('div');
@@ -640,7 +715,7 @@
                 div.onclick = () => loadAndPlayTrack(index);
                 container.appendChild(div);
             });
-            updateTrackInfo();
+            updateAudioUI();
         }
 
         function loadAndPlayTrack(index) {
@@ -648,8 +723,7 @@
             audioElement.src = soundTracks[currentTrackIndex].file;
             audioElement.play().then(() => {
                 isPlaying = true;
-                updatePlayButton();
-                setupPlaylistUI();
+                updateAudioUI();
             }).catch(err => {
                 console.log("Esperando interacción del usuario:", err);
             });
@@ -667,7 +741,7 @@
                 audioElement.play();
                 isPlaying = true;
             }
-            updatePlayButton();
+            updateAudioUI();
         }
 
         function nextTrack() {
@@ -680,12 +754,28 @@
             loadAndPlayTrack(currentTrackIndex);
         }
 
-        function updatePlayButton() {
-            document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
-        }
+        function updateAudioUI() {
+            const track = soundTracks[currentTrackIndex];
+            
+            // Actualizar textos en la Rockola (Modal)
+            const trackNameEl = document.getElementById('current-track-name');
+            if (trackNameEl) trackNameEl.textContent = `🎵 REPRODUCIENDO: ${track.title}`;
+            
+            // Actualizar textos en el Mini-Reproductor Flotante superior izquierdo
+            const miniNameEl = document.getElementById('mini-track-name');
+            if (miniNameEl) miniNameEl.textContent = track.title;
 
-        function updateTrackInfo() {
-            document.getElementById('current-track-name').textContent = `🎵 REPRODUCIENDO: ${soundTracks[currentTrackIndex].title}`;
+            // Actualizar botones de reproducción
+            const playText = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
+            const miniPlayText = isPlaying ? '⏸' : '▶';
+
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            if (playPauseBtn) playPauseBtn.textContent = playText;
+
+            const miniPlayBtn = document.getElementById('mini-play-btn');
+            if (miniPlayBtn) miniPlayBtn.textContent = miniPlayText;
+
+            setupPlaylistUI();
         }
 
         audioElement.onended = () => { nextTrack(); };
