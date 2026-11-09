@@ -44,14 +44,14 @@
     .intro-kicker { position: relative; z-index: 1; color: var(--cyan); letter-spacing: .34em; font-size: .68rem; text-transform: uppercase; text-align: center; }
     .intro-title { z-index: 1; max-width: 760px; margin: 28px 0 10px; text-align: center; font: 500 clamp(1.55rem, 4vw, 3.2rem)/1.22 var(--serif); letter-spacing: .055em; color: var(--gold-light); text-shadow: 0 6px 28px rgba(0,0,0,.7); }
     .intro-subtitle { z-index: 1; max-width: 580px; text-align: center; color: #c3cbd5; font-size: clamp(.8rem, 1.5vw, .98rem); line-height: 1.8; letter-spacing: .04em; }
-    .intro-seal { position: relative; z-index: 1; width: 84px; height: 84px; margin: 12px 0 0; border: 1px solid rgba(199,154,85,.6); border-radius: 50%; display: grid; place-items: center; color: var(--gold-light); font: 2.5rem var(--serif); box-shadow: 0 0 32px rgba(199,154,85,.12), inset 0 0 22px rgba(199,154,85,.1); }
-    .intro-seal::after { content: ""; position: absolute; width: 65px; height: 65px; border: 1px solid rgba(114,201,216,.28); border-radius: 50%; }
+    .intro-seal { position: relative; z-index: 1; width: clamp(118px, 15vw, 178px); height: clamp(124px, 16vw, 188px); margin: 10px 0 0; display: grid; place-items: center; filter: drop-shadow(0 0 18px rgba(199,154,85,.28)) drop-shadow(0 0 32px rgba(114,201,216,.12)); }
+    .intro-seal img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .intro-button { position: relative; z-index: 1; margin-top: 34px; min-width: 230px; padding: 15px 26px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.18), rgba(199,154,85,.04)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
     .intro-button:hover { background: rgba(199,154,85,.24); box-shadow: 0 0 32px rgba(199,154,85,.18); transform: translateY(-2px); }
     .intro-foot { z-index: 1; margin-top: 24px; text-transform: uppercase; letter-spacing: .2em; font-size: .58rem; color: #778598; text-align: center; }
 
     /* Interfaz de navegación */
-    #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 400px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
+    #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 520px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
     #topbar.visible { opacity: 1; visibility: visible; }
     .topbar-brand { min-width: 0; }
     .topbar-overline { display: block; margin-bottom: 3px; color: var(--cyan); font-size: .55rem; letter-spacing: .26em; text-transform: uppercase; }
@@ -59,11 +59,11 @@
     .topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .quiet-btn { border: 1px solid rgba(199,154,85,.4); background: rgba(255,255,255,.025); color: #d5dce5; padding: 8px 11px; cursor: pointer; font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; transition: .2s; }
     .quiet-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(114,201,216,.08); }
-    #scene-caption { position: fixed; z-index: 4; bottom: 25px; left: 50%; transform: translateX(-50%); width: min(660px, calc(100vw - 36px)); text-align: center; color: rgba(231,236,242,.72); font-size: .68rem; letter-spacing: .08em; line-height: 1.6; text-shadow: 0 2px 12px #000; pointer-events: none; }
-    #scene-caption strong { color: var(--gold-light); font-weight: 600; }
-    #mini-player { position: fixed; z-index: 9; top: 22px; left: 20px; width: min(340px, calc(100vw - 40px)); display: flex; align-items: center; gap: 11px; padding: 9px 12px 9px 9px; border: 1px solid rgba(199,154,85,.52); background: rgba(4,9,17,.88); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.35); transition: opacity .25s, transform .25s; }
+    #scene-caption { position: fixed; z-index: 4; bottom: 25px; left: 50%; transform: translateX(-50%); width: min(780px, calc(100vw - 36px)); text-align: center; color: rgba(255,255,255,.92); font-size: .76rem; letter-spacing: .055em; line-height: 1.7; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 3px 12px #000; -webkit-text-stroke: .35px #000; paint-order: stroke fill; pointer-events: none; }
+    #scene-caption strong { color: var(--gold-light); font-weight: 700; -webkit-text-stroke: .45px #000; }
+    #mini-player { position: fixed; z-index: 9; top: 18px; left: 18px; width: min(470px, calc(100vw - 40px)); min-height: 106px; display: flex; align-items: center; gap: 13px; padding: 10px 13px 10px 10px; border: 1px solid rgba(199,154,85,.62); background: rgba(4,9,17,.92); backdrop-filter: blur(18px); box-shadow: 0 14px 48px rgba(0,0,0,.42), 0 0 26px rgba(114,201,216,.08); transition: opacity .25s, transform .25s; }
     #mini-player.hidden { opacity: 0; visibility: hidden; transform: translateY(-8px); pointer-events: none; }
-    .mini-cover { width: 43px; height: 43px; flex: 0 0 43px; border: 1px solid rgba(114,201,216,.55); background-image: url("Quimera.webp"); background-color: #101b2a; background-position: center; background-size: cover; background-position: center; background-size: cover; }
+    .mini-cover { width: 86px; height: 86px; flex: 0 0 86px; border: 1px solid rgba(114,201,216,.62); background-image: url("Quimera_Electrotango_1600x900.webp"); background-color: #101b2a; background-position: center; background-size: cover; box-shadow: 0 0 20px rgba(114,201,216,.16); }
     .mini-meta { min-width: 0; flex: 1; }
     .mini-label { color: var(--cyan); font-size: .53rem; letter-spacing: .18em; text-transform: uppercase; }
     #mini-track-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-top: 4px; color: #e6e9ed; font-size: .68rem; }
@@ -96,18 +96,15 @@
 
     /* Rockola y reproductor */
     #audio-overlay { z-index: 35; }
-    .audio-shell { position: relative; width: min(1180px, 100%); max-height: min(850px, 92vh); overflow: hidden; border: 1px solid rgba(199,154,85,.52); background: linear-gradient(135deg, rgba(15,25,41,.98), rgba(4,8,15,.99) 65%); box-shadow: var(--shadow), 0 0 70px rgba(114,201,216,.08); }
-    .audio-header { display: flex; align-items: center; gap: 18px; padding: 22px 25px; border-bottom: 1px solid rgba(199,154,85,.22); }
+    .audio-shell { position: relative; display: flex; flex-direction: column; width: min(1240px, 100%); height: min(820px, 92vh); max-height: 92vh; overflow: hidden; border: 1px solid rgba(199,154,85,.58); background: linear-gradient(135deg, rgba(15,25,41,.99), rgba(4,8,15,.995) 65%); box-shadow: var(--shadow), 0 0 70px rgba(114,201,216,.1); }
+    .audio-header { flex: 0 0 auto; display: flex; align-items: center; gap: 18px; padding: 20px 25px; border-bottom: 1px solid rgba(199,154,85,.22); background: rgba(5,10,18,.94); }
     .audio-close { width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid rgba(199,154,85,.6); background: transparent; color: var(--gold-light); cursor: pointer; font-size: 1.25rem; }
-    .audio-kicker { color: var(--cyan); font-size: .57rem; letter-spacing: .25em; text-transform: uppercase; }
-    .audio-heading { margin: 5px 0 0; color: var(--gold-light); font: 500 clamp(1.05rem, 2.5vw, 1.55rem) var(--serif); letter-spacing: .08em; }
-    .audio-layout { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(330px, 1.1fr); min-height: 420px; max-height: calc(92vh - 88px); }
-    .now-playing { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; border-right: 1px solid rgba(199,154,85,.18); text-align: center; }
-    .record-art { position: relative; width: min(270px, 56vw); aspect-ratio: 1; margin-bottom: 24px; border: 1px solid rgba(199,154,85,.58); background: radial-gradient(circle, rgba(114,201,216,.15), transparent 55%), linear-gradient(145deg, #18283e, #050910); box-shadow: 0 0 55px rgba(114,201,216,.1); display: grid; place-items: center; overflow: hidden; }
-    .record-art::before, .record-art::after { content: ""; position: absolute; width: 78%; aspect-ratio: 1; border: 1px solid rgba(199,154,85,.3); border-radius: 50%; }
-    .record-art::after { width: 58%; border-color: rgba(114,201,216,.24); }
-    #record-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .72; }
-    .record-mark { position: relative; z-index: 1; width: 72px; height: 72px; border: 1px solid rgba(234,210,160,.8); border-radius: 50%; display: grid; place-items: center; color: var(--gold-light); font: 2.2rem var(--serif); background: rgba(5,10,18,.42); }
+    .audio-kicker { color: var(--cyan); font-size: .62rem; letter-spacing: .25em; text-transform: uppercase; }
+    .audio-heading { margin: 5px 0 0; color: var(--gold-light); font: 600 clamp(1.15rem, 2.7vw, 1.72rem)/1.3 var(--serif); letter-spacing: .08em; }
+    .audio-layout { display: grid; grid-template-columns: minmax(310px, .92fr) minmax(370px, 1.08fr); flex: 1 1 auto; min-height: 0; overflow: hidden; }
+    .now-playing { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 0; overflow: hidden; padding: 24px 28px; border-right: 1px solid rgba(199,154,85,.18); text-align: center; }
+    .record-art { position: relative; width: min(420px, 38vw); max-height: 42vh; aspect-ratio: 16 / 9; flex: 0 1 auto; margin: 0 auto 18px; border: 1px solid rgba(199,154,85,.68); background: linear-gradient(145deg, #18283e, #050910); box-shadow: 0 0 55px rgba(114,201,216,.16), 0 0 24px rgba(199,154,85,.08); display: grid; place-items: center; overflow: hidden; }
+    #record-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1; background: #050910; }
     #current-track { max-width: 100%; margin: 0; color: var(--white); font: 500 1rem/1.5 var(--serif); }
     .track-state { margin: 7px 0 18px; color: var(--cyan); font-size: .6rem; letter-spacing: .19em; text-transform: uppercase; }
     .progress-row { display: flex; align-items: center; width: min(390px, 100%); gap: 10px; color: #8996a7; font: .64rem monospace; }
@@ -116,13 +113,15 @@
     .audio-control { width: 42px; height: 42px; border: 1px solid rgba(199,154,85,.48); background: rgba(199,154,85,.07); color: var(--gold-light); cursor: pointer; }
     .audio-control.primary { width: 54px; height: 54px; border-color: var(--gold); background: rgba(199,154,85,.2); font-size: 1.1rem; }
     .audio-control:hover { border-color: var(--cyan); color: var(--cyan); }
-    .library { display: flex; flex-direction: column; min-height: 0; padding: 22px 24px 18px; }
+    .library { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 22px 24px 18px; }
+    .library-head, #track-search, .audio-note { flex: 0 0 auto; }
+    #playlist { flex: 1 1 auto; min-height: 0; max-height: none; overscroll-behavior: contain; }
     .library-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
     .library-title { color: var(--gold-light); font: 500 .9rem var(--serif); letter-spacing: .1em; text-transform: uppercase; }
     .library-count { color: var(--cyan); font: .66rem monospace; }
     #track-search { width: 100%; margin-bottom: 12px; padding: 10px 12px; border: 1px solid rgba(114,201,216,.22); background: rgba(0,0,0,.24); color: var(--white); outline: none; font: .72rem var(--sans); }
     #track-search:focus { border-color: var(--cyan); }
-    #playlist { overflow: auto; min-height: 0; padding-right: 5px; scrollbar-color: rgba(199,154,85,.5) rgba(255,255,255,.04); scrollbar-width: thin; }
+    #playlist { overflow-x: hidden; overflow-y: auto; min-height: 0; padding-right: 7px; scrollbar-color: rgba(199,154,85,.62) rgba(255,255,255,.04); scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
     .track-item { display: grid; grid-template-columns: 32px minmax(0,1fr) 25px; align-items: center; gap: 10px; width: 100%; padding: 10px 9px; border: 0; border-bottom: 1px solid rgba(255,255,255,.055); background: transparent; color: #aab5c2; text-align: left; cursor: pointer; transition: background .18s, color .18s; }
     .track-item:hover { background: rgba(114,201,216,.07); color: var(--white); }
     .track-item.active { background: rgba(199,154,85,.11); color: var(--gold-light); }
@@ -138,8 +137,9 @@
 
     @media (max-width: 760px) {
       #topbar { top: 12px; width: calc(100vw - 24px); padding: 9px 11px; }
-      #mini-player { top: 74px; left: 12px; width: min(320px, calc(100vw - 24px)); }
-      #scene-caption { bottom: 16px; font-size: .61rem; }
+      #mini-player { top: 80px; left: 12px; width: min(390px, calc(100vw - 24px)); min-height: 86px; }
+      .mini-cover { width: 86px; height: 86px; flex-basis: 86px; }
+      #scene-caption { bottom: 16px; font-size: .68rem; width: calc(100vw - 28px); }
       #touch-controls.active { display: grid; }
       .overlay { padding: 14px; }
       .viewer-image-wrap { height: calc(100% - 70px); }
@@ -148,14 +148,22 @@
       #viewer-prev { left: 4px; }
       #viewer-next { right: 4px; }
       .viewer-caption { padding: 0 70px; font-size: .57rem; }
-      .audio-shell { max-height: 96vh; overflow-y: auto; }
-      .audio-layout { display: flex; flex-direction: column; max-height: none; }
-      .now-playing { padding: 22px 16px; border-right: 0; border-bottom: 1px solid rgba(199,154,85,.18); }
-      .record-art { width: 150px; margin-bottom: 14px; }
-      .record-mark { width: 48px; height: 48px; font-size: 1.4rem; }
-      .audio-header { padding: 15px; }
-      .library { min-height: 260px; padding: 17px; }
-      #playlist { max-height: 34vh; }
+      .audio-shell { height: 96vh; max-height: 96vh; overflow: hidden; }
+      .audio-layout { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; max-height: none; overflow: hidden; }
+      .now-playing { flex: 0 0 auto; display: grid; grid-template-columns: minmax(104px, 34%) minmax(0,1fr); grid-template-rows: auto auto auto; column-gap: 15px; align-items: center; padding: 12px 15px; border-right: 0; border-bottom: 1px solid rgba(199,154,85,.18); text-align: left; }
+      .record-art { grid-column: 1; grid-row: 1 / span 3; width: min(150px, 100%); max-height: 18vh; margin: 0; }
+      #current-track { grid-column: 2; grid-row: 1; font-size: .82rem; }
+      .track-state { grid-column: 2; grid-row: 2; margin: 4px 0 7px; font-size: .53rem; }
+      .progress-row { grid-column: 2; grid-row: 3; gap: 5px; font-size: .55rem; }
+      .audio-controls { grid-column: 2; grid-row: 4; justify-content: flex-start; margin-top: 7px; }
+      .audio-control { width: 34px; height: 34px; }
+      .audio-control.primary { width: 42px; height: 42px; }
+      .audio-header { padding: 12px 14px; gap: 12px; }
+      .audio-close { width: 34px; height: 34px; flex-basis: 34px; }
+      .audio-heading { font-size: clamp(.92rem, 4vw, 1.25rem); }
+      .library { flex: 1 1 auto; min-height: 0; padding: 12px 15px; }
+      #playlist { flex: 1 1 auto; min-height: 0; max-height: none; }
+      .audio-note { margin-top: 7px; font-size: .53rem; }
       .intro-architecture { min-height: min(650px, 90vh); }
       .intro-foot { line-height: 1.8; }
     }
@@ -171,7 +179,8 @@
   <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
     <div class="intro-architecture">
       <div class="intro-kicker">Instituto Quimera · Investigación · Docencia · Servicio · Divulgación</div>
-      <div class="intro-seal" aria-hidden="true">Q</div>
+      <!-- Mantener Emblema_QuimeraC3.webp en la misma carpeta que este index.html. -->
+      <div class="intro-seal"><img src="Emblema_QuimeraC3.webp" alt="Emblema del Instituto Quimera"></div>
       <h1 class="intro-title">Galería de Arte Audiovisual</h1>
       <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
       <button class="intro-button" id="enter-castle">Atravesar el umbral</button>
@@ -228,7 +237,7 @@
       </header>
       <div class="audio-layout">
         <div class="now-playing">
-          <div class="record-art"><img id="record-cover" src="Quimera_Electrotango.webp" alt="" onerror="this.style.display='none'"><div class="record-mark">Q</div></div>
+          <div class="record-art"><img id="record-cover" src="Quimera_Electrotango_1600x900.webp" alt="Carátula del álbum Quimera Electrotango" onerror="this.style.display='none'"></div>
           <h3 id="current-track">Selecciona una composición</h3>
           <div class="track-state" id="track-state">Archivo sonoro · En espera</div>
           <div class="progress-row"><span id="elapsed">00:00</span><input id="seek-bar" type="range" min="0" max="1000" value="0" aria-label="Posición de reproducción"><span id="duration">00:00</span></div>
@@ -263,6 +272,7 @@
       { id: 'vision', title: 'Visión', short: 'VISIÓN', description: 'Obras proyectivas que ilustran el horizonte que guía nuestra evolución y el futuro que buscamos construir.', images: ['Quimera_Vision.webp','Quimera_V_Mod.webp','V_glitch_01.webp','V_glitch_02.webp','V_glitch_03.webp','V_glitch_04.webp','V_glitch_05.webp','V_glitch_06.webp','V_glitch_07.webp','V_glitch_08.webp','V_glitch_09.webp','V_glitch_10.webp','V_glitch_11.webp'] },
       { id: 'principles', title: 'Principios', short: 'PRINCIPIOS', description: 'El origen simbólico y conceptual que da vida e identidad a nuestro ecosistema.', images: ['Quimera_Principios.webp','Quimera_P_Mod.webp','P_glitch_01.webp','P_glitch_02.webp','P_glitch_03.webp','P_glitch_04.webp','P_glitch_05.webp','P_glitch_06.webp','P_glitch_07.webp','P_glitch_08.webp','P_glitch_09.webp','P_glitch_10.webp','P_glitch_11.webp'] },
       { id: 'development', title: 'Desarrollo', short: 'DESARROLLO', description: 'Las áreas donde convergen nuestras capacidades para investigar, formar, comunicar e innovar.', images: ['Quimera_Desarrollo.webp','Quimera_D_Mod.webp','D_glitch_Q.webp','D_glitch_U.webp','D_glitch_I.webp','D_glitch_M.webp','D_glitch_E.webp','D_glitch_R.webp','D_glitch_A.webp'] },
+      { id: 'mythology', title: 'Mitología detrás de Quimera', short: 'MITOLOGÍA DETRÁS DE QUIMERA', description: 'La dimensión mitológica, simbólica y conceptual que dio nombre al Instituto Quimera. Esta colección reúne sus 35 obras.', images: ['Quimera_MDQ.webp','Quimeratrix.webp','Mod_01.webp','Mod_02.webp','Mod_03.webp','Mod_04.webp','Mod_05.webp','Mod_06.webp','Mod_07.webp','Mod_08.webp','Mod_09.webp','Mod_10.webp','Mod_11.webp','Mod_12.webp','Mod_13.webp','Mod_14.webp','01-borrador_T-P.webp','02-Teoria-Preg.webp','03-HECE.webp','04-MHDC.webp','ECQ.webp','MDQ_glitch_01.webp','MDQ_glitch_02.webp','MDQ_glitch_03.webp','MDQ_glitch_04.webp','MDQ_glitch_05.webp','MDQ_glitch_06.webp','MDQ_glitch_07.webp','MDQ_glitch_08.webp','MDQ_glitch_09.webp','MDQ_glitch_10.webp','MDQ_glitch_11.webp','MDQ_glitch_12.webp','MDQ_glitch_13.webp','MDQ_glitch_14.webp'] },
       { id: 'electrotango', title: 'Quimera · Electrotango', short: 'QUIMERA · ELECTROTANGO', description: 'Una fusión musical y visual que expande el universo simbólico de Quimera.', images: ['Quimera_Electrotango.webp','Quimera_Electrotango_1600x900.webp'] }
     ];
 
@@ -314,7 +324,8 @@
     let dragging = false, pointerStart = null;
     let galleryLength = 24;
     let toastTimer = null;
-    let textureLoader, clock;
+    let textureLoader, clock, emblemBaseTexture = null;
+    let emblemMaterialCache = new Map();
     const animatedObjects = [];
 
     // Estado y reproductor de audio: independiente de la navegación 3D.
@@ -354,6 +365,7 @@
       world = null;
       interactables = [];
       animatedObjects.length = 0;
+      emblemMaterialCache = new Map();
     }
 
     function newWorld(fog = 0x080e18) {
@@ -377,7 +389,48 @@
       return new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
     }
 
-    function addShell(width, length, height = 7.5, backWall = true) {
+    function emblemMaterial(opacity = 1) {
+      const key = Number(opacity).toFixed(2);
+      if (emblemMaterialCache.has(key)) return emblemMaterialCache.get(key);
+      let result;
+      if (!emblemBaseTexture) {
+        result = new THREE.MeshBasicMaterial({ color: 0x9a7b4f, transparent: true, opacity: .18, side: THREE.DoubleSide });
+      } else {
+        const texture = emblemBaseTexture.clone();
+        texture.needsUpdate = true;
+        texture.encoding = THREE.sRGBEncoding;
+        texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        result = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false, toneMapped: false });
+      }
+      emblemMaterialCache.set(key, result);
+      return result;
+    }
+
+    function addEmblemFloor(width, length, z = 0) {
+      const logo = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 4.75), emblemMaterial(.19));
+      logo.rotation.x = -Math.PI / 2;
+      logo.position.set(0, .035, z);
+      logo.renderOrder = 1;
+      world.add(logo);
+    }
+
+    function addEndEmblem(width, length, height = 7.5) {
+      const z = -length / 2 + .265;
+      const emblem = new THREE.Mesh(new THREE.PlaneGeometry(3.55, 3.72), emblemMaterial(.92));
+      emblem.position.set(0, 4.85, z);
+      world.add(emblem);
+      const namePlate = new THREE.Mesh(
+        new THREE.PlaneGeometry(4.65, .72),
+        new THREE.MeshBasicMaterial({ map: makePlaqueTexture('Instituto Quimera', 'Investigación · Docencia · Servicio · Divulgación', '#c79a55'), transparent: true })
+      );
+      namePlate.position.set(0, 2.15, z - .012);
+      world.add(namePlate);
+      const halo = new THREE.PointLight(0xc79a55, .85, 11);
+      halo.position.set(0, 4.8, z + 1.35);
+      world.add(halo);
+    }
+
+    function addShell(width, length, height = 7.5, backWall = true, options = {}) {
       const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, length), material(0x111a28, .42, .22));
       floor.rotation.x = -Math.PI / 2;
       floor.position.set(0, 0, 0);
@@ -416,9 +469,12 @@
       // Pilastras modulares a lo largo del recinto.
       const pillarMat = material(0x1a2637, .64, .3);
       const pillarTrim = material(0x8b6939, .36, .7);
-      const count = Math.max(2, Math.floor(length / 8));
+      const count = options.pillarCount || Math.max(2, Math.floor(length / 8));
+      const bayStep = (length - 2.2) / count;
+      const pillarPositions = [];
       for (let i = 0; i <= count; i++) {
-        const z = -length / 2 + 1.1 + i * ((length - 2.2) / count);
+        const z = -length / 2 + 1.1 + i * bayStep;
+        pillarPositions.push(z);
         [-1, 1].forEach((side) => {
           const x = side * (width / 2 - .48);
           const column = new THREE.Mesh(new THREE.BoxGeometry(.34, height - .4, .34), pillarMat);
@@ -433,8 +489,22 @@
           world.add(base);
         });
       }
+      // Emblemas retroiluminados en la franja superior de cada tramo mural,
+      // centrados entre pilastras y separados de los bastidores de las obras.
+      for (let i = 0; i < pillarPositions.length - 1; i++) {
+        const bayCenter = (pillarPositions[i] + pillarPositions[i + 1]) / 2;
+        [-1, 1].forEach((side) => {
+          const badge = new THREE.Mesh(new THREE.PlaneGeometry(1.38, 1.45), emblemMaterial(.42));
+          badge.position.set(side * (width / 2 - .242), height - 1.18, bayCenter);
+          badge.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+          world.add(badge);
+        });
+      }
+      addEmblemFloor(width, length, options.floorEmblemZ ?? 0);
+      if (backWall && options.endEmblem !== false) addEndEmblem(width, length, height);
+
       // Luminarias cálidas espaciadas.
-      for (let z = -length / 2 + 3; z <= length / 2 - 2; z += 7) {
+      for (let z = -length / 2 + 3; z <= length / 2 - 2; z += 9) {
         const light = new THREE.PointLight(0xc58c49, .48, 10);
         light.position.set(0, height - .8, z);
         world.add(light);
@@ -446,27 +516,30 @@
 
     function makePlaqueTexture(title, subtitle, accent = '#c79a55') {
       const c = document.createElement('canvas');
-      c.width = 1024; c.height = 300;
+      c.width = 1200; c.height = 360;
       const ctx = c.getContext('2d');
       const grad = ctx.createLinearGradient(0, 0, 1024, 300);
       grad.addColorStop(0, '#101b2a'); grad.addColorStop(1, '#060b13');
       ctx.fillStyle = grad; ctx.fillRect(0, 0, 1024, 300);
-      ctx.strokeStyle = accent; ctx.lineWidth = 5; ctx.strokeRect(13, 13, 998, 274);
-      ctx.strokeStyle = 'rgba(234,210,160,.45)'; ctx.lineWidth = 1.5; ctx.strokeRect(28, 28, 968, 244);
+      ctx.strokeStyle = accent; ctx.lineWidth = 6; ctx.strokeRect(14, 14, 1172, 332);
+      ctx.strokeStyle = 'rgba(234,210,160,.5)'; ctx.lineWidth = 2; ctx.strokeRect(31, 31, 1138, 298);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ead2a0'; ctx.font = '600 42px Georgia, serif';
-      const titleText = title.length > 25 ? title.slice(0, 24) + '…' : title;
-      ctx.fillText(titleText.toLocaleUpperCase('es'), 512, 122);
-      ctx.fillStyle = '#83c8d4'; ctx.font = '24px Arial, sans-serif';
-      ctx.fillText((subtitle || 'INSTITUTO QUIMERA').toLocaleUpperCase('es'), 512, 205);
+      ctx.fillStyle = '#f0d8a6';
+      const titleText = title.toLocaleUpperCase('es');
+      let titleSize = titleText.length > 25 ? 46 : titleText.length > 18 ? 53 : 62;
+      ctx.font = `600 ${titleSize}px Georgia, serif`;
+      ctx.fillText(titleText, 600, 132, 1080);
+      ctx.fillStyle = '#9bdce5'; ctx.font = '30px Arial, sans-serif';
+      ctx.fillText((subtitle || 'INSTITUTO QUIMERA').toLocaleUpperCase('es'), 600, 245, 1080);
       const tex = new THREE.CanvasTexture(c);
       tex.encoding = THREE.sRGBEncoding;
       return tex;
     }
 
-    function createPortal({ x, z, title, subtitle, action, data, accent = 0xc79a55, width = 2.35, height = 3.75 }) {
+    function createPortal({ x, z, title, subtitle, action, data, accent = 0xc79a55, width = 2.35, height = 3.75, rotationY = 0 }) {
       const group = new THREE.Group();
       group.position.set(x, 0, z);
+      group.rotation.y = rotationY;
       const gold = material(accent, .32, .78, { emissive: accent, emissiveIntensity: .08 });
       const dark = material(0x101a29, .55, .38);
       const panel = new THREE.Mesh(new THREE.BoxGeometry(width, height, .22), material(0x080e18, .32, .3));
@@ -498,14 +571,14 @@
       const handle = new THREE.Mesh(new THREE.SphereGeometry(.075, 16, 12), gold);
       handle.position.set(width * .29, height * .46, .25);
       group.add(handle);
-      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(width + .5, .72), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(title, subtitle, '#' + accent.toString(16).padStart(6, '0')), transparent: false }));
-      plaque.position.set(0, height + .92, .12);
+      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(width + .82, .98), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(title, subtitle, '#' + accent.toString(16).padStart(6, '0')), transparent: false }));
+      plaque.position.set(0, height + 1.02, .12);
       group.add(plaque);
       const halo = new THREE.PointLight(accent, .65, 8);
       halo.position.set(0, 3.1, 1.1);
       group.add(halo);
-      const hit = new THREE.Mesh(new THREE.BoxGeometry(width + .65, height + 1.5, .9), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
-      hit.position.set(0, (height + .75) / 2, .2);
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(width + .82, height + 1.75, .95), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(0, (height + .85) / 2, .2);
       hit.userData = { action, data, title };
       group.add(hit);
       interactables.push(hit);
@@ -522,27 +595,58 @@
 
     function buildAtrium() {
       currentZone = 'atrium'; activeCollection = null;
-      $('touch-controls').classList.remove('active');
+      $('touch-controls').classList.add('active');
       newWorld(0x080e18);
       addShell(21, 22, 8, true);
       setCamera(0, 1.72, 6.8, 0, 0);
-      // Un rosetón geométrico en el techo y una brújula de latón en el suelo.
+      // Rosetón de bóveda; el emblema institucional ya retroilumina el pavimento y los muros.
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .035, 8, 96), material(0x8f6a3d, .32, .8, { emissive: 0x2a1708, emissiveIntensity: .22 }));
       ring.rotation.x = Math.PI / 2; ring.position.set(0, 7.82, -2); world.add(ring);
-      const floorRing = new THREE.Mesh(new THREE.TorusGeometry(2.2, .025, 8, 96), material(0x4d8993, .3, .7, { emissive: 0x12313c, emissiveIntensity: .3 }));
-      floorRing.rotation.x = -Math.PI / 2; floorRing.position.set(0, .04, -1.6); world.add(floorRing);
       createPortal({ x: -4.1, z: -10.72, title: 'Ala de Audio', subtitle: 'Rockola holográfica', action: 'audio', accent: 0x72c9d8, width: 3.0, height: 4.2 });
-      createPortal({ x: 4.1, z: -10.72, title: 'Ala Visual', subtitle: 'Siete colecciones', action: 'visual', accent: 0xc79a55, width: 3.0, height: 4.2 });
+      createPortal({ x: 4.1, z: -10.72, title: 'Ala Visual', subtitle: 'Ocho colecciones', action: 'visual', accent: 0xc79a55, width: 3.0, height: 4.2 });
       zoneTitle.textContent = 'Vestíbulo central';
-      setCaption('Dos umbrales abren el recorrido: <strong>Ala de Audio</strong> a la izquierda · <strong>Ala Visual</strong> a la derecha.');
+      setCaption('Muévete con <strong>W/A/S/D</strong> o las <strong>flechas</strong>; arrastra el ratón para mirar. Acércate a una puerta y pulsa <strong>Enter</strong>.');
       $('back-button').style.visibility = 'hidden';
+    }
+
+    function createDoubleHelix(parent) {
+      const dna = new THREE.Group();
+      dna.position.y = 2.05;
+      const radius = .34, halfHeight = 1.18, turns = 3.1, pointsA = [], pointsB = [];
+      const samples = 220;
+      for (let i = 0; i <= samples; i++) {
+        const t = i / samples;
+        const angle = t * Math.PI * 2 * turns;
+        const y = -halfHeight + t * halfHeight * 2;
+        pointsA.push(new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius));
+        pointsB.push(new THREE.Vector3(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius));
+      }
+      const strandA = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pointsA), 260, .035, 8, false), new THREE.MeshStandardMaterial({ color: 0x78d8e4, emissive: 0x176b7b, emissiveIntensity: .75, metalness: .55, roughness: .22 }));
+      const strandB = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pointsB), 260, .035, 8, false), new THREE.MeshStandardMaterial({ color: 0xe1b66f, emissive: 0x76501e, emissiveIntensity: .7, metalness: .62, roughness: .2 }));
+      dna.add(strandA, strandB);
+      const rungMat = new THREE.MeshStandardMaterial({ color: 0xe9dfc9, emissive: 0x5a6c73, emissiveIntensity: .35, metalness: .55, roughness: .25 });
+      for (let i = 0; i <= 27; i++) {
+        const t = i / 27;
+        const angle = t * Math.PI * 2 * turns;
+        const y = -halfHeight + t * halfHeight * 2;
+        const a = new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+        const b = new THREE.Vector3(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius);
+        const direction = new THREE.Vector3().subVectors(b, a);
+        const rung = new THREE.Mesh(new THREE.CylinderGeometry(.018, .018, direction.length(), 8), rungMat);
+        rung.position.copy(a).add(b).multiplyScalar(.5);
+        rung.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+        dna.add(rung);
+      }
+      parent.add(dna);
+      animatedObjects.push({ object: dna, speed: .46, axis: 'y' });
+      return dna;
     }
 
     function buildAudioWing() {
       currentZone = 'audio';
-      $('touch-controls').classList.remove('active');
+      $('touch-controls').classList.add('active');
       newWorld(0x07121c);
-      addShell(17, 20, 8, true);
+      addShell(17, 20, 8, true, { floorEmblemZ: 5.25 });
       setCamera(0, 1.72, 7.1, 0, 0);
       // Tarima de exhibición y corona lumínica.
       const stage = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.4, .22, 64), material(0x18283a, .38, .45));
@@ -557,37 +661,45 @@
       core.position.y = 2.05; jukebox.add(core);
       const innerDisk = new THREE.Mesh(new THREE.CylinderGeometry(.94, .94, .12, 64), material(0x0b1420, .22, .78));
       innerDisk.position.y = 3.45; jukebox.add(innerDisk);
-      const label = new THREE.Mesh(new THREE.PlaneGeometry(1.12, .68), new THREE.MeshBasicMaterial({ map: makePlaqueTexture('Rockola Quimera', 'Archivo sonoro · 24 pistas', '#72c9d8'), transparent: false }));
-      label.position.set(0, 2.15, .735); jukebox.add(label);
+      // Carátula del álbum visible al aproximarse a la rockola.
+      const coverTexture = textureLoader.load('Quimera_Electrotango_1600x900.webp');
+      coverTexture.encoding = THREE.sRGBEncoding;
+      const albumCover = new THREE.Mesh(new THREE.PlaneGeometry(1.35, .76), new THREE.MeshBasicMaterial({ map: coverTexture, side: THREE.DoubleSide }));
+      albumCover.position.set(0, 1.08, 1.225); jukebox.add(albumCover);
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(1.34, .48), new THREE.MeshBasicMaterial({ map: makePlaqueTexture('Rockola Quimera', 'Archivo sonoro · 24 pistas', '#72c9d8'), transparent: false }));
+      label.position.set(0, 3.75, .08); jukebox.add(label);
       const orbitA = new THREE.Mesh(new THREE.TorusGeometry(1.7, .045, 10, 96), new THREE.MeshStandardMaterial({ color: 0x72c9d8, emissive: 0x1b8298, emissiveIntensity: .72, metalness: .55, roughness: .2 }));
       orbitA.position.y = 2.1; orbitA.rotation.x = Math.PI / 2.65; jukebox.add(orbitA);
       const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.05, .025, 8, 96), new THREE.MeshStandardMaterial({ color: 0xc79a55, emissive: 0x6d4117, emissiveIntensity: .6, metalness: .75, roughness: .2 }));
       orbitB.position.y = 2.1; orbitB.rotation.y = Math.PI / 2.2; jukebox.add(orbitB);
       const crown = new THREE.Mesh(new THREE.TorusGeometry(.9, .035, 8, 64), material(0xc79a55, .25, .8, { emissive: 0x6b441a, emissiveIntensity: .65 }));
       crown.position.y = 3.58; crown.rotation.x = Math.PI / 2; jukebox.add(crown);
+      createDoubleHelix(jukebox);
       const light = new THREE.PointLight(0x64c8da, 2.5, 12); light.position.set(0, 2.4, 0); jukebox.add(light);
       const hit = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.25, 4.7, 48), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
       hit.position.y = 2.25; hit.userData = { action: 'openAudio' }; jukebox.add(hit); interactables.push(hit);
       world.add(jukebox);
       animatedObjects.push({ object: orbitA, speed: .24, axis: 'z' }, { object: orbitB, speed: -.18, axis: 'y' }, { object: crown, speed: .38, axis: 'y' });
       zoneTitle.textContent = 'Ala de Audio';
-      setCaption('Acércate a la <strong>rockola holográfica</strong> y haz clic para abrir el archivo sonoro. La reproducción continuará al cambiar de ala.');
+      setCaption('Avanza con <strong>W/A/S/D</strong> o las flechas para acercarte a la rockola y ver la carátula. Pulsa <strong>Enter</strong> o haz clic para abrir las 24 pistas.');
       $('back-button').style.visibility = 'visible';
     }
 
     function buildVisualHub() {
       currentZone = 'visualHub'; activeCollection = null;
-      $('touch-controls').classList.remove('active');
+      $('touch-controls').classList.add('active');
       newWorld(0x100d0a);
-      addShell(25, 22, 8, true);
-      setCamera(0, 1.72, 6.6, 0, 0);
-      // Las siete salas, y únicamente las siete salas especificadas para el ala visual.
-      const spacing = 3.08;
-      const start = -spacing * 3;
+      addShell(26, 32, 8, true);
+      setCamera(0, 1.72, 11.2, 0, 0);
+      // Ocho accesos laterales, cuatro a cada lado del corredor central.
+      const zPositions = [10.2, 3.4, -3.4, -10.2];
       collections.forEach((collection, index) => {
+        const side = index < 4 ? -1 : 1;
+        const position = zPositions[index % 4];
         createPortal({
-          x: start + index * spacing,
-          z: -10.72,
+          x: side * 12.18,
+          z: position,
+          rotationY: side < 0 ? Math.PI / 2 : -Math.PI / 2,
           title: collection.title,
           subtitle: `${String(index + 1).padStart(2, '0')} · ${collection.images.length} obras`,
           action: 'collection', data: collection,
@@ -595,16 +707,16 @@
           width: 2.35, height: 3.6
         });
       });
-      zoneTitle.textContent = 'Ala Visual · Siete colecciones';
-      setCaption('Selecciona una de las <strong>siete puertas</strong>. Al entrar, las obras estarán dispuestas en las paredes de su sala.');
+      zoneTitle.textContent = 'Ala Visual · Ocho colecciones';
+      setCaption('Ocho salas se distribuyen a ambos lados del corredor. Acércate a cada puerta con <strong>W/A/S/D</strong> o flechas y pulsa <strong>Enter</strong> para entrar.');
       $('back-button').style.visibility = 'visible';
     }
 
-    function makeArtworkFrame(collection, index, x, y, z, side) {
+    function makeArtworkFrame(collection, index, x, y, z, side, bayWidth) {
       const frameGroup = new THREE.Group();
       frameGroup.position.set(x, y, z);
       frameGroup.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
-      const width = 3.65, height = 2.28;
+      const width = Math.min(3.62, bayWidth - .72), height = width * .625;
       const frameMat = material(0x987242, .28, .82, { emissive: 0x2a1708, emissiveIntensity: .18 });
       const innerMat = material(0x090f19, .52, .18);
       const back = new THREE.Mesh(new THREE.BoxGeometry(width + .28, height + .28, .13), frameMat);
@@ -637,8 +749,8 @@
       imageMesh.position.z = .12;
       imageMesh.userData = { action: 'artwork', data: { collection, index } };
       frameGroup.add(imageMesh);
-      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .36), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(cleanArtworkName(filename), 'COLECCIÓN QUIMERA', '#c79a55') }));
-      plaque.position.set(0, -height / 2 - .38, .11);
+      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(2.8, width - .25), .34), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(cleanArtworkName(filename), 'COLECCIÓN QUIMERA', '#c79a55') }));
+      plaque.position.set(0, -height / 2 - .34, .11);
       frameGroup.add(plaque);
       interactables.push(imageMesh);
       world.add(frameGroup);
@@ -648,26 +760,23 @@
       currentZone = 'collection'; activeCollection = collection;
       $('touch-controls').classList.add('active');
       const rows = Math.ceil(collection.images.length / 2);
-      galleryLength = Math.max(24, 12 + rows * 5.1);
+      galleryLength = Math.max(27, 8 + rows * 4.5);
+      const pillarCount = rows; // Un vano arquitectónico por cada pareja de obras.
+      const bayWidth = (galleryLength - 2.2) / pillarCount;
       newWorld(0x080e18);
-      addShell(20, galleryLength, 8, true);
+      addShell(20, galleryLength, 8, true, { pillarCount });
       setCamera(0, 1.72, galleryLength / 2 - 3.8, 0, 0);
-      // Obras alternadas a ambos lados: una galería física, no una simple cuadrícula de miniaturas.
+      // Cada bastidor queda centrado en el vano entre dos columnas; nunca se superpone con una pilastra.
       collection.images.forEach((filename, index) => {
         const side = index % 2 === 0 ? -1 : 1;
         const row = Math.floor(index / 2);
-        const z = galleryLength / 2 - 7 - row * 5.05;
-        makeArtworkFrame(collection, index, side * 9.72, 2.78, z, side);
-        const spot = new THREE.PointLight(side < 0 ? 0x70bdca : 0xd5a25b, .48, 7);
-        spot.position.set(side * 7.6, 4.4, z + 1.1);
-        world.add(spot);
+        const firstPillarZ = -galleryLength / 2 + 1.1;
+        const z = firstPillarZ + (pillarCount - row - .5) * bayWidth;
+        makeArtworkFrame(collection, index, side * 9.72, 2.82, z, side, bayWidth);
       });
-      // Señal de cierre de sala al fondo.
-      const endMark = new THREE.Mesh(new THREE.TorusGeometry(1.15, .045, 8, 64), material(0xc79a55, .32, .78, { emissive: 0x4b2c0c, emissiveIntensity: .25 }));
-      endMark.position.set(0, 3.4, -galleryLength / 2 + .8);
-      world.add(endMark);
+      // El fondo de cada una de las ocho salas utiliza el emblema institucional y su nombre.
       zoneTitle.textContent = collection.title;
-      setCaption(`${collection.description} <strong>Recorre la sala</strong> con W/A/S/D o las flechas; arrastra para mirar y haz clic sobre una obra para ampliarla.`);
+      setCaption(`${collection.description} <strong>Recorre la sala</strong> con W/A/S/D o flechas. Cada obra está centrada entre columnas: haz clic o acércate y pulsa Enter para ampliarla.`);
       $('back-button').style.visibility = 'visible';
     }
 
@@ -696,16 +805,43 @@
     }
 
     function moveInGallery(direction) {
-      if (currentZone !== 'collection') return;
+      if (!camera || !['atrium', 'audio', 'visualHub', 'collection'].includes(currentZone)) return;
       const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
       const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
-      const step = 1.25;
+      const step = 1.18;
       if (direction === 'forward') camera.position.addScaledVector(forward, step);
       if (direction === 'back') camera.position.addScaledVector(forward, -step);
       if (direction === 'left') camera.position.addScaledVector(right, -step);
       if (direction === 'right') camera.position.addScaledVector(right, step);
-      camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.5, 7.5);
-      camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
+      // Límites físicos distintos para cada estancia.
+      if (currentZone === 'collection') {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.6, 7.6);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
+      } else if (currentZone === 'audio') {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.4, 7.4);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -8.7, 8.4);
+      } else if (currentZone === 'visualHub') {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -10.6, 10.6);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -13.7, 13.7);
+      } else {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x, -8.5, 8.5);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -9.0, 9.0);
+      }
+    }
+
+    function interactNearest() {
+      if (!camera || !interactables.length) return;
+      let nearest = null;
+      let nearestDistance = 6.2;
+      const position = new THREE.Vector3();
+      for (const object of interactables) {
+        if (!object.userData || !object.userData.action) continue;
+        object.getWorldPosition(position);
+        const distance = camera.position.distanceTo(position);
+        if (distance < nearestDistance) { nearestDistance = distance; nearest = object; }
+      }
+      if (nearest) handleAction(nearest.userData.action, nearest.userData.data);
+      else showToast('Acércate un poco más a la puerta, obra o rockola para interactuar.');
     }
 
     function goBack() {
@@ -886,8 +1022,9 @@
       const dy = event.clientY - pointerStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 4) pointerStart.moved = true;
       if (pointerStart.moved) {
-        yaw -= dx * .0032;
-        pitch = THREE.MathUtils.clamp(pitch - dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
+        // Cámara invertida: arrastrar a derecha mira a izquierda; arrastrar abajo mira a bóveda.
+        yaw += dx * .0032;
+        pitch = THREE.MathUtils.clamp(pitch + dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
         camera.rotation.set(pitch, yaw, 0);
         pointerStart.x = event.clientX; pointerStart.y = event.clientY;
       }
@@ -906,17 +1043,20 @@
         return;
       }
       if (audioOverlay.classList.contains('open')) {
-        if (event.key === 'Escape') closeAudioPlayer();
+        if (event.key === 'Escape') { closeAudioPlayer(); return; }
+        const target = event.target;
+        if (target && (target.matches('input, textarea, select') || target.isContentEditable)) return;
+        if (event.key === 'ArrowDown' || event.key === 'PageDown') { event.preventDefault(); $('playlist').scrollBy({ top: event.key === 'PageDown' ? $('playlist').clientHeight * .82 : 86, behavior: 'smooth' }); }
+        else if (event.key === 'ArrowUp' || event.key === 'PageUp') { event.preventDefault(); $('playlist').scrollBy({ top: event.key === 'PageUp' ? -$('playlist').clientHeight * .82 : -86, behavior: 'smooth' }); }
         return;
       }
       if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); goBack(); return; }
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); interactNearest(); return; }
       const key = event.key.toLowerCase();
       if (['arrowup','w'].includes(key)) { event.preventDefault(); moveInGallery('forward'); }
       else if (['arrowdown','s'].includes(key)) { event.preventDefault(); moveInGallery('back'); }
-      else if (key === 'a') moveInGallery('left');
-      else if (key === 'd') moveInGallery('right');
-      else if (key === 'arrowleft') { yaw += .12; camera.rotation.y = yaw; }
-      else if (key === 'arrowright') { yaw -= .12; camera.rotation.y = yaw; }
+      else if (['arrowleft','a'].includes(key)) { event.preventDefault(); moveInGallery('left'); }
+      else if (['arrowright','d'].includes(key)) { event.preventDefault(); moveInGallery('right'); }
     });
 
     document.querySelectorAll('[data-move]').forEach((button) => {
@@ -930,13 +1070,19 @@
       if (renderer && scene && camera) renderer.render(scene, camera);
     }
 
-    function init() {
+    async function init() {
       if (!window.THREE) {
         $('webgl-fallback').classList.add('show');
         return;
       }
       try {
         textureLoader = new THREE.TextureLoader();
+        try {
+          emblemBaseTexture = await new Promise((resolve) => textureLoader.load('Emblema_QuimeraC3.webp', resolve, undefined, () => resolve(null)));
+          if (emblemBaseTexture) { emblemBaseTexture.encoding = THREE.sRGBEncoding; emblemBaseTexture.anisotropy = 8; }
+        } catch (emblemError) {
+          console.warn('No se pudo cargar Emblema_QuimeraC3.webp. La galería continuará sin los emblemas 3D.', emblemError);
+        }
         clock = new THREE.Clock();
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x070b14);
