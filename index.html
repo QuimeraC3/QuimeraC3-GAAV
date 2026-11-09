@@ -1,929 +1,982 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GALERÍA DE ARTE AUDIOVISUAL &bull; Instituto Quimera</title>
-    
-    <!-- LIBRERÍA THREE.JS (MOTOR 3D EN TIEMPO REAL) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b14">
+  <meta name="description" content="Galería de Arte Audiovisual del Ecosistema Quimera: un recorrido inmersivo por sus colecciones sonoras y visuales.">
+  <title>Galería de Arte Audiovisual · Ecosistema Quimera</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #070b14;
+      --ink-2: #0c1422;
+      --panel: rgba(8, 14, 25, .88);
+      --gold: #c79a55;
+      --gold-light: #ead2a0;
+      --cyan: #72c9d8;
+      --muted: #9eabbc;
+      --white: #f5f1e9;
+      --line: rgba(199,154,85,.36);
+      --shadow: 0 24px 80px rgba(0,0,0,.55);
+      --serif: "Cinzel", Georgia, serif;
+      --sans: "Manrope", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--ink); color: var(--white); font-family: var(--sans); }
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+    #world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; outline: none; cursor: grab; }
+    #world:active { cursor: grabbing; }
+    .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,.24) 100%); }
+    .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
 
-    <style>
-        :root {
-            --bg-dark: #020617;
-            --accent-gold: #c88b32;
-            --accent-blue: #38bdf8;
-        }
+    /* Umbral de entrada */
+    #intro-screen { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 28px; background: radial-gradient(ellipse at 50% 42%, #17243a 0%, #0a1220 44%, #03060c 100%); transition: opacity 1s ease, visibility 1s ease; }
+    #intro-screen.leaving { opacity: 0; visibility: hidden; pointer-events: none; }
+    .intro-architecture { position: relative; width: min(920px, 94vw); min-height: min(720px, 88vh); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: clamp(28px, 5vw, 64px) 24px 38px; border: 1px solid rgba(199,154,85,.28); border-bottom: 0; border-radius: 48% 48% 0 0 / 23% 23% 0 0; background: linear-gradient(180deg, rgba(22,34,54,.76), rgba(4,8,15,.9)); box-shadow: inset 0 0 100px rgba(92,154,180,.08), 0 0 100px rgba(0,0,0,.6); overflow: hidden; }
+    .intro-architecture::before { content: ""; position: absolute; inset: 15px 15px 0; border: 1px solid rgba(199,154,85,.2); border-bottom: 0; border-radius: 48% 48% 0 0 / 23% 23% 0 0; pointer-events: none; }
+    .intro-architecture::after { content: ""; position: absolute; left: 50%; top: 16%; width: min(55vw, 510px); height: min(55vw, 510px); transform: translateX(-50%); border: 1px solid rgba(114,201,216,.12); border-radius: 50%; box-shadow: 0 0 80px rgba(114,201,216,.06), inset 0 0 80px rgba(114,201,216,.04); pointer-events: none; }
+    .intro-kicker { position: relative; z-index: 1; color: var(--cyan); letter-spacing: .34em; font-size: .68rem; text-transform: uppercase; text-align: center; }
+    .intro-title { z-index: 1; max-width: 760px; margin: 28px 0 10px; text-align: center; font: 500 clamp(1.55rem, 4vw, 3.2rem)/1.22 var(--serif); letter-spacing: .055em; color: var(--gold-light); text-shadow: 0 6px 28px rgba(0,0,0,.7); }
+    .intro-subtitle { z-index: 1; max-width: 580px; text-align: center; color: #c3cbd5; font-size: clamp(.8rem, 1.5vw, .98rem); line-height: 1.8; letter-spacing: .04em; }
+    .intro-seal { position: relative; z-index: 1; width: 84px; height: 84px; margin: 12px 0 0; border: 1px solid rgba(199,154,85,.6); border-radius: 50%; display: grid; place-items: center; color: var(--gold-light); font: 2.5rem var(--serif); box-shadow: 0 0 32px rgba(199,154,85,.12), inset 0 0 22px rgba(199,154,85,.1); }
+    .intro-seal::after { content: ""; position: absolute; width: 65px; height: 65px; border: 1px solid rgba(114,201,216,.28); border-radius: 50%; }
+    .intro-button { position: relative; z-index: 1; margin-top: 34px; min-width: 230px; padding: 15px 26px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.18), rgba(199,154,85,.04)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
+    .intro-button:hover { background: rgba(199,154,85,.24); box-shadow: 0 0 32px rgba(199,154,85,.18); transform: translateY(-2px); }
+    .intro-foot { z-index: 1; margin-top: 24px; text-transform: uppercase; letter-spacing: .2em; font-size: .58rem; color: #778598; text-align: center; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    /* Interfaz de navegación */
+    #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 400px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
+    #topbar.visible { opacity: 1; visibility: visible; }
+    .topbar-brand { min-width: 0; }
+    .topbar-overline { display: block; margin-bottom: 3px; color: var(--cyan); font-size: .55rem; letter-spacing: .26em; text-transform: uppercase; }
+    #zone-title { font: 500 clamp(.75rem, 1.5vw, .98rem) var(--serif); letter-spacing: .08em; color: var(--gold-light); text-transform: uppercase; }
+    .topbar-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .quiet-btn { border: 1px solid rgba(199,154,85,.4); background: rgba(255,255,255,.025); color: #d5dce5; padding: 8px 11px; cursor: pointer; font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; transition: .2s; }
+    .quiet-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(114,201,216,.08); }
+    #scene-caption { position: fixed; z-index: 4; bottom: 25px; left: 50%; transform: translateX(-50%); width: min(660px, calc(100vw - 36px)); text-align: center; color: rgba(231,236,242,.72); font-size: .68rem; letter-spacing: .08em; line-height: 1.6; text-shadow: 0 2px 12px #000; pointer-events: none; }
+    #scene-caption strong { color: var(--gold-light); font-weight: 600; }
+    #mini-player { position: fixed; z-index: 9; top: 22px; left: 20px; width: min(340px, calc(100vw - 40px)); display: flex; align-items: center; gap: 11px; padding: 9px 12px 9px 9px; border: 1px solid rgba(199,154,85,.52); background: rgba(4,9,17,.88); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.35); transition: opacity .25s, transform .25s; }
+    #mini-player.hidden { opacity: 0; visibility: hidden; transform: translateY(-8px); pointer-events: none; }
+    .mini-cover { width: 43px; height: 43px; flex: 0 0 43px; border: 1px solid rgba(114,201,216,.55); background-image: url("Quimera.webp"); background-color: #101b2a; background-position: center; background-size: cover; background-position: center; background-size: cover; }
+    .mini-meta { min-width: 0; flex: 1; }
+    .mini-label { color: var(--cyan); font-size: .53rem; letter-spacing: .18em; text-transform: uppercase; }
+    #mini-track-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-top: 4px; color: #e6e9ed; font-size: .68rem; }
+    .mini-controls { display: flex; gap: 5px; }
+    .mini-control { width: 29px; height: 29px; border: 1px solid rgba(199,154,85,.45); background: transparent; color: var(--gold-light); cursor: pointer; }
+    .mini-control:hover { background: rgba(199,154,85,.15); }
+    #mini-hide { border: 0; background: transparent; color: #8390a0; cursor: pointer; font-size: 1rem; padding: 2px; }
+    #touch-controls { position: fixed; z-index: 6; right: 18px; bottom: 75px; display: none; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(2, 42px); gap: 5px; }
+    .touch-btn { border: 1px solid rgba(114,201,216,.55); background: rgba(4,10,18,.78); color: var(--cyan); border-radius: 2px; font-size: 1rem; }
+    .touch-up { grid-column: 2; grid-row: 1; }
+    .touch-left { grid-column: 1; grid-row: 2; }
+    .touch-down { grid-column: 2; grid-row: 2; }
+    .touch-right { grid-column: 3; grid-row: 2; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            color: #ffffff;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
+    /* Visor de obras */
+    .overlay { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 30px; background: rgba(1,3,8,.94); backdrop-filter: blur(13px); opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s ease; }
+    .overlay.open { opacity: 1; visibility: visible; }
+    .image-viewer { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; max-width: 1800px; }
+    .viewer-image-wrap { width: 100%; height: calc(100% - 54px); display: grid; place-items: center; }
+    #viewer-image { display: block; max-width: 96%; max-height: 100%; object-fit: contain; box-shadow: 0 18px 90px rgba(0,0,0,.58); }
+    #viewer-image.missing { width: min(700px, 80vw); height: min(430px, 60vh); object-fit: contain; padding: 38px; border: 1px solid rgba(199,154,85,.35); background: linear-gradient(135deg,#111d2d,#050910); color: var(--gold-light); }
+    .viewer-close { position: absolute; z-index: 2; top: 0; left: 0; width: 44px; height: 44px; border: 1px solid rgba(199,154,85,.7); background: rgba(6,10,17,.72); color: var(--gold-light); cursor: pointer; font-size: 1.5rem; line-height: 1; }
+    .viewer-close:hover { color: white; border-color: var(--cyan); }
+    .viewer-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 62px; border: 1px solid rgba(199,154,85,.45); background: rgba(3,8,15,.62); color: var(--gold-light); font-size: 1.35rem; cursor: pointer; }
+    .viewer-arrow:hover { border-color: var(--cyan); color: var(--cyan); }
+    #viewer-prev { left: 8px; }
+    #viewer-next { right: 8px; }
+    .viewer-caption { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 18px; color: #bec7d2; font-size: .69rem; letter-spacing: .12em; text-transform: uppercase; text-align: center; }
+    #viewer-count { color: var(--cyan); font-family: monospace; }
 
-        /* CAPA CRT SCANLINES GLOBAL */
-        .crt-scanlines {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none;
-            z-index: 2000;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            background-size: 100% 3px, 6px 100%;
-            opacity: 0.65;
-        }
+    /* Rockola y reproductor */
+    #audio-overlay { z-index: 35; }
+    .audio-shell { position: relative; width: min(1180px, 100%); max-height: min(850px, 92vh); overflow: hidden; border: 1px solid rgba(199,154,85,.52); background: linear-gradient(135deg, rgba(15,25,41,.98), rgba(4,8,15,.99) 65%); box-shadow: var(--shadow), 0 0 70px rgba(114,201,216,.08); }
+    .audio-header { display: flex; align-items: center; gap: 18px; padding: 22px 25px; border-bottom: 1px solid rgba(199,154,85,.22); }
+    .audio-close { width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid rgba(199,154,85,.6); background: transparent; color: var(--gold-light); cursor: pointer; font-size: 1.25rem; }
+    .audio-kicker { color: var(--cyan); font-size: .57rem; letter-spacing: .25em; text-transform: uppercase; }
+    .audio-heading { margin: 5px 0 0; color: var(--gold-light); font: 500 clamp(1.05rem, 2.5vw, 1.55rem) var(--serif); letter-spacing: .08em; }
+    .audio-layout { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(330px, 1.1fr); min-height: 420px; max-height: calc(92vh - 88px); }
+    .now-playing { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; border-right: 1px solid rgba(199,154,85,.18); text-align: center; }
+    .record-art { position: relative; width: min(270px, 56vw); aspect-ratio: 1; margin-bottom: 24px; border: 1px solid rgba(199,154,85,.58); background: radial-gradient(circle, rgba(114,201,216,.15), transparent 55%), linear-gradient(145deg, #18283e, #050910); box-shadow: 0 0 55px rgba(114,201,216,.1); display: grid; place-items: center; overflow: hidden; }
+    .record-art::before, .record-art::after { content: ""; position: absolute; width: 78%; aspect-ratio: 1; border: 1px solid rgba(199,154,85,.3); border-radius: 50%; }
+    .record-art::after { width: 58%; border-color: rgba(114,201,216,.24); }
+    #record-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .72; }
+    .record-mark { position: relative; z-index: 1; width: 72px; height: 72px; border: 1px solid rgba(234,210,160,.8); border-radius: 50%; display: grid; place-items: center; color: var(--gold-light); font: 2.2rem var(--serif); background: rgba(5,10,18,.42); }
+    #current-track { max-width: 100%; margin: 0; color: var(--white); font: 500 1rem/1.5 var(--serif); }
+    .track-state { margin: 7px 0 18px; color: var(--cyan); font-size: .6rem; letter-spacing: .19em; text-transform: uppercase; }
+    .progress-row { display: flex; align-items: center; width: min(390px, 100%); gap: 10px; color: #8996a7; font: .64rem monospace; }
+    #seek-bar { flex: 1; accent-color: var(--gold); cursor: pointer; }
+    .audio-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
+    .audio-control { width: 42px; height: 42px; border: 1px solid rgba(199,154,85,.48); background: rgba(199,154,85,.07); color: var(--gold-light); cursor: pointer; }
+    .audio-control.primary { width: 54px; height: 54px; border-color: var(--gold); background: rgba(199,154,85,.2); font-size: 1.1rem; }
+    .audio-control:hover { border-color: var(--cyan); color: var(--cyan); }
+    .library { display: flex; flex-direction: column; min-height: 0; padding: 22px 24px 18px; }
+    .library-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .library-title { color: var(--gold-light); font: 500 .9rem var(--serif); letter-spacing: .1em; text-transform: uppercase; }
+    .library-count { color: var(--cyan); font: .66rem monospace; }
+    #track-search { width: 100%; margin-bottom: 12px; padding: 10px 12px; border: 1px solid rgba(114,201,216,.22); background: rgba(0,0,0,.24); color: var(--white); outline: none; font: .72rem var(--sans); }
+    #track-search:focus { border-color: var(--cyan); }
+    #playlist { overflow: auto; min-height: 0; padding-right: 5px; scrollbar-color: rgba(199,154,85,.5) rgba(255,255,255,.04); scrollbar-width: thin; }
+    .track-item { display: grid; grid-template-columns: 32px minmax(0,1fr) 25px; align-items: center; gap: 10px; width: 100%; padding: 10px 9px; border: 0; border-bottom: 1px solid rgba(255,255,255,.055); background: transparent; color: #aab5c2; text-align: left; cursor: pointer; transition: background .18s, color .18s; }
+    .track-item:hover { background: rgba(114,201,216,.07); color: var(--white); }
+    .track-item.active { background: rgba(199,154,85,.11); color: var(--gold-light); }
+    .track-number { color: #738195; font: .66rem monospace; }
+    .track-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .72rem; }
+    .track-status { color: var(--cyan); text-align: right; font-size: .72rem; }
+    .audio-note { margin: 12px 0 0; color: #758396; font-size: .59rem; line-height: 1.6; }
 
-        /* FACHADA MONUMENTAL DEL CASTILLO */
-        #castle-entrance {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, #0b1329 0%, #020617 80%, #000000 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 1.2s ease, filter 1.2s ease;
-            overflow: hidden;
-        }
+    #toast { position: fixed; z-index: 50; left: 50%; bottom: 76px; transform: translate(-50%, 12px); max-width: calc(100vw - 40px); padding: 10px 16px; border: 1px solid rgba(114,201,216,.4); background: rgba(4,10,18,.92); color: #dce5ed; font-size: .68rem; letter-spacing: .04em; opacity: 0; visibility: hidden; transition: .25s; text-align: center; }
+    #toast.show { opacity: 1; visibility: visible; transform: translate(-50%,0); }
+    #webgl-fallback { display: none; position: fixed; z-index: 10; inset: 0; place-items: center; padding: 30px; text-align: center; background: #080e18; color: var(--white); }
+    #webgl-fallback.show { display: grid; }
 
-        .castle-facade {
-            position: relative;
-            width: min(90vw, 800px);
-            height: min(80vh, 600px);
-            background: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
-            border: 3px solid #334155;
-            border-bottom: none;
-            border-radius: 180px 180px 0 0;
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), inset 0 0 40px rgba(56, 189, 248, 0.15);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 2rem;
-            perspective: 1000px;
-        }
-
-        .battlements {
-            position: absolute;
-            top: -24px; width: 100%; height: 24px;
-            display: flex; justify-content: space-around;
-        }
-
-        .merlon {
-            width: 12%; height: 100%;
-            background: #1e293b;
-            border: 2px solid #334155;
-            border-bottom: none;
-        }
-
-        .emblem-header {
-            text-align: center;
-            z-index: 10;
-            margin-top: 1rem;
-        }
-
-        .emblem-title {
-            font-family: Georgia, serif;
-            font-size: clamp(1.6rem, 3.8vw, 3rem);
-            color: var(--accent-gold);
-            -webkit-text-stroke: 1px #ffffff;
-            text-shadow: 0 0 25px rgba(200, 139, 50, 0.9), 0 0 45px rgba(56, 189, 248, 0.5);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .emblem-subtitle {
-            font-family: monospace;
-            color: var(--accent-blue);
-            font-size: clamp(0.8rem, 1.5vw, 1.1rem);
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
-            margin-top: 0.4rem;
-            text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
-        }
-
-        .archway {
-            position: relative;
-            width: min(65vw, 380px);
-            height: min(50vh, 340px);
-            background: #020617;
-            border: 10px solid #1e293b;
-            border-bottom: none;
-            border-radius: 190px 190px 0 0;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
-            display: flex;
-            overflow: hidden;
-        }
-
-        .gate-door {
-            width: 50%; height: 100%;
-            background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            border: 2px solid var(--accent-gold);
-            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: left center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .gate-door-right { transform-origin: right center; }
-
-        .gate-iron-bar {
-            width: 80%; height: 5px;
-            background: var(--accent-gold);
-            box-shadow: 0 0 8px rgba(200, 139, 50, 0.6);
-        }
-
-        .gate-knocker {
-            width: 30px; height: 30px;
-            border: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-blue);
-        }
-
-        .gate-open .gate-door-left { transform: rotateY(-110deg); }
-        .gate-open .gate-door-right { transform: rotateY(110deg); }
-
-        .btn-enter {
-            background: rgba(2, 6, 23, 0.9);
-            border: 2px solid var(--accent-gold);
-            color: #ffffff;
-            padding: 0.8rem 2.5rem;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 0 25px rgba(200, 139, 50, 0.5);
-            transition: all 0.3s ease;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            z-index: 20;
-        }
-
-        .btn-enter:hover {
-            background: var(--accent-gold);
-            color: #000000;
-            box-shadow: 0 0 45px var(--accent-gold), 0 0 65px var(--accent-blue);
-            transform: scale(1.05);
-        }
-
-        /* LIENZO 3D WEBGL */
-        #webgl-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 1;
-        }
-
-        /* HUD DE NAVEGACIÓN EN PANTALLA */
-        #hud-info {
-            position: fixed;
-            top: 1.5rem; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--accent-blue);
-            padding: 0.6rem 2rem;
-            border-radius: 20px;
-            font-family: monospace;
-            font-size: 1.05rem;
-            color: var(--accent-blue);
-            z-index: 100;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-            text-align: center;
-        }
-
-        /* MINI-REPRODUCTOR FLOTANTE CON CARÁTULA (ESQUINA SUPERIOR IZQUIERDA) */
-        #mini-player {
-            position: fixed;
-            top: 1.5rem; left: 1.5rem;
-            background: rgba(2, 6, 23, 0.92);
-            border: 1.5px solid var(--accent-gold);
-            border-radius: 12px;
-            padding: 0.5rem 0.8rem;
-            z-index: 1500;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            box-shadow: 0 0 20px rgba(200, 139, 50, 0.4);
-            font-family: monospace;
-            font-size: 0.8rem;
-        }
-
-        .mini-album-art {
-            width: 38px;
-            height: 38px;
-            border-radius: 6px;
-            border: 1px solid var(--accent-blue);
-            background-image: url('Quimera.webp');
-            background-size: cover;
-            background-position: center;
-        }
-
-        .mini-track-info {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .mini-track-title {
-            color: var(--accent-blue);
-            max-width: 180px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.8rem;
-        }
-
-        .mini-controls {
-            display: flex;
-            gap: 5px;
-        }
-
-        .mini-btn {
-            background: transparent;
-            border: 1px solid var(--accent-gold);
-            color: #ffffff;
-            border-radius: 4px;
-            padding: 0.15rem 0.45rem;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-
-        .mini-btn:hover {
-            background: var(--accent-gold);
-            color: #000;
-        }
-
-        /* CONTROLES TÁCTILES MÓVILES */
-        .dpad-container {
-            position: fixed;
-            bottom: 2rem; right: 2rem;
-            width: 150px; height: 150px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 5px;
-            z-index: 100;
-        }
-
-        .dpad-btn {
-            background: rgba(15, 23, 42, 0.85);
-            border: 1.5px solid var(--accent-blue);
-            color: #ffffff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .dpad-btn:active { background: var(--accent-blue); color: #000000; }
-        .dpad-up { grid-column: 2; grid-row: 1; }
-        .dpad-down { grid-column: 2; grid-row: 3; }
-        .dpad-left { grid-column: 1; grid-row: 2; }
-        .dpad-right { grid-column: 3; grid-row: 2; }
-        .dpad-enter { grid-column: 2; grid-row: 2; border-color: var(--accent-gold); color: var(--accent-gold); }
-
-        /* VENTANA MODAL CRT DE EXHIBICIÓN */
-        #gallery-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.88);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-            z-index: 3000;
-        }
-
-        #gallery-modal.show { opacity: 1; pointer-events: auto; }
-
-        .modal-box {
-            background: #0b1329;
-            border: 2px solid var(--accent-gold);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 720px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 0 35px var(--accent-gold);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .modal-preview-box {
-            width: 100%;
-            height: 260px;
-            background: #020617;
-            border: 1px solid var(--accent-blue);
-            border-radius: 8px;
-            margin-bottom: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.2);
-            color: var(--accent-gold);
-            font-family: Georgia, serif;
-            font-size: 1.1rem;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: relative;
-        }
-
-        .img-counter {
-            position: absolute;
-            bottom: 8px; right: 12px;
-            background: rgba(0,0,0,0.7);
-            border: 1px solid var(--accent-blue);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: var(--accent-blue);
-        }
-
-        .image-nav-controls {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-
-        /* REPRODUCTOR DE AUDIO REAL */
-        .audio-player-container {
-            width: 100%;
-            background: #020617;
-            border: 1px solid var(--accent-gold);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1.2rem;
-            text-align: left;
-        }
-
-        .track-info {
-            font-family: monospace;
-            color: var(--accent-blue);
-            font-size: 0.95rem;
-            margin-bottom: 0.8rem;
-            text-align: center;
-        }
-
-        .playlist {
-            max-height: 140px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(56, 189, 248, 0.2);
-            padding-top: 0.5rem;
-        }
-
-        .track-item {
-            font-family: monospace;
-            font-size: 0.85rem;
-            padding: 0.4rem 0.6rem;
-            cursor: pointer;
-            color: #94a3b8;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .track-item:hover, .track-item.active {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent-blue);
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .ctrl-btn {
-            background: rgba(200, 139, 50, 0.2);
-            border: 1px solid var(--accent-gold);
-            color: #ffffff;
-            padding: 0.4rem 1.2rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: monospace;
-        }
-
-        .ctrl-btn:hover {
-            background: var(--accent-gold);
-            color: #000000;
-        }
-    </style>
+    @media (max-width: 760px) {
+      #topbar { top: 12px; width: calc(100vw - 24px); padding: 9px 11px; }
+      #mini-player { top: 74px; left: 12px; width: min(320px, calc(100vw - 24px)); }
+      #scene-caption { bottom: 16px; font-size: .61rem; }
+      #touch-controls.active { display: grid; }
+      .overlay { padding: 14px; }
+      .viewer-image-wrap { height: calc(100% - 70px); }
+      #viewer-image { max-width: 100%; max-height: 100%; }
+      .viewer-arrow { width: 38px; height: 48px; top: auto; bottom: 2px; transform: none; }
+      #viewer-prev { left: 4px; }
+      #viewer-next { right: 4px; }
+      .viewer-caption { padding: 0 70px; font-size: .57rem; }
+      .audio-shell { max-height: 96vh; overflow-y: auto; }
+      .audio-layout { display: flex; flex-direction: column; max-height: none; }
+      .now-playing { padding: 22px 16px; border-right: 0; border-bottom: 1px solid rgba(199,154,85,.18); }
+      .record-art { width: 150px; margin-bottom: 14px; }
+      .record-mark { width: 48px; height: 48px; font-size: 1.4rem; }
+      .audio-header { padding: 15px; }
+      .library { min-height: 260px; padding: 17px; }
+      #playlist { max-height: 34vh; }
+      .intro-architecture { min-height: min(650px, 90vh); }
+      .intro-foot { line-height: 1.8; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
+  <canvas id="world" aria-label="Recorrido tridimensional por la Galería de Arte Audiovisual del Ecosistema Quimera"></canvas>
+  <div class="vignette"></div><div class="grain"></div>
 
-    <div class="crt-scanlines"></div>
+  <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
+    <div class="intro-architecture">
+      <div class="intro-kicker">Instituto Quimera · Investigación · Docencia · Servicio · Divulgación</div>
+      <div class="intro-seal" aria-hidden="true">Q</div>
+      <h1 class="intro-title">Galería de Arte Audiovisual</h1>
+      <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
+      <button class="intro-button" id="enter-castle">Atravesar el umbral</button>
+      <div class="intro-foot">Una experiencia inmersiva · Explora a tu propio ritmo</div>
+    </div>
+  </section>
 
-    <!-- FACHADA DEL CASTILLO MONUMENTAL -->
-    <div id="castle-entrance">
-        <div class="castle-facade">
-            <div class="battlements">
-                <div class="merlon"></div><div class="merlon"></div><div class="merlon"></div>
-                <div class="merlon"></div><div class="merlon"></div><div class="merlon"></div>
-            </div>
+  <header id="topbar" aria-live="polite">
+    <div class="topbar-brand">
+      <span class="topbar-overline">Galería de Arte Audiovisual · Quimera</span>
+      <div id="zone-title">Vestíbulo central</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="quiet-btn" id="back-button">← Regresar</button>
+      <button class="quiet-btn" id="home-button" title="Volver al vestíbulo">Vestíbulo</button>
+    </div>
+  </header>
 
-            <div class="emblem-header">
-                <div class="emblem-title">GALERÍA DE ARTE AUDIOVISUAL</div>
-                <div class="emblem-subtitle">DEL ECOSISTEMA QUIMERA</div>
-            </div>
+  <div id="mini-player" class="hidden" aria-label="Minirreproductor persistente">
+    <div class="mini-cover" id="mini-cover"></div>
+    <div class="mini-meta"><div class="mini-label">Archivo sonoro Quimera</div><div id="mini-track-name">Selecciona una composición</div></div>
+    <div class="mini-controls">
+      <button class="mini-control" id="mini-prev" aria-label="Pista anterior">‹</button>
+      <button class="mini-control" id="mini-play" aria-label="Reproducir o pausar">▶</button>
+      <button class="mini-control" id="mini-next" aria-label="Pista siguiente">›</button>
+    </div>
+    <button id="mini-hide" aria-label="Ocultar minirreproductor" title="Ocultar">×</button>
+  </div>
 
-            <div class="archway" id="archway-gate">
-                <div class="gate-door gate-door-left">
-                    <div class="gate-iron-bar"></div>
-                    <div class="gate-knocker"></div>
-                    <div class="gate-iron-bar"></div>
-                </div>
-                <div class="gate-door gate-door-right">
-                    <div class="gate-iron-bar"></div>
-                    <div class="gate-knocker"></div>
-                    <div class="gate-iron-bar"></div>
-                </div>
-            </div>
+  <div id="scene-caption">Haz clic en una puerta u objeto para acceder. <strong>Arrastra</strong> para mirar alrededor.</div>
 
-            <button class="btn-enter" onclick="enterGallery()">ENTRAR A LA GALERÍA</button>
+  <div id="touch-controls" aria-label="Controles de recorrido">
+    <button class="touch-btn touch-up" data-move="forward" aria-label="Avanzar">↑</button>
+    <button class="touch-btn touch-left" data-move="left" aria-label="Desplazarse a la izquierda">←</button>
+    <button class="touch-btn touch-down" data-move="back" aria-label="Retroceder">↓</button>
+    <button class="touch-btn touch-right" data-move="right" aria-label="Desplazarse a la derecha">→</button>
+  </div>
+
+  <section id="image-overlay" class="overlay" aria-modal="true" role="dialog" aria-label="Obra visual">
+    <div class="image-viewer">
+      <button class="viewer-close" id="viewer-close" aria-label="Cerrar obra">×</button>
+      <button class="viewer-arrow" id="viewer-prev" aria-label="Obra anterior">‹</button>
+      <div class="viewer-image-wrap"><img id="viewer-image" alt="Obra de la colección Quimera"></div>
+      <button class="viewer-arrow" id="viewer-next" aria-label="Obra siguiente">›</button>
+      <div class="viewer-caption"><span id="viewer-title">Obra</span><span id="viewer-count">01 / 01</span></div>
+    </div>
+  </section>
+
+  <section id="audio-overlay" class="overlay" aria-modal="true" role="dialog" aria-label="Rockola holográfica Quimera">
+    <div class="audio-shell">
+      <header class="audio-header">
+        <button class="audio-close" id="audio-close" aria-label="Cerrar reproductor">×</button>
+        <div><div class="audio-kicker">Archivo sonoro · 24 composiciones</div><h2 class="audio-heading">Rockola holográfica Quimera</h2></div>
+      </header>
+      <div class="audio-layout">
+        <div class="now-playing">
+          <div class="record-art"><img id="record-cover" src="Quimera_Electrotango.webp" alt="" onerror="this.style.display='none'"><div class="record-mark">Q</div></div>
+          <h3 id="current-track">Selecciona una composición</h3>
+          <div class="track-state" id="track-state">Archivo sonoro · En espera</div>
+          <div class="progress-row"><span id="elapsed">00:00</span><input id="seek-bar" type="range" min="0" max="1000" value="0" aria-label="Posición de reproducción"><span id="duration">00:00</span></div>
+          <div class="audio-controls">
+            <button class="audio-control" id="audio-prev" aria-label="Pista anterior">Ⅱ‹</button>
+            <button class="audio-control primary" id="audio-play" aria-label="Reproducir">▶</button>
+            <button class="audio-control" id="audio-next" aria-label="Pista siguiente">›Ⅱ</button>
+          </div>
         </div>
-    </div>
-
-    <!-- HUD GUÍA EN PANTALLA -->
-    <div id="hud-info">PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]</div>
-
-    <!-- MINI REPRODUCTOR FLOTANTE CON CARÁTULA (ESQUINA SUPERIOR IZQUIERDA) -->
-    <div id="mini-player">
-        <div class="mini-album-art"></div>
-        <div class="mini-track-info">
-            <div class="mini-track-title" id="mini-track-name">Reproductor Quimera</div>
-            <div class="mini-controls">
-                <button class="mini-btn" onclick="prevTrack()">◀</button>
-                <button class="mini-btn" id="mini-play-btn" onclick="togglePlay()">▶</button>
-                <button class="mini-btn" onclick="nextTrack()">▶</button>
-            </div>
+        <div class="library">
+          <div class="library-head"><div class="library-title">Colección musical</div><div class="library-count" id="library-count">24 PISTAS</div></div>
+          <input id="track-search" type="search" placeholder="Buscar en el archivo sonoro…" autocomplete="off" aria-label="Buscar pista">
+          <div id="playlist"></div>
+          <p class="audio-note">La reproducción comienza únicamente cuando seleccionas una pista. Al cerrar esta ventana, la música puede continuar mientras recorres el ala visual.</p>
         </div>
+      </div>
     </div>
+  </section>
 
-    <!-- CONTENEDOR 3D WEBGL -->
-    <canvas id="webgl-canvas"></canvas>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="webgl-fallback"><div><h2>La experiencia 3D no está disponible en este navegador.</h2><p>Activa la aceleración por hardware o prueba con una versión reciente de Chrome, Firefox o Edge.</p></div></div>
 
-    <!-- CONTROLES TÁCTILES MÓVILES -->
-    <div class="dpad-container">
-        <button class="dpad-btn dpad-up" onclick="movePlayer('up')">▲</button>
-        <button class="dpad-btn dpad-left" onclick="movePlayer('left')">◀</button>
-        <button class="dpad-btn dpad-enter" onclick="movePlayer('enter')">OK</button>
-        <button class="dpad-btn dpad-right" onclick="movePlayer('right')">▶</button>
-        <button class="dpad-btn dpad-down" onclick="movePlayer('down')">▼</button>
-    </div>
+  <script>
+  (() => {
+    'use strict';
 
-    <!-- MODAL DE EXHIBICIÓN DE OBRAS / SALA DE AUDIO -->
-    <div id="gallery-modal">
-        <div class="modal-box">
-            <!-- SECCIÓN VISUAL CON MULTI-IMAGEN -->
-            <div id="modal-content-visual" style="width: 100%;">
-                <div class="modal-preview-box" id="modal-img-box">
-                    [ VISTA PREVIA DE LA OBRA ]
-                    <div class="img-counter" id="img-counter-label">1 / 1</div>
-                </div>
-                <div class="image-nav-controls" id="visual-nav-controls" style="display: none;">
-                    <button class="ctrl-btn" onclick="prevImage()">◀ ANTERIOR FOTO</button>
-                    <button class="ctrl-btn" onclick="nextImage()">SIGUIENTE FOTO ▶</button>
-                </div>
-            </div>
+    // Colecciones y nombres de archivo preservados del index de origen.
+    const collections = [
+      { id: 'ecosystem', title: 'Ecosistema Quimera', short: 'ECOSISTEMA', description: 'Una exposición del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.', images: ['Quimera_Negro.webp','Quimera.webp','Belerofonte_Negro.webp','Belerofonte.webp','Pegaso_Negro.webp','Pegaso.webp','Quimera_Ecosistema01.webp','Quimeratrix.webp'] },
+      { id: 'what', title: '¿Qué es Quimera?', short: '¿QUÉ ES QUIMERA?', description: 'La estructura que conecta conocimiento, metodología y aplicación para generar soluciones.', images: ['Quimera_QE.webp','Quimera_QE_Mod.webp','QE_glitch_Q.webp','QE_glitch_U.webp','QE_glitch_I.webp','QE_glitch_M.webp','QE_glitch_E.webp','QE_glitch_R.webp','QE_glitch_A.webp'] },
+      { id: 'mission', title: 'Misión', short: 'MISIÓN', description: 'El propósito que transforma el conocimiento en capacidades, soluciones y servicio.', images: ['Quimera_Mision.webp','ECQ.webp','QM01_Investigacion.webp','QM02_Formacion.webp','QM03_Desarrollo.webp','QM04_Aplicacion.webp','QM05_Transferencia.webp','Quimera_M_Mod.webp','M_glitch_Q.webp','M_glitch_U.webp','M_glitch_I.webp','M_glitch_M.webp','M_glitch_E.webp','M_glitch_R.webp','M_glitch_A.webp'] },
+      { id: 'vision', title: 'Visión', short: 'VISIÓN', description: 'Obras proyectivas que ilustran el horizonte que guía nuestra evolución y el futuro que buscamos construir.', images: ['Quimera_Vision.webp','Quimera_V_Mod.webp','V_glitch_01.webp','V_glitch_02.webp','V_glitch_03.webp','V_glitch_04.webp','V_glitch_05.webp','V_glitch_06.webp','V_glitch_07.webp','V_glitch_08.webp','V_glitch_09.webp','V_glitch_10.webp','V_glitch_11.webp'] },
+      { id: 'principles', title: 'Principios', short: 'PRINCIPIOS', description: 'El origen simbólico y conceptual que da vida e identidad a nuestro ecosistema.', images: ['Quimera_Principios.webp','Quimera_P_Mod.webp','P_glitch_01.webp','P_glitch_02.webp','P_glitch_03.webp','P_glitch_04.webp','P_glitch_05.webp','P_glitch_06.webp','P_glitch_07.webp','P_glitch_08.webp','P_glitch_09.webp','P_glitch_10.webp','P_glitch_11.webp'] },
+      { id: 'development', title: 'Desarrollo', short: 'DESARROLLO', description: 'Las áreas donde convergen nuestras capacidades para investigar, formar, comunicar e innovar.', images: ['Quimera_Desarrollo.webp','Quimera_D_Mod.webp','D_glitch_Q.webp','D_glitch_U.webp','D_glitch_I.webp','D_glitch_M.webp','D_glitch_E.webp','D_glitch_R.webp','D_glitch_A.webp'] },
+      { id: 'electrotango', title: 'Quimera · Electrotango', short: 'QUIMERA · ELECTROTANGO', description: 'Una fusión musical y visual que expande el universo simbólico de Quimera.', images: ['Quimera_Electrotango.webp','Quimera_Electrotango_1600x900.webp'] }
+    ];
 
-            <!-- SECCIÓN DE AUDIO CON REPRODUCTOR REAL (24 PISTAS) -->
-            <div id="modal-content-audio" style="width: 100%; display: none;">
-                <div class="audio-player-container">
-                    <div class="track-info" id="current-track-name">🎵 REPRODUCTOR QUIMERA: [Selecciona Pista]</div>
-                    <div class="playlist" id="playlist-container">
-                        <!-- Las 24 pistas se cargan dinámicamente -->
-                    </div>
-                    <div class="player-controls">
-                        <button class="ctrl-btn" onclick="prevTrack()">◀ ANTERIOR</button>
-                        <button class="ctrl-btn" id="play-pause-btn" onclick="togglePlay()">▶ REPRODUCIR</button>
-                        <button class="ctrl-btn" onclick="nextTrack()">SIGUIENTE ▶</button>
-                    </div>
-                </div>
-            </div>
+    const soundTracks = [
+      { title: '01. Tango Futuro (Lado A)', file: '01._Tango_Futuro_(Lado_A).mp3' },
+      { title: '02. Tango Futuro (Lado B)', file: '02._Tango_Futuro_(Lado_B).mp3' },
+      { title: '03. Nivea Tierra 2090ngo (Lado A)', file: '03._Nivea_Tierra_2090ngo_(Lado_A).mp3' },
+      { title: '04. Nivea Tierra 2090ngo (Lado B)', file: '04._Nivea_Tierra_2090ngo_(Lado_B).mp3' },
+      { title: '05. Tangénesis (Lado A)', file: '05._Tangénesis_(Lado_A).mp3' },
+      { title: '06. Tangénesis (Lado B)', file: '06._Tangénesis_(Lado_B).mp3' },
+      { title: '07. Un Último Tango (Lado A)', file: '07._Un_Último_Tango_(Lado_A).mp3' },
+      { title: '08. Un Último Tango (Lado B)', file: '08._Un_Último_Tango_(Lado_B).mp3' },
+      { title: '09. Quimera Milonga (Lado A)', file: '09._Quimera_Milonga_(Lado_A).mp3' },
+      { title: '10. Quimera Milonga (Lado B)', file: '10._Quimera_Milonga_(Lado_B).mp3' },
+      { title: '11. Tangépico (Lado A)', file: '11._Tangépico_(Lado_A).mp3' },
+      { title: '12. Tangépico (Lado B)', file: '12._Tangépico_(Lado_B).mp3' },
+      { title: '13. La Mirada De La Noche (Lado A)', file: '13._La_Mirada_De_La_Noche_(Lado_A).mp3' },
+      { title: '14. La Mirada De La Noche (Lado B)', file: '14._La_Mirada_De_La_Noche_(Lado_B).mp3' },
+      { title: '15. Jueves De Lluvia', file: '15._Jueves_De_Lluvia.mp3' },
+      { title: '16. Libertad Real', file: '16._Libertad_Real.mp3' },
+      { title: '17. Utopía Del Despertar', file: '17._Utopía_Del_Despertar.mp3' },
+      { title: '18. La Idea En El Espejo (¡Recuerda, recuerda!)', file: '18._La_Idea_En_El_Espejo_(¡Recuerda,_recuerda!).mp3' },
+      { title: '19. La Idea A Través Del Espejo (¡Recuerda, Recuerda!)', file: '19._La_Idea_A_Través_Del_Espejo_(¡Recuerda,_Recuerda!).mp3' },
+      { title: '20. Tango De Obscuridad', file: '20._Tango_De_Obscuridad.mp3' },
+      { title: '21. Tango de Luz 2.0', file: '21._Tango_de_Luz_2.0.mp3' },
+      { title: '22. Tango De Luz', file: '22._Tango_De_Luz.mp3' },
+      { title: '23. Futuro De Arrabal (Lado A)', file: '23._Futuro_De_Arrabal_(Lado_A).mp3' },
+      { title: '24. Futuro De Arrabal (Lado B)', file: '24._Futuro_De_Arrabal_(Lado_B).mp3' }
+    ];
 
-            <h2 id="modal-title" style="color: var(--accent-gold); margin-bottom: 0.6rem; font-family: Georgia, serif;"></h2>
-            <p id="modal-desc" style="color: #ffffff; line-height: 1.5; margin-bottom: 1.2rem; font-size: 0.95rem;"></p>
-            <button class="btn-enter" style="margin-bottom:0;" onclick="closeModal()">CERRAR [ENTER]</button>
-        </div>
-    </div>
+    const $ = (id) => document.getElementById(id);
+    const canvas = $('world');
+    const intro = $('intro-screen');
+    const topbar = $('topbar');
+    const zoneTitle = $('zone-title');
+    const caption = $('scene-caption');
+    const miniPlayer = $('mini-player');
+    const imageOverlay = $('image-overlay');
+    const audioOverlay = $('audio-overlay');
+    const toast = $('toast');
 
-    <!-- SCRIPT DEL MOTOR THREE.JS Y REPRODUCTORES -->
-    <script>
-        let scene, camera, renderer;
-        let playerZ = 0, playerRotY = 0;
-        let isModalOpen = false;
+    let scene, camera, renderer, world, raycaster, pointer;
+    let interactables = [];
+    let currentZone = 'intro';
+    let previousZone = 'atrium';
+    let activeCollection = null;
+    let activeArtworkIndex = 0;
+    let yaw = 0, pitch = 0;
+    let dragging = false, pointerStart = null;
+    let galleryLength = 24;
+    let toastTimer = null;
+    let textureLoader, clock;
+    const animatedObjects = [];
 
-        // 🎵 LAS 24 PISTAS DEL SOUNDTRACK OFICIAL DEL INSTITUTO QUIMERA
-        const soundTracks = [
-            { title: "01. Tango Futuro (Lado A)", file: "01._Tango_Futuro_(Lado_A).mp3" },
-            { title: "02. Tango Futuro (Lado B)", file: "02._Tango_Futuro_(Lado_B).mp3" },
-            { title: "03. Nivea Tierra 2090ngo (Lado A)", file: "03._Nivea_Tierra_2090ngo_(Lado_A).mp3" },
-            { title: "04. Nivea Tierra 2090ngo (Lado B)", file: "04._Nivea_Tierra_2090ngo_(Lado_B).mp3" },
-            { title: "05. Tangénesis (Lado A)", file: "05._Tangénesis_(Lado_A).mp3" },
-            { title: "06. Tangénesis (Lado B)", file: "06._Tangénesis_(Lado_B).mp3" },
-            { title: "07. Un Último Tango (Lado A)", file: "07._Un_Último_Tango_(Lado_A).mp3" },
-            { title: "08. Un Último Tango (Lado B)", file: "08._Un_Último_Tango_(Lado_B).mp3" },
-            { title: "09. Quimera Milonga (Lado A)", file: "09._Quimera_Milonga_(Lado_A).mp3" },
-            { title: "10. Quimera Milonga (Lado B)", file: "10._Quimera_Milonga_(Lado_B).mp3" },
-            { title: "11. Tangépico (Lado A)", file: "11._Tangépico_(Lado_A).mp3" },
-            { title: "12. Tangépico (Lado B)", file: "12._Tangépico_(Lado_B).mp3" },
-            { title: "13. La Mirada De La Noche (Lado A)", file: "13._La_Mirada_De_La_Noche_(Lado_A).mp3" },
-            { title: "14. La Mirada De La Noche (Lado B)", file: "14._La_Mirada_De_La_Noche_(Lado_B).mp3" },
-            { title: "15. Jueves De Lluvia", file: "15._Jueves_De_Lluvia.mp3" },
-            { title: "16. Libertad Real", file: "16._Libertad_Real.mp3" },
-            { title: "17. Utopía Del Despertar", file: "17._Utopía_Del_Despertar.mp3" },
-            { title: "18. La Idea En El Espejo (¡Recuerda, recuerda!)", file: "18._La_Idea_En_El_Espejo_(¡Recuerda,_recuerda!).mp3" },
-            { title: "19. La Idea A Través Del Espejo (¡Recuerda, Recuerda!)", file: "19._La_Idea_A_Través_Del_Espejo_(¡Recuerda,_Recuerda!).mp3" },
-            { title: "20. Tango De Obscuridad", file: "20._Tango_De_Obscuridad.mp3" },
-            { title: "21. Tango de Luz 2.0", file: "21._Tango_de_Luz_2.0.mp3" },
-            { title: "22. Tango De Luz", file: "22._Tango_De_Luz.mp3" },
-            { title: "23. Futuro De Arrabal (Lado A)", file: "23._Futuro_De_Arrabal_(Lado_A).mp3" },
-            { title: "24. Futuro De Arrabal (Lado B)", file: "24._Futuro_De_Arrabal_(Lado_B).mp3" }
-        ];
-        let currentTrackIndex = 0;
-        let audioElement = new Audio();
-        let isPlaying = false;
+    // Estado y reproductor de audio: independiente de la navegación 3D.
+    const audio = new Audio();
+    audio.preload = 'metadata';
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let playerWasOpened = false;
+    let seeking = false;
 
-        // 🖼️ LAS 8 SECCIONES VISUALES AMPLIADAS (CON SUS MÚLTIPLES FOTOS)
-        const roomsData = [
-            { id: 1, z: -15, type: "audio", title: "🎵 SALA DE AUDIO", desc: "Cabina acústica oficial del Instituto Quimera. Disfruta de las 24 pistas musicales del soundtrack oficial." },
-            { id: 2, z: -30, type: "visual", title: "🖼️ 00 - ECOSISTEMA QUIMERA", desc: "Exposición visual del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.", images: ["Quimera_Negro.webp", "Quimera.webp", "Belerofonte_Negro.webp", "Belerofonte.webp", "Pegaso_Negro.webp", "Pegaso.webp", "Quimera_Ecosistema01.webp", "Quimeratrix.webp"] },
-            { id: 3, z: -45, type: "visual", title: "🖼️ 01 - ¿QUÉ ES QUIMERA?", desc: "Exposición visual de la estructura que conecta conocimiento, metodología y aplicación para generar soluciones.", images: ["Quimera_QE.webp", "Quimera_QE_Mod.webp", "QE_glitch_Q.webp", "QE_glitch_U.webp", "QE_glitch_I.webp", "QE_glitch_M.webp", "QE_glitch_E.webp", "QE_glitch_R.webp", "QE_glitch_A.webp"] },
-            { id: 4, z: -60, type: "visual", title: "🖼️ 02 - MISIÓN", desc: "Exposición visual del propósito que transforma el conocimiento en capacidades, soluciones y servicio.", images: ["Quimera_Mision.webp", "ECQ.webp", "QM01_Investigacion.webp", "QM02_Formacion.webp", "QM03_Desarrollo.webp", "QM04_Aplicacion.webp", "QM05_Transferencia.webp", "Quimera_M_Mod.webp", "M_glitch_Q.webp", "M_glitch_U.webp", "M_glitch_I.webp", "M_glitch_M.webp", "M_glitch_E.webp", "M_glitch_R.webp", "M_glitch_A.webp"] },
-            { id: 5, z: -75, type: "visual", title: "🖼️ 03 - VISIÓN", desc: "Obras proyectivas que ilustran el horizonte que guía nuestra evolución y define el futuro que buscamos construir.", images: ["Quimera_Vision.webp", "Quimera_V_Mod.webp", "V_glitch_01.webp", "V_glitch_02.webp", "V_glitch_03.webp", "V_glitch_04.webp", "V_glitch_05.webp", "V_glitch_06.webp", "V_glitch_07.webp", "V_glitch_08.webp", "V_glitch_09.webp", "V_glitch_10.webp", "V_glitch_11.webp"] },
-            { id: 6, z: -90, type: "visual", title: "🖼️ 04 - PRINCIPIOS", desc: "Exposición visual del origen simbólico y conceptual que da vida e identidad a nuestro ecosistema.", images: ["Quimera_Principios.webp", "Quimera_P_Mod.webp", "P_glitch_01.webp", "P_glitch_02.webp", "P_glitch_03.webp", "P_glitch_04.webp", "P_glitch_05.webp", "P_glitch_06.webp", "P_glitch_07.webp", "P_glitch_08.webp", "P_glitch_09.webp", "P_glitch_10.webp", "P_glitch_11.webp"] },
-            { id: 7, z: -105, type: "visual", title: "🖼️ 05 - DESARROLLO", desc: "Colección visual de las áreas donde convergen nuestras capacidades para investigar, formar, comunicar e innovar.", images: ["Quimera_Desarrollo.webp", "Quimera_D_Mod.webp", "D_glitch_Q.webp", "D_glitch_U.webp", "D_glitch_I.webp", "D_glitch_M.webp", "D_glitch_E.webp", "D_glitch_R.webp", "D_glitch_A.webp"] },
-            { id: 8, z: -120, type: "visual", title: "🖼️ 06 - MITOLOGÍA DETRÁS DE QUIMERA", desc: "Galería visual-conceptual de la mitología que dio vida al Instituto.", images: ["Quimera_MDQ.webp", "Quimeratrix.webp", "Mod_01.webp", "Mod_02.webp", "Mod_03.webp", "Mod_04.webp", "Mod_05.webp", "Mod_06.webp", "Mod_07.webp", "Mod_08.webp", "Mod_09.webp", "Mod_10.webp", "Mod_11.webp", "Mod_12.webp", "Mod_13.webp", "Mod_14.webp", "01-borrador_T-P.webp", "02-Teoria-Preg.webp", "03-HECE.webp", "04-MHDC.webp", "ECQ.webp", "MDQ_glitch_01.webp", "MDQ_glitch_02.webp", "MDQ_glitch_03.webp", "MDQ_glitch_04.webp", "MDQ_glitch_05.webp", "MDQ_glitch_06.webp", "MDQ_glitch_07.webp", "MDQ_glitch_08.webp", "MDQ_glitch_09.webp", "MDQ_glitch_10.webp", "MDQ_glitch_11.webp", "MDQ_glitch_12.webp", "MDQ_glitch_13.webp", "MDQ_glitch_14.webp"] },
-            { id: 9, z: -135, type: "visual", title: "🖼️ 07 - QUIMERA ELECTROTANGO", desc: "Fusión vanguardista electrotango-dubstep.", images: ["Quimera_Electrotango.webp", "Quimera_Electrotango_1600x900.webp"] }
-        ];
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
 
-        let currentActiveRoom = null;
-        let currentImageIndex = 0;
+    function setCaption(html) { caption.innerHTML = html; }
 
-        function createDynamicTexture(text, accentColor) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512; canvas.height = 712;
-            const ctx = canvas.getContext('2d');
+    function cleanArtworkName(filename) {
+      return filename.replace(/\.webp$/i, '').replace(/_/g, ' ').replace(/\bMod\b/gi, '·').replace(/glitch/gi, 'Glitch');
+    }
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, 712);
-            gradient.addColorStop(0, '#0b1329');
-            gradient.addColorStop(1, '#020617');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 512, 712);
-
-            ctx.strokeStyle = accentColor;
-            ctx.lineWidth = 16;
-            ctx.strokeRect(10, 10, 492, 692);
-
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(30, 30, 452, 652);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 28px Georgia, serif';
-            ctx.textAlign = 'center';
-            
-            const words = text.split(' ');
-            let line = '';
-            let y = 300;
-            for (let n = 0; n < words.length; n++) {
-                let testLine = line + words[n] + ' ';
-                let metrics = ctx.measureText(testLine);
-                if (metrics.width > 400 && n > 0) {
-                    ctx.fillText(line, 256, y);
-                    line = words[n] + ' ';
-                    y += 40;
-                } else {
-                    line = testLine;
-                }
-            }
-            ctx.fillText(line, 256, y);
-
-            ctx.fillStyle = accentColor;
-            ctx.font = '22px monospace';
-            ctx.fillText('INSTITUTO QUIMERA', 256, 630);
-
-            return new THREE.CanvasTexture(canvas);
+    function disposeWorld() {
+      if (!world) return;
+      world.traverse((object) => {
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => {
+            if (material.map) material.map.dispose();
+            material.dispose();
+          });
         }
+      });
+      scene.remove(world);
+      world = null;
+      interactables = [];
+      animatedObjects.length = 0;
+    }
 
-        function init3D() {
-            const canvas = document.getElementById('webgl-canvas');
-            
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x020617, 0.02);
+    function newWorld(fog = 0x080e18) {
+      disposeWorld();
+      world = new THREE.Group();
+      scene.add(world);
+      scene.fog = new THREE.FogExp2(fog, 0.012);
+      const hemi = new THREE.HemisphereLight(0x9bb8d0, 0x100c08, 1.15);
+      world.add(hemi);
+      const key = new THREE.DirectionalLight(0xffdfaa, 1.45);
+      key.position.set(-6, 10, 8);
+      key.castShadow = true;
+      key.shadow.mapSize.set(1024, 1024);
+      world.add(key);
+      const cool = new THREE.PointLight(0x4eafc7, 1.25, 34);
+      cool.position.set(5, 4.5, -3);
+      world.add(cool);
+    }
 
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 1.6, 0);
+    function material(color, roughness = .78, metalness = .08, extra = {}) {
+      return new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
+    }
 
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-
-            const ambientLight = new THREE.AmbientLight(0x0f172a, 1.8);
-            scene.add(ambientLight);
-
-            for (let z = -10; z >= -150; z -= 20) {
-                const color = (z % 40 === 0) ? 0x38bdf8 : 0xc88b32;
-                const pointLight = new THREE.PointLight(color, 2, 25);
-                pointLight.position.set(0, 4, z);
-                scene.add(pointLight);
-            }
-
-            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-            const gridMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, opacity: 0.12, transparent: true });
-
-            const hallwayLength = 150;
-            const floorGeo = new THREE.PlaneGeometry(12, hallwayLength);
-            
-            const floor = new THREE.Mesh(floorGeo, wallMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.set(0, 0, -hallwayLength / 2);
-            scene.add(floor);
-
-            const ceiling = new THREE.Mesh(floorGeo, wallMaterial);
-            ceiling.rotation.x = Math.PI / 2;
-            ceiling.position.set(0, 5, -hallwayLength / 2);
-            scene.add(ceiling);
-
-            const wallGeo = new THREE.PlaneGeometry(hallwayLength, 5);
-            const leftWall = new THREE.Mesh(wallGeo, wallMaterial);
-            leftWall.rotation.y = Math.PI / 2;
-            leftWall.position.set(-6, 2.5, -hallwayLength / 2);
-            scene.add(leftWall);
-
-            const rightWall = new THREE.Mesh(wallGeo, wallMaterial);
-            rightWall.rotation.y = -Math.PI / 2;
-            rightWall.position.set(6, 2.5, -hallwayLength / 2);
-            scene.add(rightWall);
-
-            const gridFloor = new THREE.Mesh(floorGeo, gridMaterial);
-            gridFloor.rotation.x = -Math.PI / 2;
-            gridFloor.position.set(0, 0.01, -hallwayLength / 2);
-            scene.add(gridFloor);
-
-            roomsData.forEach(room => {
-                const accentHex = (room.id % 2 === 0) ? '#38bdf8' : '#c88b32';
-                const canvasTex = createDynamicTexture(room.title, accentHex);
-                
-                const frameGeo = new THREE.BoxGeometry(0.15, 3.2, 2.3);
-                const frameMat = new THREE.MeshStandardMaterial({ map: canvasTex, roughness: 0.3 });
-                const frame = new THREE.Mesh(frameGeo, frameMat);
-                
-                const isLeft = (room.id % 2 !== 0);
-                const sideX = isLeft ? -5.85 : 5.85;
-                const rotY = isLeft ? Math.PI / 2 : -Math.PI / 2;
-
-                frame.position.set(sideX, 2.4, room.z);
-                frame.rotation.y = rotY;
-                scene.add(frame);
-            });
-
-            setupPlaylistUI();
-            animate();
-        }
-
-        // FUNCIONES DE CONTROL DE AUDIO REAL Y SINCRONIZACIÓN
-        function setupPlaylistUI() {
-            const container = document.getElementById('playlist-container');
-            if (!container) return;
-            container.innerHTML = '';
-            soundTracks.forEach((track, index) => {
-                const div = document.createElement('div');
-                div.className = `track-item ${index === currentTrackIndex ? 'active' : ''}`;
-                div.textContent = track.title;
-                div.onclick = () => loadAndPlayTrack(index);
-                container.appendChild(div);
-            });
-            updateAudioUI();
-        }
-
-        function loadAndPlayTrack(index) {
-            currentTrackIndex = index;
-            audioElement.src = soundTracks[currentTrackIndex].file;
-            audioElement.play().then(() => {
-                isPlaying = true;
-                updateAudioUI();
-            }).catch(err => {
-                console.log("Esperando interacción del usuario:", err);
-            });
-        }
-
-        function togglePlay() {
-            if (!audioElement.src) {
-                loadAndPlayTrack(currentTrackIndex);
-                return;
-            }
-            if (isPlaying) {
-                audioElement.pause();
-                isPlaying = false;
-            } else {
-                audioElement.play();
-                isPlaying = true;
-            }
-            updateAudioUI();
-        }
-
-        function nextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % soundTracks.length;
-            loadAndPlayTrack(currentTrackIndex);
-        }
-
-        function prevTrack() {
-            currentTrackIndex = (currentTrackIndex - 1 + soundTracks.length) % soundTracks.length;
-            loadAndPlayTrack(currentTrackIndex);
-        }
-
-        function updateAudioUI() {
-            const track = soundTracks[currentTrackIndex];
-            
-            // Actualizar textos en la Rockola (Modal)
-            const trackNameEl = document.getElementById('current-track-name');
-            if (trackNameEl) trackNameEl.textContent = `🎵 REPRODUCIENDO: ${track.title}`;
-            
-            // Actualizar textos en el Mini-Reproductor Flotante superior izquierdo
-            const miniNameEl = document.getElementById('mini-track-name');
-            if (miniNameEl) miniNameEl.textContent = track.title;
-
-            // Actualizar botones de reproducción
-            const playText = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
-            const miniPlayText = isPlaying ? '⏸' : '▶';
-
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            if (playPauseBtn) playPauseBtn.textContent = playText;
-
-            const miniPlayBtn = document.getElementById('mini-play-btn');
-            if (miniPlayBtn) miniPlayBtn.textContent = miniPlayText;
-
-            setupPlaylistUI();
-        }
-
-        audioElement.onended = () => { nextTrack(); };
-
-        // FUNCIONES DE NAVEGACIÓN MULTI-IMAGEN EN MODAL
-        function updateModalImage() {
-            if (!currentActiveRoom || currentActiveRoom.type === 'audio') return;
-            const imgBox = document.getElementById('modal-img-box');
-            const counterLabel = document.getElementById('img-counter-label');
-            const total = currentActiveRoom.images.length;
-            const currentImg = currentActiveRoom.images[currentImageIndex];
-
-            imgBox.style.backgroundImage = `url('${currentImg}')`;
-            counterLabel.textContent = `${currentImageIndex + 1} / ${total}`;
-        }
-
-        function nextImage() {
-            if (!currentActiveRoom || !currentActiveRoom.images) return;
-            currentImageIndex = (currentImageIndex + 1) % currentActiveRoom.images.length;
-            updateModalImage();
-        }
-
-        function prevImage() {
-            if (!currentActiveRoom || !currentActiveRoom.images) return;
-            currentImageIndex = (currentImageIndex - 1 + currentActiveRoom.images.length) % currentActiveRoom.images.length;
-            updateModalImage();
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            camera.position.z = playerZ;
-            camera.rotation.y = playerRotY;
-            renderer.render(scene, camera);
-        }
-
-        function enterGallery() {
-            const archway = document.getElementById('archway-gate');
-            const entrance = document.getElementById('castle-entrance');
-
-            archway.classList.add('gate-open');
-            setTimeout(() => {
-                entrance.style.opacity = '0';
-                setTimeout(() => { entrance.style.display = 'none'; }, 1200);
-            }, 600);
-        }
-
-        function movePlayer(direction) {
-            if (isModalOpen) {
-                if (direction === 'enter') closeModal();
-                return;
-            }
-
-            const stepZ = 3.5;
-            const stepRot = 0.15;
-
-            switch (direction) {
-                case 'up':
-                    if (playerZ > -140) playerZ -= stepZ;
-                    break;
-                case 'down':
-                    if (playerZ < 0) playerZ += stepZ;
-                    break;
-                case 'left':
-                    playerRotY += stepRot;
-                    break;
-                case 'right':
-                    playerRotY -= stepRot;
-                    break;
-                case 'enter':
-                    checkRoomEntry();
-                    return;
-            }
-
-            updateHUD();
-        }
-
-        function updateHUD() {
-            const hud = document.getElementById('hud-info');
-            const activeRoom = roomsData.find(r => Math.abs(playerZ - r.z) < 4);
-
-            if (activeRoom) {
-                hud.textContent = `EXHIBICIÓN CERCA: [ ${activeRoom.title} ] - PRESIONA ENTER`;
-            } else {
-                hud.textContent = "PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]";
-            }
-        }
-
-        function checkRoomEntry() {
-            const activeRoom = roomsData.find(r => Math.abs(playerZ - r.z) < 4);
-            if (activeRoom) {
-                openModal(activeRoom);
-            }
-        }
-
-        function openModal(room) {
-            currentActiveRoom = room;
-            currentImageIndex = 0;
-
-            document.getElementById('modal-title').textContent = room.title;
-            document.getElementById('modal-desc').textContent = room.desc;
-
-            const visualBox = document.getElementById('modal-content-visual');
-            const audioBox = document.getElementById('modal-content-audio');
-            const navControls = document.getElementById('visual-nav-controls');
-
-            if (room.type === 'audio') {
-                visualBox.style.display = 'none';
-                audioBox.style.display = 'block';
-            } else {
-                audioBox.style.display = 'none';
-                visualBox.style.display = 'block';
-                navControls.style.display = room.images.length > 1 ? 'flex' : 'none';
-                updateModalImage();
-            }
-
-            document.getElementById('gallery-modal').classList.add('show');
-            isModalOpen = true;
-        }
-
-        function closeModal() {
-            document.getElementById('gallery-modal').classList.remove('show');
-            isModalOpen = false;
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (isModalOpen) {
-                if (e.key === 'ArrowRight') nextImage();
-                if (e.key === 'ArrowLeft') prevImage();
-                if (e.key === 'Enter') closeModal();
-                return;
-            }
-
-            switch (e.key) {
-                case 'ArrowUp': movePlayer('up'); break;
-                case 'ArrowDown': movePlayer('down'); break;
-                case 'ArrowLeft': movePlayer('left'); break;
-                case 'ArrowRight': movePlayer('right'); break;
-                case 'Enter': movePlayer('enter'); break;
-            }
+    function addShell(width, length, height = 7.5, backWall = true) {
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, length), material(0x111a28, .42, .22));
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.set(0, 0, 0);
+      floor.receiveShadow = true;
+      world.add(floor);
+      const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(width, length), material(0x101827, .92, .02));
+      ceiling.rotation.x = Math.PI / 2;
+      ceiling.position.y = height;
+      world.add(ceiling);
+      const sideMat = material(0x111b2b, .88, .12);
+      const sideGeo = new THREE.BoxGeometry(.48, height, length);
+      const left = new THREE.Mesh(sideGeo, sideMat);
+      left.position.set(-width / 2, height / 2, 0);
+      left.receiveShadow = true;
+      world.add(left);
+      const right = new THREE.Mesh(sideGeo, sideMat);
+      right.position.set(width / 2, height / 2, 0);
+      right.receiveShadow = true;
+      world.add(right);
+      if (backWall) {
+        const back = new THREE.Mesh(new THREE.BoxGeometry(width, height, .5), material(0x0b1422, .9, .1));
+        back.position.set(0, height / 2, -length / 2);
+        back.receiveShadow = true;
+        world.add(back);
+      }
+      // Zócalos de latón y líneas de arquitectura: discretos, no decorativos en exceso.
+      const trimMat = material(0x8b6939, .38, .68);
+      [-1, 1].forEach((side) => {
+        const trim = new THREE.Mesh(new THREE.BoxGeometry(.055, .13, length), trimMat);
+        trim.position.set(side * (width / 2 - .25), .13, 0);
+        world.add(trim);
+      });
+      const floorLine = new THREE.Mesh(new THREE.BoxGeometry(width - .5, .035, .045), material(0x426b7d, .35, .6, { emissive: 0x102a39, emissiveIntensity: .45 }));
+      floorLine.position.set(0, .025, -length / 2 + .34);
+      world.add(floorLine);
+      // Pilastras modulares a lo largo del recinto.
+      const pillarMat = material(0x1a2637, .64, .3);
+      const pillarTrim = material(0x8b6939, .36, .7);
+      const count = Math.max(2, Math.floor(length / 8));
+      for (let i = 0; i <= count; i++) {
+        const z = -length / 2 + 1.1 + i * ((length - 2.2) / count);
+        [-1, 1].forEach((side) => {
+          const x = side * (width / 2 - .48);
+          const column = new THREE.Mesh(new THREE.BoxGeometry(.34, height - .4, .34), pillarMat);
+          column.position.set(x, (height - .4) / 2, z);
+          column.castShadow = true;
+          world.add(column);
+          const capital = new THREE.Mesh(new THREE.BoxGeometry(.52, .18, .52), pillarTrim);
+          capital.position.set(x, height - .48, z);
+          world.add(capital);
+          const base = new THREE.Mesh(new THREE.BoxGeometry(.52, .18, .52), pillarTrim);
+          base.position.set(x, .28, z);
+          world.add(base);
         });
+      }
+      // Luminarias cálidas espaciadas.
+      for (let z = -length / 2 + 3; z <= length / 2 - 2; z += 7) {
+        const light = new THREE.PointLight(0xc58c49, .48, 10);
+        light.position.set(0, height - .8, z);
+        world.add(light);
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(.09, 12, 10), new THREE.MeshBasicMaterial({ color: 0xe0b46e }));
+        lamp.position.set(0, height - .8, z);
+        world.add(lamp);
+      }
+    }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+    function makePlaqueTexture(title, subtitle, accent = '#c79a55') {
+      const c = document.createElement('canvas');
+      c.width = 1024; c.height = 300;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 1024, 300);
+      grad.addColorStop(0, '#101b2a'); grad.addColorStop(1, '#060b13');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, 1024, 300);
+      ctx.strokeStyle = accent; ctx.lineWidth = 5; ctx.strokeRect(13, 13, 998, 274);
+      ctx.strokeStyle = 'rgba(234,210,160,.45)'; ctx.lineWidth = 1.5; ctx.strokeRect(28, 28, 968, 244);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ead2a0'; ctx.font = '600 42px Georgia, serif';
+      const titleText = title.length > 25 ? title.slice(0, 24) + '…' : title;
+      ctx.fillText(titleText.toLocaleUpperCase('es'), 512, 122);
+      ctx.fillStyle = '#83c8d4'; ctx.font = '24px Arial, sans-serif';
+      ctx.fillText((subtitle || 'INSTITUTO QUIMERA').toLocaleUpperCase('es'), 512, 205);
+      const tex = new THREE.CanvasTexture(c);
+      tex.encoding = THREE.sRGBEncoding;
+      return tex;
+    }
+
+    function createPortal({ x, z, title, subtitle, action, data, accent = 0xc79a55, width = 2.35, height = 3.75 }) {
+      const group = new THREE.Group();
+      group.position.set(x, 0, z);
+      const gold = material(accent, .32, .78, { emissive: accent, emissiveIntensity: .08 });
+      const dark = material(0x101a29, .55, .38);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(width, height, .22), material(0x080e18, .32, .3));
+      panel.position.set(0, height / 2, 0);
+      panel.castShadow = true;
+      group.add(panel);
+      // Bastidores verticales y dintel en arco.
+      [-1, 1].forEach((side) => {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(.16, height + .35, .42), dark);
+        post.position.set(side * (width / 2 + .12), (height + .35) / 2, .04);
+        group.add(post);
+        const inlay = new THREE.Mesh(new THREE.BoxGeometry(.035, height - .2, .035), gold);
+        inlay.position.set(side * (width / 2 + .12), height / 2, .27);
+        group.add(inlay);
+      });
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(width / 2 + .12, .105, 12, 56, Math.PI), gold);
+      arch.position.set(0, height, .04);
+      group.add(arch);
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(width + .46, .14, .48), gold);
+      crown.position.set(0, height + .02, .04);
+      group.add(crown);
+      // Cuarterones de la puerta y tirador.
+      const insetMat = material(0x152237, .46, .42);
+      for (let i = 0; i < 3; i++) {
+        const inset = new THREE.Mesh(new THREE.BoxGeometry(width - .48, .72, .045), insetMat);
+        inset.position.set(0, .62 + i * 1.0, .145);
+        group.add(inset);
+      }
+      const handle = new THREE.Mesh(new THREE.SphereGeometry(.075, 16, 12), gold);
+      handle.position.set(width * .29, height * .46, .25);
+      group.add(handle);
+      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(width + .5, .72), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(title, subtitle, '#' + accent.toString(16).padStart(6, '0')), transparent: false }));
+      plaque.position.set(0, height + .92, .12);
+      group.add(plaque);
+      const halo = new THREE.PointLight(accent, .65, 8);
+      halo.position.set(0, 3.1, 1.1);
+      group.add(halo);
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(width + .65, height + 1.5, .9), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(0, (height + .75) / 2, .2);
+      hit.userData = { action, data, title };
+      group.add(hit);
+      interactables.push(hit);
+      world.add(group);
+      return group;
+    }
+
+    function setCamera(x, y, z, lookYaw = 0, lookPitch = 0) {
+      camera.position.set(x, y, z);
+      yaw = lookYaw; pitch = lookPitch;
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(pitch, yaw, 0);
+    }
+
+    function buildAtrium() {
+      currentZone = 'atrium'; activeCollection = null;
+      $('touch-controls').classList.remove('active');
+      newWorld(0x080e18);
+      addShell(21, 22, 8, true);
+      setCamera(0, 1.72, 6.8, 0, 0);
+      // Un rosetón geométrico en el techo y una brújula de latón en el suelo.
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .035, 8, 96), material(0x8f6a3d, .32, .8, { emissive: 0x2a1708, emissiveIntensity: .22 }));
+      ring.rotation.x = Math.PI / 2; ring.position.set(0, 7.82, -2); world.add(ring);
+      const floorRing = new THREE.Mesh(new THREE.TorusGeometry(2.2, .025, 8, 96), material(0x4d8993, .3, .7, { emissive: 0x12313c, emissiveIntensity: .3 }));
+      floorRing.rotation.x = -Math.PI / 2; floorRing.position.set(0, .04, -1.6); world.add(floorRing);
+      createPortal({ x: -4.1, z: -10.72, title: 'Ala de Audio', subtitle: 'Rockola holográfica', action: 'audio', accent: 0x72c9d8, width: 3.0, height: 4.2 });
+      createPortal({ x: 4.1, z: -10.72, title: 'Ala Visual', subtitle: 'Siete colecciones', action: 'visual', accent: 0xc79a55, width: 3.0, height: 4.2 });
+      zoneTitle.textContent = 'Vestíbulo central';
+      setCaption('Dos umbrales abren el recorrido: <strong>Ala de Audio</strong> a la izquierda · <strong>Ala Visual</strong> a la derecha.');
+      $('back-button').style.visibility = 'hidden';
+    }
+
+    function buildAudioWing() {
+      currentZone = 'audio';
+      $('touch-controls').classList.remove('active');
+      newWorld(0x07121c);
+      addShell(17, 20, 8, true);
+      setCamera(0, 1.72, 7.1, 0, 0);
+      // Tarima de exhibición y corona lumínica.
+      const stage = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.4, .22, 64), material(0x18283a, .38, .45));
+      stage.position.set(0, .12, -2.4); stage.receiveShadow = true; world.add(stage);
+      const stageRing = new THREE.Mesh(new THREE.TorusGeometry(3.18, .035, 10, 100), material(0x72c9d8, .22, .72, { emissive: 0x174a59, emissiveIntensity: .5 }));
+      stageRing.rotation.x = Math.PI / 2; stageRing.position.set(0, .25, -2.4); world.add(stageRing);
+      const jukebox = new THREE.Group();
+      jukebox.position.set(0, .22, -2.4);
+      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 1.45, .48, 48), material(0x25384b, .28, .72));
+      pedestal.position.y = .35; jukebox.add(pedestal);
+      const core = new THREE.Mesh(new THREE.CylinderGeometry(.72, .72, 2.8, 48, 1, true), new THREE.MeshPhysicalMaterial({ color: 0x3d8da0, metalness: .48, roughness: .12, transparent: true, opacity: .34, transmission: .35, emissive: 0x0e5262, emissiveIntensity: .42, side: THREE.DoubleSide }));
+      core.position.y = 2.05; jukebox.add(core);
+      const innerDisk = new THREE.Mesh(new THREE.CylinderGeometry(.94, .94, .12, 64), material(0x0b1420, .22, .78));
+      innerDisk.position.y = 3.45; jukebox.add(innerDisk);
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(1.12, .68), new THREE.MeshBasicMaterial({ map: makePlaqueTexture('Rockola Quimera', 'Archivo sonoro · 24 pistas', '#72c9d8'), transparent: false }));
+      label.position.set(0, 2.15, .735); jukebox.add(label);
+      const orbitA = new THREE.Mesh(new THREE.TorusGeometry(1.7, .045, 10, 96), new THREE.MeshStandardMaterial({ color: 0x72c9d8, emissive: 0x1b8298, emissiveIntensity: .72, metalness: .55, roughness: .2 }));
+      orbitA.position.y = 2.1; orbitA.rotation.x = Math.PI / 2.65; jukebox.add(orbitA);
+      const orbitB = new THREE.Mesh(new THREE.TorusGeometry(2.05, .025, 8, 96), new THREE.MeshStandardMaterial({ color: 0xc79a55, emissive: 0x6d4117, emissiveIntensity: .6, metalness: .75, roughness: .2 }));
+      orbitB.position.y = 2.1; orbitB.rotation.y = Math.PI / 2.2; jukebox.add(orbitB);
+      const crown = new THREE.Mesh(new THREE.TorusGeometry(.9, .035, 8, 64), material(0xc79a55, .25, .8, { emissive: 0x6b441a, emissiveIntensity: .65 }));
+      crown.position.y = 3.58; crown.rotation.x = Math.PI / 2; jukebox.add(crown);
+      const light = new THREE.PointLight(0x64c8da, 2.5, 12); light.position.set(0, 2.4, 0); jukebox.add(light);
+      const hit = new THREE.Mesh(new THREE.CylinderGeometry(2.25, 2.25, 4.7, 48), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.y = 2.25; hit.userData = { action: 'openAudio' }; jukebox.add(hit); interactables.push(hit);
+      world.add(jukebox);
+      animatedObjects.push({ object: orbitA, speed: .24, axis: 'z' }, { object: orbitB, speed: -.18, axis: 'y' }, { object: crown, speed: .38, axis: 'y' });
+      zoneTitle.textContent = 'Ala de Audio';
+      setCaption('Acércate a la <strong>rockola holográfica</strong> y haz clic para abrir el archivo sonoro. La reproducción continuará al cambiar de ala.');
+      $('back-button').style.visibility = 'visible';
+    }
+
+    function buildVisualHub() {
+      currentZone = 'visualHub'; activeCollection = null;
+      $('touch-controls').classList.remove('active');
+      newWorld(0x100d0a);
+      addShell(25, 22, 8, true);
+      setCamera(0, 1.72, 6.6, 0, 0);
+      // Las siete salas, y únicamente las siete salas especificadas para el ala visual.
+      const spacing = 3.08;
+      const start = -spacing * 3;
+      collections.forEach((collection, index) => {
+        createPortal({
+          x: start + index * spacing,
+          z: -10.72,
+          title: collection.title,
+          subtitle: `${String(index + 1).padStart(2, '0')} · ${collection.images.length} obras`,
+          action: 'collection', data: collection,
+          accent: index % 2 === 0 ? 0xc79a55 : 0x72c9d8,
+          width: 2.35, height: 3.6
         });
+      });
+      zoneTitle.textContent = 'Ala Visual · Siete colecciones';
+      setCaption('Selecciona una de las <strong>siete puertas</strong>. Al entrar, las obras estarán dispuestas en las paredes de su sala.');
+      $('back-button').style.visibility = 'visible';
+    }
 
-        window.addEventListener('DOMContentLoaded', init3D);
-    </script>
+    function makeArtworkFrame(collection, index, x, y, z, side) {
+      const frameGroup = new THREE.Group();
+      frameGroup.position.set(x, y, z);
+      frameGroup.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2;
+      const width = 3.65, height = 2.28;
+      const frameMat = material(0x987242, .28, .82, { emissive: 0x2a1708, emissiveIntensity: .18 });
+      const innerMat = material(0x090f19, .52, .18);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(width + .28, height + .28, .13), frameMat);
+      frameGroup.add(back);
+      const inset = new THREE.Mesh(new THREE.PlaneGeometry(width, height), innerMat);
+      inset.position.z = .075;
+      frameGroup.add(inset);
+      // Filete interior doble.
+      const bars = [
+        [width + .08, .045, 0, height / 2 + .045], [width + .08, .045, 0, -height / 2 - .045],
+        [.045, height + .08, width / 2 + .045, 0], [.045, height + .08, -width / 2 - .045, 0]
+      ];
+      bars.forEach(([w, h, bx, by]) => {
+        const line = new THREE.Mesh(new THREE.BoxGeometry(w, h, .045), material(0xe0bd7d, .25, .86));
+        line.position.set(bx, by, .14); frameGroup.add(line);
+      });
+      const filename = collection.images[index];
+      let imageMesh;
+      const texture = textureLoader.load(encodeURI(filename), (tex) => {
+        tex.encoding = THREE.sRGBEncoding;
+        tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        if (imageMesh) imageMesh.material.needsUpdate = true;
+      }, undefined, () => {
+        const fallback = new THREE.Mesh(new THREE.PlaneGeometry(width - .12, height - .12), new THREE.MeshBasicMaterial({ map: makePlaqueTexture('Archivo no disponible', cleanArtworkName(filename), '#72c9d8') }));
+        fallback.position.z = .16;
+        frameGroup.add(fallback);
+      });
+      texture.encoding = THREE.sRGBEncoding;
+      imageMesh = new THREE.Mesh(new THREE.PlaneGeometry(width - .12, height - .12), new THREE.MeshBasicMaterial({ map: texture, color: 0xffffff, side: THREE.DoubleSide }));
+      imageMesh.position.z = .12;
+      imageMesh.userData = { action: 'artwork', data: { collection, index } };
+      frameGroup.add(imageMesh);
+      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(2.5, .36), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(cleanArtworkName(filename), 'COLECCIÓN QUIMERA', '#c79a55') }));
+      plaque.position.set(0, -height / 2 - .38, .11);
+      frameGroup.add(plaque);
+      interactables.push(imageMesh);
+      world.add(frameGroup);
+    }
+
+    function buildCollectionRoom(collection) {
+      currentZone = 'collection'; activeCollection = collection;
+      $('touch-controls').classList.add('active');
+      const rows = Math.ceil(collection.images.length / 2);
+      galleryLength = Math.max(24, 12 + rows * 5.1);
+      newWorld(0x080e18);
+      addShell(20, galleryLength, 8, true);
+      setCamera(0, 1.72, galleryLength / 2 - 3.8, 0, 0);
+      // Obras alternadas a ambos lados: una galería física, no una simple cuadrícula de miniaturas.
+      collection.images.forEach((filename, index) => {
+        const side = index % 2 === 0 ? -1 : 1;
+        const row = Math.floor(index / 2);
+        const z = galleryLength / 2 - 7 - row * 5.05;
+        makeArtworkFrame(collection, index, side * 9.72, 2.78, z, side);
+        const spot = new THREE.PointLight(side < 0 ? 0x70bdca : 0xd5a25b, .48, 7);
+        spot.position.set(side * 7.6, 4.4, z + 1.1);
+        world.add(spot);
+      });
+      // Señal de cierre de sala al fondo.
+      const endMark = new THREE.Mesh(new THREE.TorusGeometry(1.15, .045, 8, 64), material(0xc79a55, .32, .78, { emissive: 0x4b2c0c, emissiveIntensity: .25 }));
+      endMark.position.set(0, 3.4, -galleryLength / 2 + .8);
+      world.add(endMark);
+      zoneTitle.textContent = collection.title;
+      setCaption(`${collection.description} <strong>Recorre la sala</strong> con W/A/S/D o las flechas; arrastra para mirar y haz clic sobre una obra para ampliarla.`);
+      $('back-button').style.visibility = 'visible';
+    }
+
+    function enterAudio() { buildAudioWing(); }
+    function enterVisual() { buildVisualHub(); }
+
+    function handleAction(action, data) {
+      if (!action) return;
+      if (action === 'audio') enterAudio();
+      else if (action === 'visual') enterVisual();
+      else if (action === 'collection') buildCollectionRoom(data);
+      else if (action === 'openAudio') openAudioPlayer();
+      else if (action === 'artwork') openArtwork(data.collection, data.index);
+    }
+
+    function interactAt(clientX, clientY) {
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(interactables, false);
+      if (hits.length && hits[0].object.userData.action) {
+        const info = hits[0].object.userData;
+        handleAction(info.action, info.data);
+      }
+    }
+
+    function moveInGallery(direction) {
+      if (currentZone !== 'collection') return;
+      const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+      const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+      const step = 1.25;
+      if (direction === 'forward') camera.position.addScaledVector(forward, step);
+      if (direction === 'back') camera.position.addScaledVector(forward, -step);
+      if (direction === 'left') camera.position.addScaledVector(right, -step);
+      if (direction === 'right') camera.position.addScaledVector(right, step);
+      camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.5, 7.5);
+      camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
+    }
+
+    function goBack() {
+      if (currentZone === 'audio' || currentZone === 'visualHub') buildAtrium();
+      else if (currentZone === 'collection') buildVisualHub();
+    }
+
+    function enterCastle() {
+      intro.classList.add('leaving');
+      topbar.classList.add('visible');
+      buildAtrium();
+    }
+
+    // Modal de imágenes: clic fuera, botón X o Escape cierran el visor.
+    function openArtwork(collection, index) {
+      activeCollection = collection;
+      activeArtworkIndex = index;
+      updateArtworkViewer();
+      imageOverlay.classList.add('open');
+    }
+
+    function updateArtworkViewer() {
+      if (!activeCollection) return;
+      const filename = activeCollection.images[activeArtworkIndex];
+      const image = $('viewer-image');
+      image.classList.remove('missing');
+      image.alt = `${activeCollection.title}: ${cleanArtworkName(filename)}`;
+      image.onerror = () => {
+        image.onerror = null;
+        image.classList.add('missing');
+        image.alt = `No se encontró el archivo ${filename}. Verifica que esté junto al index.html.`;
+        image.setAttribute('src', 'data:,');
+      };
+      image.src = encodeURI(filename);
+      $('viewer-title').textContent = cleanArtworkName(filename);
+      $('viewer-count').textContent = `${String(activeArtworkIndex + 1).padStart(2, '0')} / ${String(activeCollection.images.length).padStart(2, '0')}`;
+    }
+
+    function closeArtwork() { imageOverlay.classList.remove('open'); }
+    function changeArtwork(delta) {
+      if (!activeCollection) return;
+      activeArtworkIndex = (activeArtworkIndex + delta + activeCollection.images.length) % activeCollection.images.length;
+      updateArtworkViewer();
+    }
+
+    // Reproductor robusto: la lista se construye por separado de la actualización del estado.
+    function renderPlaylist(filter = '') {
+      const list = $('playlist');
+      const query = filter.trim().toLocaleLowerCase('es');
+      list.innerHTML = '';
+      let visible = 0;
+      soundTracks.forEach((track, index) => {
+        if (query && !track.title.toLocaleLowerCase('es').includes(query)) return;
+        visible++;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `track-item${index === currentTrackIndex ? ' active' : ''}`;
+        button.setAttribute('aria-label', `Reproducir ${track.title}`);
+        const number = document.createElement('span'); number.className = 'track-number'; number.textContent = String(index + 1).padStart(2, '0');
+        const name = document.createElement('span'); name.className = 'track-name'; name.textContent = track.title;
+        const status = document.createElement('span'); status.className = 'track-status'; status.textContent = index === currentTrackIndex && isPlaying ? '♪' : '›';
+        button.append(number, name, status);
+        button.addEventListener('click', () => selectTrack(index, true));
+        list.appendChild(button);
+      });
+      $('library-count').textContent = `${visible} / ${soundTracks.length} PISTAS`;
+      if (!visible) {
+        const empty = document.createElement('p'); empty.className = 'audio-note'; empty.textContent = 'No se encontraron pistas con ese término.'; list.appendChild(empty);
+      }
+    }
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+      const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateAudioUI() {
+      const track = soundTracks[currentTrackIndex];
+      $('current-track').textContent = track ? track.title : 'Selecciona una composición';
+      $('track-state').textContent = isPlaying ? 'Reproducción en curso' : (audio.src ? 'En pausa' : 'Archivo sonoro · En espera');
+      $('audio-play').textContent = isPlaying ? 'Ⅱ' : '▶';
+      $('audio-play').setAttribute('aria-label', isPlaying ? 'Pausar' : 'Reproducir');
+      $('mini-track-name').textContent = track ? track.title : 'Selecciona una composición';
+      $('mini-play').textContent = isPlaying ? 'Ⅱ' : '▶';
+      $('mini-play').setAttribute('aria-label', isPlaying ? 'Pausar' : 'Reproducir');
+      renderPlaylist($('track-search').value);
+    }
+
+    async function selectTrack(index, autoplay) {
+      currentTrackIndex = (index + soundTracks.length) % soundTracks.length;
+      const track = soundTracks[currentTrackIndex];
+      audio.pause();
+      audio.src = track.file;
+      audio.load();
+      isPlaying = false;
+      updateAudioUI();
+      if (autoplay) {
+        try {
+          await audio.play();
+        } catch (error) {
+          isPlaying = false;
+          updateAudioUI();
+          showToast(`No se pudo reproducir «${track.title}». Verifica el archivo MP3 y su ruta.`);
+        }
+      }
+    }
+
+    async function togglePlayback() {
+      if (!audio.src) { await selectTrack(currentTrackIndex, true); return; }
+      if (audio.paused) {
+        try { await audio.play(); }
+        catch (error) { showToast('El navegador no pudo iniciar la reproducción. Verifica el archivo de audio.'); }
+      } else audio.pause();
+    }
+
+    function nextTrack() { selectTrack((currentTrackIndex + 1) % soundTracks.length, true); }
+    function previousTrack() { selectTrack((currentTrackIndex - 1 + soundTracks.length) % soundTracks.length, true); }
+
+    function openAudioPlayer() {
+      playerWasOpened = true;
+      miniPlayer.classList.remove('hidden');
+      audioOverlay.classList.add('open');
+      renderPlaylist($('track-search').value);
+      updateAudioUI();
+    }
+    function closeAudioPlayer() { audioOverlay.classList.remove('open'); }
+
+    audio.addEventListener('play', () => { isPlaying = true; updateAudioUI(); });
+    audio.addEventListener('pause', () => { isPlaying = false; updateAudioUI(); });
+    audio.addEventListener('ended', nextTrack);
+    audio.addEventListener('timeupdate', () => {
+      if (seeking) return;
+      const duration = audio.duration || 0;
+      $('elapsed').textContent = formatTime(audio.currentTime);
+      $('duration').textContent = formatTime(duration);
+      $('seek-bar').value = duration ? Math.round((audio.currentTime / duration) * 1000) : 0;
+    });
+    audio.addEventListener('loadedmetadata', () => { $('duration').textContent = formatTime(audio.duration); });
+    audio.addEventListener('error', () => {
+      if (audio.src) showToast(`No se encontró el archivo: ${soundTracks[currentTrackIndex].file}`);
+    });
+
+    // Eventos de interfaz.
+    $('enter-castle').addEventListener('click', enterCastle);
+    $('back-button').addEventListener('click', goBack);
+    $('home-button').addEventListener('click', buildAtrium);
+    $('viewer-close').addEventListener('click', closeArtwork);
+    $('viewer-prev').addEventListener('click', () => changeArtwork(-1));
+    $('viewer-next').addEventListener('click', () => changeArtwork(1));
+    $('audio-close').addEventListener('click', closeAudioPlayer);
+    $('audio-prev').addEventListener('click', previousTrack);
+    $('audio-next').addEventListener('click', nextTrack);
+    $('audio-play').addEventListener('click', togglePlayback);
+    $('mini-prev').addEventListener('click', previousTrack);
+    $('mini-next').addEventListener('click', nextTrack);
+    $('mini-play').addEventListener('click', togglePlayback);
+    $('mini-hide').addEventListener('click', () => miniPlayer.classList.add('hidden'));
+    $('track-search').addEventListener('input', (event) => renderPlaylist(event.target.value));
+    $('seek-bar').addEventListener('input', () => { seeking = true; });
+    $('seek-bar').addEventListener('change', (event) => {
+      if (Number.isFinite(audio.duration)) audio.currentTime = (Number(event.target.value) / 1000) * audio.duration;
+      seeking = false;
+    });
+    imageOverlay.addEventListener('click', (event) => { if (event.target === imageOverlay) closeArtwork(); });
+    audioOverlay.addEventListener('click', (event) => { if (event.target === audioOverlay) closeAudioPlayer(); });
+
+    // Ratón y teclado: clic sobre elementos 3D, arrastre para mirar y WASD para recorrer.
+    canvas.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      dragging = true;
+      pointerStart = { x: event.clientX, y: event.clientY, moved: false };
+      canvas.setPointerCapture?.(event.pointerId);
+    });
+    canvas.addEventListener('pointermove', (event) => {
+      if (!dragging || !pointerStart) return;
+      const dx = event.clientX - pointerStart.x;
+      const dy = event.clientY - pointerStart.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) pointerStart.moved = true;
+      if (pointerStart.moved) {
+        yaw -= dx * .0032;
+        pitch = THREE.MathUtils.clamp(pitch - dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
+        camera.rotation.set(pitch, yaw, 0);
+        pointerStart.x = event.clientX; pointerStart.y = event.clientY;
+      }
+    });
+    canvas.addEventListener('pointerup', (event) => {
+      if (dragging && pointerStart && !pointerStart.moved) interactAt(event.clientX, event.clientY);
+      dragging = false; pointerStart = null;
+    });
+    canvas.addEventListener('pointercancel', () => { dragging = false; pointerStart = null; });
+
+    window.addEventListener('keydown', (event) => {
+      if (imageOverlay.classList.contains('open')) {
+        if (event.key === 'Escape') closeArtwork();
+        if (event.key === 'ArrowLeft') changeArtwork(-1);
+        if (event.key === 'ArrowRight') changeArtwork(1);
+        return;
+      }
+      if (audioOverlay.classList.contains('open')) {
+        if (event.key === 'Escape') closeAudioPlayer();
+        return;
+      }
+      if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); goBack(); return; }
+      const key = event.key.toLowerCase();
+      if (['arrowup','w'].includes(key)) { event.preventDefault(); moveInGallery('forward'); }
+      else if (['arrowdown','s'].includes(key)) { event.preventDefault(); moveInGallery('back'); }
+      else if (key === 'a') moveInGallery('left');
+      else if (key === 'd') moveInGallery('right');
+      else if (key === 'arrowleft') { yaw += .12; camera.rotation.y = yaw; }
+      else if (key === 'arrowright') { yaw -= .12; camera.rotation.y = yaw; }
+    });
+
+    document.querySelectorAll('[data-move]').forEach((button) => {
+      button.addEventListener('click', () => moveInGallery(button.dataset.move));
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), .05);
+      animatedObjects.forEach(({ object, speed, axis }) => { object.rotation[axis] += speed * delta; });
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    function init() {
+      if (!window.THREE) {
+        $('webgl-fallback').classList.add('show');
+        return;
+      }
+      try {
+        textureLoader = new THREE.TextureLoader();
+        clock = new THREE.Clock();
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x070b14);
+        camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, .1, 180);
+        camera.position.set(0, 1.72, 6.8);
+        camera.rotation.order = 'YXZ';
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        renderer.physicallyCorrectLights = false;
+        raycaster = new THREE.Raycaster();
+        pointer = new THREE.Vector2();
+        buildAtrium();
+        $('back-button').style.visibility = 'hidden';
+        animate();
+      } catch (error) {
+        console.error(error);
+        $('webgl-fallback').classList.add('show');
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      // No se pausa el audio al cambiar de pestaña: el usuario conserva el control.
+    });
+
+    window.addEventListener('DOMContentLoaded', init);
+  })();
+  </script>
 </body>
 </html>
