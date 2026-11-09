@@ -191,7 +191,7 @@
             position: fixed;
             top: 1.5rem; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             border: 1px solid var(--accent-blue);
             padding: 0.6rem 2rem;
             border-radius: 20px;
@@ -605,7 +605,7 @@
             const canvas = document.getElementById('webgl-canvas');
             
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x020617, 0.02);
+            scene.fog = new THREE.FogExp2(0x020617, 0.015); // Niebla más suave para mejor visibilidad
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.6, 0);
@@ -614,18 +614,20 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
 
-            const ambientLight = new THREE.AmbientLight(0x0f172a, 1.8);
+            // ILUMINACIÓN AMBIENTAL MÁS CLARA Y CÁLIDA PARA VISIBILIDAD DE LAS PAREDES
+            const ambientLight = new THREE.AmbientLight(0x1e293b, 2.2);
             scene.add(ambientLight);
 
             for (let z = -10; z >= -150; z -= 20) {
                 const color = (z % 40 === 0) ? 0x38bdf8 : 0xc88b32;
-                const pointLight = new THREE.PointLight(color, 2, 25);
-                pointLight.position.set(0, 4, z);
+                const pointLight = new THREE.PointLight(color, 2.5, 30);
+                pointLight.position.set(0, 4.5, z);
                 scene.add(pointLight);
             }
 
-            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-            const gridMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, opacity: 0.12, transparent: true });
+            // MATERIAL DE MUROS CLARO Y TEXTURIZADO VISIBLE
+            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+            const gridMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, opacity: 0.15, transparent: true });
 
             const hallwayLength = 150;
             const floorGeo = new THREE.PlaneGeometry(12, hallwayLength);
@@ -731,15 +733,12 @@
         function updateAudioUI() {
             const track = soundTracks[currentTrackIndex];
             
-            // Actualizar textos en la Rockola (Modal)
             const trackNameEl = document.getElementById('current-track-name');
             if (trackNameEl) trackNameEl.textContent = `🎵 REPRODUCIENDO: ${track.title}`;
             
-            // Actualizar textos en el Mini-Reproductor Flotante
             const miniNameEl = document.getElementById('mini-track-name');
             if (miniNameEl) miniNameEl.textContent = track.title;
 
-            // Actualizar botones de reproducción (Modal y Mini)
             const playText = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
             const miniPlayText = isPlaying ? '⏸' : '▶';
 
