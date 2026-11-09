@@ -385,7 +385,7 @@
     let emblemMaterialCache = new Map();
     const animatedObjects = [];
 
-    // Sistema de Audio Web con eco espacial pronunciado de galería (Delay & Feedback)
+    // Sistema de Audio Web con volumen de pasos reducido al 50% y eco envolvente
     let audioCtx = null;
     function initSFX() {
       if (!audioCtx) {
@@ -410,7 +410,8 @@
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(320, now);
 
-        gain.gain.setValueAtTime(0.25, now);
+        // Volumen reducido al 50% (de 0.25 a 0.125) para una presencia sutil pero clara
+        gain.gain.setValueAtTime(0.125, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
 
         osc.connect(filter);
@@ -424,7 +425,7 @@
         delay.delayTime.setValueAtTime(0.22, now);
 
         const feedback = audioCtx.createGain();
-        feedback.gain.setValueAtTime(0.55, now);
+        feedback.gain.setValueAtTime(0.4, now); // Eco ligeramente más controlado acorde al nuevo volumen
 
         const echoFilter = audioCtx.createBiquadFilter();
         echoFilter.type = 'bandpass';
