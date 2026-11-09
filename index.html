@@ -191,7 +191,7 @@
             position: fixed;
             top: 1.5rem; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid var(--accent-blue);
             padding: 0.6rem 2rem;
             border-radius: 20px;
@@ -275,7 +275,7 @@
         .dpad-right { grid-column: 3; grid-row: 2; }
         .dpad-enter { grid-column: 2; grid-row: 2; border-color: var(--accent-gold); color: var(--accent-gold); }
 
-        /* VENTANA MODAL CRT DE EXHIBICIÓN Y ROCKOLA */
+        /* VENTANA MODAL CRT DE EXHIBICIÓN */
         #gallery-modal {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -305,6 +305,46 @@
             align-items: center;
         }
 
+        .modal-preview-box {
+            width: 100%;
+            height: 260px;
+            background: #020617;
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.2);
+            color: var(--accent-gold);
+            font-family: Georgia, serif;
+            font-size: 1.1rem;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        .img-counter {
+            position: absolute;
+            bottom: 8px; right: 12px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--accent-blue);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+        }
+
+        .image-nav-controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        /* REPRODUCTOR DE AUDIO REAL */
         .audio-player-container {
             width: 100%;
             background: #020617;
@@ -324,7 +364,7 @@
         }
 
         .playlist {
-            max-height: 160px;
+            max-height: 140px;
             overflow-y: auto;
             border-top: 1px solid rgba(56, 189, 248, 0.2);
             padding-top: 0.5rem;
@@ -398,21 +438,12 @@
                 </div>
             </div>
 
-            <button class="btn-enter" onclick="enterGallery()">ENTRAR AL VESTÍBULO</button>
+            <button class="btn-enter" onclick="enterGallery()">ENTRAR A LA GALERÍA</button>
         </div>
     </div>
 
     <!-- HUD GUÍA EN PANTALLA -->
-    <div id="hud-info">VESTÍBULO PRINCIPAL: USA [ ↑ ] PARA AVANZAR</div>
-
-    <!-- MINI REPRODUCTOR PERSISTENTE (ESQUINA SUPERIOR IZQUIERDA) -->
-    <div id="mini-player">
-        <span style="color: var(--accent-gold);">🎵</span>
-        <div class="mini-track-title" id="mini-track-name">Selecciona música en la Rockola</div>
-        <button class="mini-btn" onclick="prevTrack()">◀</button>
-        <button class="mini-btn" id="mini-play-btn" onclick="togglePlay()">▶</button>
-        <button class="mini-btn" onclick="nextTrack()">▶</button>
-    </div>
+    <div id="hud-info">PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]</div>
 
     <!-- CONTENEDOR 3D WEBGL -->
     <canvas id="webgl-canvas"></canvas>
@@ -426,15 +457,28 @@
         <button class="dpad-btn dpad-down" onclick="movePlayer('down')">▼</button>
     </div>
 
-    <!-- MODAL DE LA ROCKOLA EN LA SALA DE AUDIO -->
+    <!-- MODAL DE EXHIBICIÓN DE OBRAS / SALA DE AUDIO -->
     <div id="gallery-modal">
         <div class="modal-box">
-            <div id="modal-content-audio" style="width: 100%;">
-                <h2 style="color: var(--accent-gold); margin-bottom: 0.5rem; font-family: Georgia, serif;">📻 ROCKOLA HOLOGRÁFICA</h2>
-                <p style="color: #ffffff; margin-bottom: 1rem; font-size: 0.9rem;">Selecciona una pista del soundtrack del Instituto Quimera. La música continuará sonando mientras exploras el castillo.</p>
+            <!-- SECCIÓN VISUAL CON MULTI-IMAGEN -->
+            <div id="modal-content-visual" style="width: 100%;">
+                <div class="modal-preview-box" id="modal-img-box">
+                    [ VISTA PREVIA DE LA OBRA ]
+                    <div class="img-counter" id="img-counter-label">1 / 1</div>
+                </div>
+                <div class="image-nav-controls" id="visual-nav-controls" style="display: none;">
+                    <button class="ctrl-btn" onclick="prevImage()">◀ ANTERIOR FOTO</button>
+                    <button class="ctrl-btn" onclick="nextImage()">SIGUIENTE FOTO ▶</button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE AUDIO CON REPRODUCTOR REAL (24 PISTAS) -->
+            <div id="modal-content-audio" style="width: 100%; display: none;">
                 <div class="audio-player-container">
-                    <div class="track-info" id="current-track-name">🎵 REPRODUCTOR: [Pista No Seleccionada]</div>
-                    <div class="playlist" id="playlist-container"></div>
+                    <div class="track-info" id="current-track-name">🎵 REPRODUCTOR QUIMERA: [Selecciona Pista]</div>
+                    <div class="playlist" id="playlist-container">
+                        <!-- Las 24 pistas se cargan dinámicamente -->
+                    </div>
                     <div class="player-controls">
                         <button class="ctrl-btn" onclick="prevTrack()">◀ ANTERIOR</button>
                         <button class="ctrl-btn" id="play-pause-btn" onclick="togglePlay()">▶ REPRODUCIR</button>
@@ -442,17 +486,20 @@
                     </div>
                 </div>
             </div>
-            <button class="btn-enter" style="margin-bottom:0;" onclick="closeModal()">CERRAR Y EXPLORAR [ENTER]</button>
+
+            <h2 id="modal-title" style="color: var(--accent-gold); margin-bottom: 0.6rem; font-family: Georgia, serif;"></h2>
+            <p id="modal-desc" style="color: #ffffff; line-height: 1.5; margin-bottom: 1.2rem; font-size: 0.95rem;"></p>
+            <button class="btn-enter" style="margin-bottom:0;" onclick="closeModal()">CERRAR [ENTER]</button>
         </div>
     </div>
 
-    <!-- SCRIPT DEL MOTOR THREE.JS (VESTÍBULO + ALAS + ROCKOLA) -->
+    <!-- SCRIPT DEL MOTOR THREE.JS Y REPRODUCTORES -->
     <script>
         let scene, camera, renderer;
-        let playerX = 0, playerZ = 0, playerRotY = 0;
+        let playerZ = 0, playerRotY = 0;
         let isModalOpen = false;
 
-        // 🎵 LAS 24 PISTAS DEL SOUNDTRACK
+        // 🎵 LAS 24 PISTAS DEL SOUNDTRACK OFICIAL DEL INSTITUTO QUIMERA
         const soundTracks = [
             { title: "01. Tango Futuro (Lado A)", file: "01._Tango_Futuro_(Lado_A).mp3" },
             { title: "02. Tango Futuro (Lado B)", file: "02._Tango_Futuro_(Lado_B).mp3" },
@@ -483,19 +530,74 @@
         let audioElement = new Audio();
         let isPlaying = false;
 
-        // ESTRUCTURA 3D DE PUERTAS Y PUNTOS DE INTERÉS
-        const mapNodes = [
-            // Vestíbulo Central
-            { id: "door_audio", x: -4, z: -12, title: "🚪 ENTRAR AL ALA DE AUDIO", targetZ: -12, targetX: -14 },
-            { id: "door_visual", x: 4, z: -12, title: "🚪 ENTRAR AL ALA VISUAL", targetZ: -12, targetX: 14 },
-            // Sala de Audio
-            { id: "jukebox", x: -14, z: -20, title: "📻 ROCKOLA HOLOGRÁFICA (PRESIONA ENTER)", action: "open_jukebox" }
+        // 🖼️ LAS 8 SECCIONES VISUALES AMPLIADAS (CON SUS MÚLTIPLES FOTOS)
+        // Puedes agregar los nombres reales de tus archivos en cada arreglo 'images'
+        const roomsData = [
+            { id: 1, z: -15, type: "audio", title: "🎵 SALA DE AUDIO", desc: "Cabina acústica oficial del Instituto Quimera. Disfruta de las 24 pistas musicales del soundtrack oficial." },
+            { id: 2, z: -30, type: "visual", title: "🖼️ 00 - ECOSISTEMA QUIMERA", desc: "Exposición visual del ecosistema para el conocimiento, la formación y la práctica interdisciplinaria.", images: ["Quimera_Negro.webp", "Quimera.webp", "Belerofonte_Negro.webp", "Belerofonte.webp", "Pegaso_Negro.webp", "Pegaso.webp", "Quimera_Ecosistema01.webp", "Quimeratrix.webp"] },
+            { id: 3, z: -45, type: "visual", title: "🖼️ 01 - ¿QUÉ ES QUIMERA?", desc: "Exposición visual de la estructura que conecta conocimiento, metodología y aplicación para generar soluciones.", images: ["Quimera_QE.webp", "Quimera_QE_Mod.webp", "QE_glitch_Q.webp", "QE_glitch_U.webp", "QE_glitch_I.webp", "QE_glitch_M.webp", "QE_glitch_E.webp", "QE_glitch_R.webp", "QE_glitch_A.webp"] },
+            { id: 4, z: -60, type: "visual", title: "🖼️ 02 - MISIÓN", desc: "Exposición visual del propósito que transforma el conocimiento en capacidades, soluciones y servicio.", images: ["Quimera_Mision.webp", "ECQ.webp", "QM01_Investigacion.webp", "QM02_Formacion.webp", "QM03_Desarrollo.webp", "QM04_Aplicacion.webp", "QM05_Transferencia.webp", "Quimera_M_Mod.webp", "M_glitch_Q.webp", "M_glitch_U.webp", "M_glitch_I.webp", "M_glitch_M.webp", "M_glitch_E.webp", "M_glitch_R.webp", "M_glitch_A.webp"] },
+            { id: 5, z: -75, type: "visual", title: "🖼️ 03 - VISIÓN", desc: "Obras proyectivas que ilustran el horizonte que guía nuestra evolución y define el futuro que buscamos construir.", images: ["Quimera_Vision.webp", "Quimera_V_Mod.webp", "V_glitch_01.webp", "V_glitch_02.webp", "V_glitch_03.webp", "V_glitch_04.webp", "V_glitch_05.webp", "V_glitch_06.webp", "V_glitch_07.webp", "V_glitch_08.webp", "V_glitch_09.webp", "V_glitch_10.webp", "V_glitch_11.webp"] },
+            { id: 6, z: -90, type: "visual", title: "🖼️ 04 - PRINCIPIOS", desc: "Exposición visual del origen simbólico y conceptual que da vida e identidad a nuestro ecosistema.", images: ["Quimera_Principios.webp", "Quimera_P_Mod.webp", "P_glitch_01.webp", "P_glitch_02.webp", "P_glitch_03.webp", "P_glitch_04.webp", "P_glitch_05.webp", "P_glitch_06.webp", "P_glitch_07.webp", "P_glitch_08.webp", "P_glitch_09.webp", "P_glitch_10.webp", "P_glitch_11.webp"] },
+            { id: 7, z: -105, type: "visual", title: "🖼️ 05 - DESARROLLO", desc: "Colección visual de las áreas donde convergen nuestras capacidades para investigar, formar, comunicar e innovar.", images: ["Quimera_Desarrollo.webp", "Quimera_D_Mod.webp", "D_glitch_Q.webp", "D_glitch_U.webp", "D_glitch_I.webp", "D_glitch_M.webp", "D_glitch_E.webp", "D_glitch_R.webp", "D_glitch_A.webp"] },
+            { id: 8, z: -120, type: "visual", title: "🖼️ 06 - MITOLOGÍA DETRÁS DE QUIMERA", desc: "Galería visual-conceptual de la mitología que dio vida al Instituto.", images: ["Quimera_MDQ.webp", "Quimeratrix.webp", "Mod_01.webp", "Mod_02.webp", "Mod_03.webp", "Mod_04.webp", "Mod_05.webp", "Mod_06.webp", "Mod_07.webp", "Mod_08.webp", "Mod_09.webp", "Mod_10.webp", "Mod_11.webp", "Mod_12.webp", "Mod_13.webp", "Mod_14.webp", "01-borrador_T-P.webp", "02-Teoria-Preg.webp", "03-HECE.webp", "04-MHDC.webp", "ECQ.webp", "MDQ_glitch_01.webp", "MDQ_glitch_02.webp", "MDQ_glitch_03.webp", "MDQ_glitch_04.webp", "MDQ_glitch_05.webp", "MDQ_glitch_06.webp", "MDQ_glitch_07.webp", "MDQ_glitch_08.webp", "MDQ_glitch_09.webp", "MDQ_glitch_10.webp", "MDQ_glitch_11.webp", "MDQ_glitch_12.webp", "MDQ_glitch_13.webp", "MDQ_glitch_14.webp"] },
+            { id: 9, z: -135, type: "visual", title: "🖼️ 07 - QUIMERA ELECTROTANGO", desc: "Fusión vanguardista electrotango-dubstep.", images: ["Quimera_Electrotango.webp", "Quimera_Electrotango_1600x900.webp"] }
         ];
+
+        let currentActiveRoom = null;
+        let currentImageIndex = 0;
+
+        function createDynamicTexture(text, accentColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 712;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 712);
+            gradient.addColorStop(0, '#0b1329');
+            gradient.addColorStop(1, '#020617');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 712);
+
+            ctx.strokeStyle = accentColor;
+            ctx.lineWidth = 16;
+            ctx.strokeRect(10, 10, 492, 692);
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(30, 30, 452, 652);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px Georgia, serif';
+            ctx.textAlign = 'center';
+            
+            const words = text.split(' ');
+            let line = '';
+            let y = 300;
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > 400 && n > 0) {
+                    ctx.fillText(line, 256, y);
+                    line = words[n] + ' ';
+                    y += 40;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, 256, y);
+
+            ctx.fillStyle = accentColor;
+            ctx.font = '22px monospace';
+            ctx.fillText('INSTITUTO QUIMERA', 256, 630);
+
+            return new THREE.CanvasTexture(canvas);
+        }
 
         function init3D() {
             const canvas = document.getElementById('webgl-canvas');
+            
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x020617, 0.025);
+            scene.fog = new THREE.FogExp2(0x020617, 0.02);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.set(0, 1.6, 0);
@@ -507,43 +609,67 @@
             const ambientLight = new THREE.AmbientLight(0x0f172a, 1.8);
             scene.add(ambientLight);
 
-            // Luz Central del Vestíbulo
-            const mainLight = new THREE.PointLight(0xc88b32, 2.5, 30);
-            mainLight.position.set(0, 5, -8);
-            scene.add(mainLight);
+            for (let z = -10; z >= -150; z -= 20) {
+                const color = (z % 40 === 0) ? 0x38bdf8 : 0xc88b32;
+                const pointLight = new THREE.PointLight(color, 2, 25);
+                pointLight.position.set(0, 4, z);
+                scene.add(pointLight);
+            }
 
-            // CONSTRUCCIÓN ARQUITECTÓNICA (VESTÍBULO Y ALAS)
-            const wallMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
-            const floorGeo = new THREE.PlaneGeometry(40, 60);
+            const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+            const gridMaterial = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, opacity: 0.12, transparent: true });
 
-            // Suelo y Techo del Vestíbulo
-            const floor = new THREE.Mesh(floorGeo, wallMat);
+            const hallwayLength = 150;
+            const floorGeo = new THREE.PlaneGeometry(12, hallwayLength);
+            
+            const floor = new THREE.Mesh(floorGeo, wallMaterial);
             floor.rotation.x = -Math.PI / 2;
-            floor.position.set(0, 0, -20);
+            floor.position.set(0, 0, -hallwayLength / 2);
             scene.add(floor);
 
-            // ROCKOLA HOLOGRÁFICA (OBJETO 3D EN EL ALA IZQUIERDA)
-            const jukeboxGeo = new THREE.CylinderGeometry(1, 1.2, 3, 16);
-            const jukeboxMat = new THREE.MeshStandardMaterial({ 
-                color: 0x38bdf8, 
-                emissive: 0x38bdf8, 
-                emissiveIntensity: 0.5,
-                wireframe: true 
-            });
-            const jukeboxMesh = new THREE.Mesh(jukeboxGeo, jukeboxMat);
-            jukeboxMesh.position.set(-14, 1.5, -20);
-            scene.add(jukeboxMesh);
+            const ceiling = new THREE.Mesh(floorGeo, wallMaterial);
+            ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.set(0, 5, -hallwayLength / 2);
+            scene.add(ceiling);
 
-            // Luz Neón sobre la Rockola
-            const jukeboxLight = new THREE.PointLight(0x38bdf8, 3, 15);
-            jukeboxLight.position.set(-14, 3, -20);
-            scene.add(jukeboxLight);
+            const wallGeo = new THREE.PlaneGeometry(hallwayLength, 5);
+            const leftWall = new THREE.Mesh(wallGeo, wallMaterial);
+            leftWall.rotation.y = Math.PI / 2;
+            leftWall.position.set(-6, 2.5, -hallwayLength / 2);
+            scene.add(leftWall);
+
+            const rightWall = new THREE.Mesh(wallGeo, wallMaterial);
+            rightWall.rotation.y = -Math.PI / 2;
+            rightWall.position.set(6, 2.5, -hallwayLength / 2);
+            scene.add(rightWall);
+
+            const gridFloor = new THREE.Mesh(floorGeo, gridMaterial);
+            gridFloor.rotation.x = -Math.PI / 2;
+            gridFloor.position.set(0, 0.01, -hallwayLength / 2);
+            scene.add(gridFloor);
+
+            roomsData.forEach(room => {
+                const accentHex = (room.id % 2 === 0) ? '#38bdf8' : '#c88b32';
+                const canvasTex = createDynamicTexture(room.title, accentHex);
+                
+                const frameGeo = new THREE.BoxGeometry(0.15, 3.2, 2.3);
+                const frameMat = new THREE.MeshStandardMaterial({ map: canvasTex, roughness: 0.3 });
+                const frame = new THREE.Mesh(frameGeo, frameMat);
+                
+                const isLeft = (room.id % 2 !== 0);
+                const sideX = isLeft ? -5.85 : 5.85;
+                const rotY = isLeft ? Math.PI / 2 : -Math.PI / 2;
+
+                frame.position.set(sideX, 2.4, room.z);
+                frame.rotation.y = rotY;
+                scene.add(frame);
+            });
 
             setupPlaylistUI();
             animate();
         }
 
-        // CONTROL DE REPRODUCCIÓN AUDIO REAL
+        // FUNCIONES DE CONTROL DE AUDIO REAL
         function setupPlaylistUI() {
             const container = document.getElementById('playlist-container');
             container.innerHTML = '';
@@ -554,6 +680,7 @@
                 div.onclick = () => loadAndPlayTrack(index);
                 container.appendChild(div);
             });
+            updateTrackInfo();
         }
 
         function loadAndPlayTrack(index) {
@@ -561,8 +688,11 @@
             audioElement.src = soundTracks[currentTrackIndex].file;
             audioElement.play().then(() => {
                 isPlaying = true;
-                updateAudioUI();
-            }).catch(err => console.log("Interacción requerida:", err));
+                updatePlayButton();
+                setupPlaylistUI();
+            }).catch(err => {
+                console.log("Esperando interacción del usuario:", err);
+            });
         }
 
         function togglePlay() {
@@ -577,7 +707,7 @@
                 audioElement.play();
                 isPlaying = true;
             }
-            updateAudioUI();
+            updatePlayButton();
         }
 
         function nextTrack() {
@@ -590,23 +720,42 @@
             loadAndPlayTrack(currentTrackIndex);
         }
 
-        function updateAudioUI() {
-            const trackName = soundTracks[currentTrackIndex].title;
-            document.getElementById('current-track-name').textContent = `🎵 REPRODUCIENDO: ${trackName}`;
-            document.getElementById('mini-track-name').textContent = trackName;
-            
-            const playText = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
-            document.getElementById('play-pause-btn').textContent = playText;
-            document.getElementById('mini-play-btn').textContent = isPlaying ? '⏸' : '▶';
-            
-            setupPlaylistUI();
+        function updatePlayButton() {
+            document.getElementById('play-pause-btn').textContent = isPlaying ? '⏸ PAUSAR' : '▶ REPRODUCIR';
+        }
+
+        function updateTrackInfo() {
+            document.getElementById('current-track-name').textContent = `🎵 REPRODUCIENDO: ${soundTracks[currentTrackIndex].title}`;
         }
 
         audioElement.onended = () => { nextTrack(); };
 
+        // FUNCIONES DE NAVEGACIÓN MULTI-IMAGEN EN MODAL
+        function updateModalImage() {
+            if (!currentActiveRoom || currentActiveRoom.type === 'audio') return;
+            const imgBox = document.getElementById('modal-img-box');
+            const counterLabel = document.getElementById('img-counter-label');
+            const total = currentActiveRoom.images.length;
+            const currentImg = currentActiveRoom.images[currentImageIndex];
+
+            imgBox.style.backgroundImage = `url('${currentImg}')`;
+            counterLabel.textContent = `${currentImageIndex + 1} / ${total}`;
+        }
+
+        function nextImage() {
+            if (!currentActiveRoom || !currentActiveRoom.images) return;
+            currentImageIndex = (currentImageIndex + 1) % currentActiveRoom.images.length;
+            updateModalImage();
+        }
+
+        function prevImage() {
+            if (!currentActiveRoom || !currentActiveRoom.images) return;
+            currentImageIndex = (currentImageIndex - 1 + currentActiveRoom.images.length) % currentActiveRoom.images.length;
+            updateModalImage();
+        }
+
         function animate() {
             requestAnimationFrame(animate);
-            camera.position.x = playerX;
             camera.position.z = playerZ;
             camera.rotation.y = playerRotY;
             renderer.render(scene, camera);
@@ -629,17 +778,15 @@
                 return;
             }
 
-            const step = 2.5;
+            const stepZ = 3.5;
             const stepRot = 0.15;
 
             switch (direction) {
                 case 'up':
-                    playerZ -= Math.cos(playerRotY) * step;
-                    playerX -= Math.sin(playerRotY) * step;
+                    if (playerZ > -140) playerZ -= stepZ;
                     break;
                 case 'down':
-                    playerZ += Math.cos(playerRotY) * step;
-                    playerX += Math.sin(playerRotY) * step;
+                    if (playerZ < 0) playerZ += stepZ;
                     break;
                 case 'left':
                     playerRotY += stepRot;
@@ -648,7 +795,7 @@
                     playerRotY -= stepRot;
                     break;
                 case 'enter':
-                    checkInteractions();
+                    checkRoomEntry();
                     return;
             }
 
@@ -657,29 +804,43 @@
 
         function updateHUD() {
             const hud = document.getElementById('hud-info');
-            const nearNode = mapNodes.find(n => Math.hypot(playerX - n.x, playerZ - n.z) < 3.5);
+            const activeRoom = roomsData.find(r => Math.abs(playerZ - r.z) < 4);
 
-            if (nearNode) {
-                hud.textContent = `${nearNode.title}`;
+            if (activeRoom) {
+                hud.textContent = `EXHIBICIÓN CERCA: [ ${activeRoom.title} ] - PRESIONA ENTER`;
             } else {
-                hud.textContent = "VESTÍBULO: [ ↑ ] AVANZAR | [ ← / → ] GIRAR";
+                hud.textContent = "PASILLO CENTRAL 3D: AVANZA CON [ ↑ ]";
             }
         }
 
-        function checkInteractions() {
-            const nearNode = mapNodes.find(n => Math.hypot(playerX - n.x, playerZ - n.z) < 3.5);
-            if (nearNode) {
-                if (nearNode.action === "open_jukebox") {
-                    openModal();
-                } else if (nearNode.targetX !== undefined) {
-                    playerX = nearNode.targetX;
-                    playerZ = nearNode.targetZ;
-                    updateHUD();
-                }
+        function checkRoomEntry() {
+            const activeRoom = roomsData.find(r => Math.abs(playerZ - r.z) < 4);
+            if (activeRoom) {
+                openModal(activeRoom);
             }
         }
 
-        function openModal() {
+        function openModal(room) {
+            currentActiveRoom = room;
+            currentImageIndex = 0;
+
+            document.getElementById('modal-title').textContent = room.title;
+            document.getElementById('modal-desc').textContent = room.desc;
+
+            const visualBox = document.getElementById('modal-content-visual');
+            const audioBox = document.getElementById('modal-content-audio');
+            const navControls = document.getElementById('visual-nav-controls');
+
+            if (room.type === 'audio') {
+                visualBox.style.display = 'none';
+                audioBox.style.display = 'block';
+            } else {
+                audioBox.style.display = 'none';
+                visualBox.style.display = 'block';
+                navControls.style.display = room.images.length > 1 ? 'flex' : 'none';
+                updateModalImage();
+            }
+
             document.getElementById('gallery-modal').classList.add('show');
             isModalOpen = true;
         }
@@ -690,6 +851,13 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            if (isModalOpen) {
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') prevImage();
+                if (e.key === 'Enter') closeModal();
+                return;
+            }
+
             switch (e.key) {
                 case 'ArrowUp': movePlayer('up'); break;
                 case 'ArrowDown': movePlayer('down'); break;
