@@ -10,6 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/Pass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -35,7 +43,6 @@
     .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,.24) 100%); }
     .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
 
-    /* Apertura inicial: blanco puro -> negro absoluto -> aparición paulatina del sendero */
     @keyframes openingReveal {
       0%   { opacity: 1; background-color: #ffffff; }
       24%  { opacity: 1; background-color: #ffffff; }
@@ -43,46 +50,18 @@
       70%  { opacity: 1; background-color: #000000; }
       100% { opacity: 0; background-color: #000000; }
     }
-    #flash-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      opacity: 1;
-      background: #ffffff;
-      pointer-events: none;
-    }
-    #flash-overlay.reveal {
-      animation: openingReveal 4.8s cubic-bezier(.7, 0, .2, 1) forwards;
-    }
+    #flash-overlay { position: fixed; inset: 0; z-index: 100; opacity: 1; background: #ffffff; pointer-events: none; }
+    #flash-overlay.reveal { animation: openingReveal 4.8s cubic-bezier(.7, 0, .2, 1) forwards; }
 
-    /* Animación de construcción holográfica para la fachada */
-    @keyframes holoBuildUp {
-      0% { opacity: 0; transform: scale(0.94) translateY(20px); filter: blur(10px) brightness(2.2); }
-      50% { opacity: 0.4; filter: blur(4px) brightness(1.6); }
-      75% { opacity: 0.85; transform: scale(1.005) translateY(-3px); filter: blur(1px) brightness(1.2); }
-      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0) brightness(1); }
-    }
-
-    /* Animación de ensamblaje para el emblema */
     @keyframes emblemHoloPulse {
       0% { opacity: 0; transform: scale(0.7) rotate(-15deg); filter: drop-shadow(0 0 0px var(--cyan)); }
       60% { opacity: 0.7; transform: scale(1.06) rotate(3deg); filter: drop-shadow(0 0 30px var(--cyan)); }
       100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 18px rgba(199,154,85,.3)) drop-shadow(0 0 32px rgba(114,201,216,.15)); }
     }
 
-
-    /* Botón contextual que aparece al llegar al portón del castillo */
-    .intro-button {
-      display: inline-flex; align-items: center; justify-content: center;
-      margin: 0; min-width: 260px; padding: 14px 24px;
-      border: 1px solid var(--gold);
-      background: linear-gradient(135deg, rgba(199,154,85,.2), rgba(199,154,85,.045));
-      color: var(--gold-light); cursor: pointer; letter-spacing: .18em;
-      font-size: .75rem; text-transform: uppercase; transition: .3s ease;
-    }
+    .intro-button { display: inline-flex; align-items: center; justify-content: center; margin: 0; min-width: 260px; padding: 14px 24px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.2), rgba(199,154,85,.045)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
     .intro-button:hover { background: rgba(199,154,85,.27); box-shadow: 0 0 32px rgba(199,154,85,.2); transform: translateY(-2px); }
 
-    /* Interfaz de navegación */
     #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 520px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
     #topbar.visible { opacity: 1; visibility: visible; }
     .topbar-brand { min-width: 0; }
@@ -110,7 +89,6 @@
     .touch-down { grid-column: 2; grid-row: 2; }
     .touch-right { grid-column: 3; grid-row: 2; }
 
-    /* Visor de obras */
     .overlay { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 30px; background: rgba(1,3,8,.94); backdrop-filter: blur(13px); opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s ease; }
     .overlay.open { opacity: 1; visibility: visible; }
     .image-viewer { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; max-width: 1800px; }
@@ -126,7 +104,6 @@
     .viewer-caption { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 18px; color: #bec7d2; font-size: .69rem; letter-spacing: .12em; text-transform: uppercase; text-align: center; }
     #viewer-count { color: var(--cyan); font-family: monospace; }
 
-    /* Rockola y reproductor */
     #audio-overlay { z-index: 35; }
     .audio-shell { position: relative; display: flex; flex-direction: column; width: min(1240px, 100%); height: min(820px, 92vh); max-height: 92vh; overflow: hidden; border: 1px solid rgba(199,154,85,.58); background: linear-gradient(135deg, rgba(15,25,41,.99), rgba(4,8,15,.995) 65%); box-shadow: var(--shadow), 0 0 70px rgba(114,201,216,.1); }
     .audio-header { flex: 0 0 auto; display: flex; align-items: center; gap: 18px; padding: 20px 25px; border-bottom: 1px solid rgba(199,154,85,.22); background: rgba(5,10,18,.94); }
@@ -167,10 +144,6 @@
     #webgl-fallback { display: none; position: fixed; z-index: 10; inset: 0; place-items: center; padding: 30px; text-align: center; background: #080e18; color: var(--white); }
     #webgl-fallback.show { display: grid; }
 
-
-
-
-    /* Acceso exterior y transición cinematográfica entre salas */
     #gate-cta { position: fixed; z-index: 18; left: 50%; bottom: 86px; transform: translate(-50%, 14px); width: min(560px, calc(100vw - 28px)); display: grid; place-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .55s ease, transform .55s ease, visibility .55s; }
     #gate-cta.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); pointer-events: auto; }
     .gate-cta-card { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; padding: 15px 18px 17px; border: 1px solid rgba(199,154,85,.68); background: linear-gradient(135deg, rgba(5,10,18,.94), rgba(13,21,33,.9)); box-shadow: 0 14px 50px rgba(0,0,0,.62), 0 0 34px rgba(199,154,85,.15); backdrop-filter: blur(12px); text-align: center; }
@@ -223,12 +196,9 @@
   </style>
 </head>
 <body>
-  <!-- Capa independiente de fundido Blanco a Negro -->
   <div id="flash-overlay" aria-hidden="true"></div>
-
   <canvas id="world" aria-label="Recorrido tridimensional por la Galería de Arte Audiovisual del Ecosistema Quimera"></canvas>
   <div class="vignette"></div><div class="grain"></div>
-
 
   <section id="gate-cta" aria-label="Acceso a la Galería">
     <div class="gate-cta-card">
@@ -390,7 +360,13 @@
     let emblemMaterialCache = new Map();
     const animatedObjects = [];
 
-    // Sistema de Audio Web con volumen de pasos reducido al 50% y eco envolvente
+    // === Nuevas variables para mejoras visuales cinematográficas ===
+    let composer = null;
+    let envMap = null;
+    let bloomPass = null;
+    let emberSystem = null;
+    let _glowTextureCache = null;
+
     let audioCtx = null;
     function initSFX() {
       if (!audioCtx) {
@@ -407,36 +383,26 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         const filter = audioCtx.createBiquadFilter();
-
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(85, now);
         osc.frequency.exponentialRampToValueAtTime(22, now + 0.18);
-
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(320, now);
-
-        // Volumen reducido al 50% (de 0.25 a 0.125) para una presencia sutil pero clara
         gain.gain.setValueAtTime(0.125, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start(now);
         osc.stop(now + 0.22);
-
         const delay = audioCtx.createDelay();
         delay.delayTime.setValueAtTime(0.22, now);
-
         const feedback = audioCtx.createGain();
-        feedback.gain.setValueAtTime(0.4, now); // Eco ligeramente más controlado acorde al nuevo volumen
-
+        feedback.gain.setValueAtTime(0.4, now);
         const echoFilter = audioCtx.createBiquadFilter();
         echoFilter.type = 'bandpass';
         echoFilter.frequency.setValueAtTime(450, now);
         echoFilter.Q.setValueAtTime(1.2, now);
-
         osc.connect(delay);
         delay.connect(echoFilter);
         echoFilter.connect(feedback);
@@ -454,10 +420,8 @@
         osc.type = 'sine';
         osc.frequency.setValueAtTime(300, now);
         osc.frequency.exponentialRampToValueAtTime(650, now + 0.2);
-
         gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start(now);
@@ -465,7 +429,6 @@
       } catch (e) {}
     }
 
-    // Estado del reproductor musical
     const audio = new Audio();
     audio.preload = 'metadata';
     let currentTrackIndex = 0;
@@ -485,6 +448,250 @@
       return filename.replace(/\.webp$/i, '').replace(/_/g, ' ').replace(/\bMod\b/gi, '·').replace(/glitch/gi, 'Glitch');
     }
 
+    /* ============================================================
+       HELPERS DE EFECTOS VISUALES AVANZADOS
+       ============================================================ */
+    function getGlowTexture(rgb = '255,220,140') {
+      if (_glowTextureCache && _glowTextureCache.rgb === rgb) return _glowTextureCache.tex;
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, `rgba(${rgb},1)`);
+      g.addColorStop(0.25, `rgba(${rgb},0.75)`);
+      g.addColorStop(0.55, `rgba(${rgb},0.25)`);
+      g.addColorStop(1, `rgba(${rgb},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(c);
+      _glowTextureCache = { rgb, tex };
+      return tex;
+    }
+
+    function createEnvironmentMap() {
+      const canvasEl = document.createElement('canvas');
+      canvasEl.width = 1024; canvasEl.height = 512;
+      const ctx = canvasEl.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 0, 512);
+      grad.addColorStop(0, '#060a14');
+      grad.addColorStop(0.45, '#141e30');
+      grad.addColorStop(0.55, '#2a1c10');
+      grad.addColorStop(1, '#050810');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, 1024, 512);
+      for (let i = 0; i < 14; i++) {
+        const x = Math.random() * 1024;
+        const y = 120 + Math.random() * 200;
+        const r = 30 + Math.random() * 70;
+        const g2 = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g2.addColorStop(0, `rgba(255,190,110,${0.55 + Math.random() * 0.35})`);
+        g2.addColorStop(1, 'rgba(255,190,110,0)');
+        ctx.fillStyle = g2;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      for (let i = 0; i < 5; i++) {
+        const x = Math.random() * 1024;
+        const y = 100 + Math.random() * 120;
+        const r = 30 + Math.random() * 50;
+        const g3 = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g3.addColorStop(0, 'rgba(120,220,240,0.7)');
+        g3.addColorStop(1, 'rgba(120,220,240,0)');
+        ctx.fillStyle = g3;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      const tex = new THREE.CanvasTexture(canvasEl);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.encoding = THREE.sRGBEncoding;
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+      const result = pmrem.fromEquirectangular(tex).texture;
+      tex.dispose();
+      pmrem.dispose();
+      return result;
+    }
+
+    function setupComposer() {
+      composer = new THREE.EffectComposer(renderer);
+      composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+      composer.setSize(window.innerWidth, window.innerHeight);
+      composer.addPass(new THREE.RenderPass(scene, camera));
+      // Ajuste fino OPCIONAL activado: look "fantasía-medieval"
+      bloomPass = new THREE.UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        1.0,    // strength  · más neón
+        0.55,   // radius
+        0.6     // threshold · más elementos florecen
+      );
+      composer.addPass(bloomPass);
+    }
+
+    function createStarfield() {
+      const count = 900;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const r = 90 + Math.random() * 60;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI * 0.48;
+        positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+        positions[i*3+1] = r * Math.cos(phi) + 25;
+        positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta) - 20;
+        const b = 0.55 + Math.random() * 0.45;
+        colors[i*3]   = b;
+        colors[i*3+1] = b;
+        colors[i*3+2] = b * (Math.random() < 0.3 ? 1.0 : 0.92);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const mat = new THREE.PointsMaterial({
+        size: 1.1,
+        map: getGlowTexture('255,255,255'),
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        vertexColors: true,
+        sizeAttenuation: true,
+        fog: false
+      });
+      return new THREE.Points(geo, mat);
+    }
+
+    function createMoon() {
+      const group = new THREE.Group();
+      group.position.set(-48, 62, -120);
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(6.5, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 0xd8d4c8, toneMapped: false, fog: false })
+      );
+      group.add(moon);
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: getGlowTexture('200,215,240'),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: false,
+        opacity: 0.55
+      }));
+      glow.scale.set(46, 46, 1);
+      group.add(glow);
+      return group;
+    }
+
+    function createGroundMist() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
+      for (let i = 0; i < 80; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const r = 40 + Math.random() * 110;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `rgba(190,215,235,${0.05 + Math.random() * 0.07})`);
+        g.addColorStop(1, 'rgba(190,215,235,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 6);
+      const mat = new THREE.MeshBasicMaterial({
+        map: tex, transparent: true, opacity: 0.55,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      });
+      const mist = new THREE.Mesh(new THREE.PlaneGeometry(58, 148), mat);
+      mist.rotation.x = -Math.PI / 2;
+      mist.position.y = 0.45;
+      mist.position.z = -1;
+      return mist;
+    }
+
+    function createEmbers() {
+      const count = 220;
+      const positions = new Float32Array(count * 3);
+      const velocity = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        positions[i*3]   = (Math.random() - 0.5) * 20;
+        positions[i*3+1] = Math.random() * 16 + 0.5;
+        positions[i*3+2] = -60 + Math.random() * 122;
+        velocity[i*3]   = (Math.random() - 0.5) * 0.35;
+        velocity[i*3+1] = 0.3 + Math.random() * 0.7;
+        velocity[i*3+2] = (Math.random() - 0.5) * 0.3;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xffaa44,
+        size: 0.32,
+        map: getGlowTexture('255,180,90'),
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+      const points = new THREE.Points(geo, mat);
+      points.userData.velocity = velocity;
+      return points;
+    }
+
+    function createDust(width, length, height) {
+      const count = 200;
+      const positions = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        positions[i*3]   = (Math.random() - 0.5) * (width - 2);
+        positions[i*3+1] = 0.5 + Math.random() * (height - 1);
+        positions[i*3+2] = (Math.random() - 0.5) * (length - 2);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xcfe4ec,
+        size: 0.055,
+        map: getGlowTexture('220,240,255'),
+        transparent: true,
+        opacity: 0.55,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+      return new THREE.Points(geo, mat);
+    }
+
+    function makeGlowSprite(color = 0xffaa44, scale = 1.2, opacity = 0.9) {
+      const mat = new THREE.SpriteMaterial({
+        map: getGlowTexture(color === 0x72c9d8 ? '130,220,235' : '255,180,90'),
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: false,
+        opacity
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(scale, scale, 1);
+      return sprite;
+    }
+
+    function updateEmbers(dt) {
+      if (!emberSystem || !emberSystem.parent) return;
+      const arr = emberSystem.geometry.attributes.position.array;
+      const vel = emberSystem.userData.velocity;
+      for (let i = 0; i < arr.length; i += 3) {
+        arr[i]   += vel[i]   * dt;
+        arr[i+1] += vel[i+1] * dt;
+        arr[i+2] += vel[i+2] * dt;
+        if (arr[i+1] > 17) {
+          arr[i]   = (Math.random() - 0.5) * 20;
+          arr[i+1] = 0.5;
+          arr[i+2] = -60 + Math.random() * 122;
+        }
+      }
+      emberSystem.geometry.attributes.position.needsUpdate = true;
+    }
+
+    /* ============================================================
+       MUNDO / ESCENAS
+       ============================================================ */
     function disposeWorld() {
       if (!world) return;
       world.traverse((object) => {
@@ -499,6 +706,7 @@
       });
       scene.remove(world);
       world = null;
+      emberSystem = null;
       interactables = [];
       animatedObjects.length = 0;
       emblemMaterialCache = new Map();
@@ -509,6 +717,7 @@
       world = new THREE.Group();
       scene.add(world);
       scene.fog = new THREE.FogExp2(fog, 0.012);
+      if (envMap) scene.environment = envMap;
       const hemi = new THREE.HemisphereLight(0x9bb8d0, 0x100c08, 1.15);
       world.add(hemi);
       const key = new THREE.DirectionalLight(0xffdfaa, 1.45);
@@ -516,7 +725,7 @@
       key.castShadow = true;
       key.shadow.mapSize.set(1024, 1024);
       world.add(key);
-      const cool = new THREE.PointLight(0x4eafc7, 1.25, 34);
+      const cool = new THREE.PointLight(0x4eafc7, 1.55, 40);
       cool.position.set(5, 4.5, -3);
       world.add(cool);
     }
@@ -639,7 +848,7 @@
         const light = new THREE.PointLight(0xc58c49, .48, 10);
         light.position.set(0, height - .8, z);
         world.add(light);
-        const lamp = new THREE.Mesh(new THREE.SphereGeometry(.09, 12, 10), new THREE.MeshBasicMaterial({ color: 0xe0b46e }));
+        const lamp = new THREE.Mesh(new THREE.SphereGeometry(.09, 12, 10), new THREE.MeshBasicMaterial({ color: 0xe0b46e, toneMapped: false }));
         lamp.position.set(0, height - .8, z);
         world.add(lamp);
       }
@@ -652,7 +861,7 @@
       const grad = ctx.createLinearGradient(0, 0, c.width, c.height);
       grad.addColorStop(0, '#101b2a'); grad.addColorStop(1, '#060b13');
       ctx.fillStyle = grad; 
-      ctx.fillRect(0, 0, c.width, c.height); // Fondo ajustado al tamaño completo del canvas (1200x360)
+      ctx.fillRect(0, 0, c.width, c.height);
       ctx.strokeStyle = accent; ctx.lineWidth = 6; ctx.strokeRect(14, 14, 1172, 332);
       ctx.strokeStyle = 'rgba(234,210,160,.5)'; ctx.lineWidth = 2; ctx.strokeRect(31, 31, 1138, 298);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -675,7 +884,6 @@
       const gold = material(accent, .32, .78, { emissive: accent, emissiveIntensity: .12 });
       const dark = material(0x101a29, .55, .38);
       const frameDepth = .42;
-      // Umbral oscuro: el hueco permanece visible cuando las hojas comienzan a abrirse.
       const recess = new THREE.Mesh(new THREE.BoxGeometry(width + .12, height + .1, .16), material(0x02050a, .28, .24));
       recess.position.set(0, height / 2, -.055);
       group.add(recess);
@@ -773,7 +981,7 @@
     function makeEmblemPlane(width, height) {
       const tex = emblemBaseTexture ? emblemBaseTexture.clone() : null;
       if (tex) tex.needsUpdate = true;
-      return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: tex, color: tex ? 0xffffff : 0x9a7b4f, transparent: true, opacity: .98, side: THREE.DoubleSide, depthWrite: false }));
+      return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: tex, color: tex ? 0xffffff : 0x9a7b4f, transparent: true, opacity: .98, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
     }
 
     function addReturnPortal(width, length, title) {
@@ -798,21 +1006,36 @@
     function addExteriorTorch(x, z) {
       const torch = new THREE.Group();
       torch.position.set(x, 0, z);
-      const bronze = material(0x71512d, .42, .72);
+      const bronze = material(0x8a6634, .32, .82, { emissive: 0x2a1608, emissiveIntensity: .35 });
       const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.075, .12, 1.72, 10), bronze);
       shaft.position.y = 1.18; torch.add(shaft);
       const bracket = new THREE.Mesh(new THREE.BoxGeometry(.28, .13, .32), bronze);
       bracket.position.set(-Math.sign(x) * .12, 1.68, 0); torch.add(bracket);
       const cup = new THREE.Mesh(new THREE.CylinderGeometry(.2, .11, .25, 12), bronze);
       cup.position.y = 2.08; torch.add(cup);
-      const flame = new THREE.Mesh(new THREE.ConeGeometry(.16, .56, 10), new THREE.MeshBasicMaterial({ color: 0xffa33c }));
-      flame.position.y = 2.48; torch.add(flame);
-      const glow = new THREE.Mesh(new THREE.SphereGeometry(.19, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffd28a, transparent: true, opacity: .72 }));
-      glow.position.y = 2.4; torch.add(glow);
+
+      const flame = new THREE.Mesh(
+        new THREE.ConeGeometry(.14, .52, 10),
+        new THREE.MeshBasicMaterial({ color: 0xffb84d, toneMapped: false })
+      );
+      flame.position.y = 2.46; torch.add(flame);
+
+      const flameGlow = makeGlowSprite(0xffaa44, 1.6, 0.95);
+      flameGlow.position.y = 2.55;
+      torch.add(flameGlow);
+
+      const innerGlow = makeGlowSprite(0xffd28a, 0.85, 0.9);
+      innerGlow.position.y = 2.48;
+      torch.add(innerGlow);
+
       world.add(torch);
-      const light = new THREE.PointLight(0xffa84d, .32, 13, 1.7);
-      light.position.set(x, 2.5, z); world.add(light);
-      exteriorTorches.push({ flame, glow, light, baseIntensity: .32, z });
+      const light = new THREE.PointLight(0xffa84d, .85, 16, 1.7);
+      light.position.set(x, 2.5, z);
+      world.add(light);
+      exteriorTorches.push({
+        flame, glow: flameGlow, innerGlow, light,
+        baseIntensity: .85, z
+      });
       exteriorLights.push(light);
     }
 
@@ -873,6 +1096,15 @@
       const key = world.children.find(o => o.isDirectionalLight); if (key) key.intensity = .42;
       const ground = new THREE.Mesh(new THREE.PlaneGeometry(58, 150), material(0x10151c, .94, .02));
       ground.rotation.x = -Math.PI / 2; ground.position.set(0, -.08, -1); ground.receiveShadow = true; world.add(ground);
+
+      // === CIELO ESTRELLADO + LUNA + NIEBLA + BRASAS ===
+      world.add(createStarfield());
+      world.add(createMoon());
+      world.add(createGroundMist());
+      emberSystem = createEmbers();
+      world.add(emberSystem);
+      // =================================================
+
       const path = new THREE.Mesh(new THREE.PlaneGeometry(8.2, 132), material(0x20242b, .52, .18));
       path.rotation.x = -Math.PI / 2; path.position.set(0, .005, 1); path.receiveShadow = true; world.add(path);
       const pathCenter = new THREE.Mesh(new THREE.PlaneGeometry(.11, 130), new THREE.MeshBasicMaterial({ color: 0xa9783b, transparent: true, opacity: .28 }));
@@ -883,7 +1115,6 @@
       });
       for (let z = 56; z >= -50; z -= 6.2) { addExteriorTorch(-5.6, z); addExteriorTorch(5.6, z); }
 
-      // Silueta monumental: torres, almenas y cuerpo del castillo.
       const stone = material(0x252a31, .88, .2);
       const stoneDark = material(0x141b25, .9, .12);
       const towerGeo = new THREE.BoxGeometry(5.4, 21, 5.8);
@@ -899,6 +1130,48 @@
       const cornice = new THREE.Mesh(new THREE.BoxGeometry(24,1.05,3.0),stone); cornice.position.set(0,14.9,-58); world.add(cornice);
       for(let i=-10;i<=10;i+=2.5){ const merlon=new THREE.Mesh(new THREE.BoxGeometry(1.05,1.2,2.8),stone); merlon.position.set(i,16,-58); world.add(merlon); }
 
+      // === DETALLE FANTASÍA: ventanas iluminadas, estandartes, espadaña ===
+      [-14.2, 14.2].forEach(x => {
+        for (let row = 0; row < 3; row++) {
+          for (let col = -1; col <= 1; col++) {
+            const win = new THREE.Mesh(
+              new THREE.PlaneGeometry(0.35, 0.85),
+              new THREE.MeshBasicMaterial({ color: 0xffbb55, toneMapped: false })
+            );
+            win.position.set(x + col * 1.4, 5.5 + row * 4.2, -55.02);
+            world.add(win);
+          }
+        }
+        const banner = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.6, 3.2),
+          new THREE.MeshStandardMaterial({
+            color: 0x7a1f28, roughness: 0.8, metalness: 0.15,
+            side: THREE.DoubleSide, emissive: 0x3a0d12, emissiveIntensity: 0.35
+          })
+        );
+        banner.position.set(x, 14.6, -55.03);
+        world.add(banner);
+        const bannerEmblem = makeEmblemPlane(0.85, 0.9);
+        bannerEmblem.position.set(x, 14.9, -55.01);
+        world.add(bannerEmblem);
+      });
+      const spire = new THREE.Mesh(
+        new THREE.ConeGeometry(0.22, 4.2, 8),
+        material(0x9a7845, .35, .8, { emissive: 0x4a2c0a, emissiveIntensity: .4 })
+      );
+      spire.position.set(0, 23.2, -58);
+      world.add(spire);
+      const orb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 20, 16),
+        new THREE.MeshBasicMaterial({ color: 0xffe28a, toneMapped: false })
+      );
+      orb.position.set(0, 26.2, -58);
+      world.add(orb);
+      const orbGlow = makeGlowSprite(0xffcc55, 3.5, 0.7);
+      orbGlow.position.copy(orb.position);
+      world.add(orbGlow);
+      // =============================================================
+
       exteriorGatePortal = createPortal({ x:0, z:-56.65, title:'ATRAVIESA EL UMBRAL', subtitle:'Instituto Quimera', action:'atrium', accent:0xc79a55, width:8.2, height:6.25, showPlaque:false });
       const emblem = makeEmblemPlane(3.0,3.1); emblem.position.set(0,10.15,-56.2); world.add(emblem);
       const thresholdPlaque = new THREE.Mesh(new THREE.PlaneGeometry(5.5,.72),new THREE.MeshBasicMaterial({map:makePlaqueTexture('ATRAVIESA EL UMBRAL','INSTITUTO QUIMERA','#c79a55')}));
@@ -911,10 +1184,8 @@
         const beacon=new THREE.PointLight(0x72c9d8,.35,20); beacon.position.set(side*10,7,-50); world.add(beacon);
       });
       if (journey === 'return') {
-        // Al salir del vestíbulo, el visitante aparece junto al portón y mira hacia el emblema del extremo opuesto.
         setCamera(0, 1.72, -52.3, Math.PI, 0);
       } else {
-        // Primera visita: el emblema queda deliberadamente a la espalda del visitante.
         setCamera(0, 1.72, 60, 0, 0);
       }
       zoneTitle.textContent = journey === 'return' ? 'Regreso por el sendero' : 'Sendero de acceso';
@@ -938,6 +1209,7 @@
       $('touch-controls').classList.add('active'); gateCTA.classList.remove('visible');
       newWorld(0x080e18);
       addShell(21, 22, 8, true);
+      world.add(createDust(18, 20, 7.5));
       returnPortal = addReturnPortal(21,22,'Regresar al sendero');
       setCamera(0, 1.72, 6.8, 0, 0);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .035, 8, 96), material(0x8f6a3d, .32, .8, { emissive: 0x2a1708, emissiveIntensity: .22 }));
@@ -988,6 +1260,7 @@
       $('touch-controls').classList.add('active');
       newWorld(0x07121c);
       addShell(17, 20, 8, true, { floorEmblemZ: 5.25 });
+      world.add(createDust(15, 18, 7.5));
       returnPortal = addReturnPortal(17,20,'Regresar al vestíbulo');
       setCamera(0, 1.72, 7.1, 0, 0);
       const stage = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.4, .22, 64), material(0x18283a, .38, .45));
@@ -1030,6 +1303,7 @@
       $('touch-controls').classList.add('active');
       newWorld(0x100d0a);
       addShell(26, 32, 8, true);
+      world.add(createDust(24, 30, 7.5));
       returnPortal = addReturnPortal(26,32,'Regresar al vestíbulo');
       setCamera(0, 1.72, 11.2, 0, 0);
       const zPositions = [10.2, 3.4, -3.4, -10.2];
@@ -1105,6 +1379,7 @@
       const bayWidth = (galleryLength - 2.2) / pillarCount;
       newWorld(0x080e18);
       addShell(20, galleryLength, 8, true, { pillarCount });
+      world.add(createDust(18, galleryLength, 7.5));
       returnPortal = addReturnPortal(20,galleryLength,'Regresar a las ocho colecciones');
       setCamera(0, 1.72, galleryLength / 2 - 3.8, 0, 0);
       collection.images.forEach((filename, index) => {
@@ -1316,11 +1591,13 @@
       if (key) key.intensity = .28 + progress * .62;
       exteriorTorches.forEach((torch,index) => {
         const distance = Math.abs(torch.z - camera.position.z);
-        const proximity = Math.max(.12, 1 - distance / 34);
+        const proximity = Math.max(.15, 1 - distance / 34);
         const flicker = .91 + Math.sin(time * 8.2 + index * 1.73) * .055 + Math.sin(time * 13.4 + index) * .025;
-        torch.light.intensity = torch.baseIntensity * (.38 + .72 * proximity) * flicker * (0.72 + progress * .55);
+        torch.light.intensity = torch.baseIntensity * (.42 + .72 * proximity) * flicker * (0.72 + progress * .55);
         torch.flame.scale.y = .85 + flicker * .22;
-        torch.glow.material.opacity = .55 + flicker * .22;
+        torch.flame.scale.x = torch.flame.scale.z = .9 + flicker * .1;
+        if (torch.glow) torch.glow.material.opacity = .78 + flicker * .18;
+        if (torch.innerGlow) torch.innerGlow.material.opacity = .75 + flicker * .15;
       });
     }
 
@@ -1510,7 +1787,11 @@
       const delta = Math.min(clock.getDelta(), .05);
       animatedObjects.forEach(({ object, speed, axis }) => { object.rotation[axis] += speed * delta; });
       updateExteriorLighting(clock.elapsedTime);
-      if (renderer && scene && camera) renderer.render(scene, camera);
+      updateEmbers(delta);
+      if (renderer && scene && camera) {
+        if (composer) composer.render();
+        else renderer.render(scene, camera);
+      }
     }
 
     async function init() {
@@ -1530,7 +1811,7 @@
         clock = new THREE.Clock();
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x070b14);
-        camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, .1, 180);
+        camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, .1, 300);
         camera.position.set(0, 1.72, 6.8);
         camera.rotation.order = 'YXZ';
         camera.rotation.set(pitch, yaw, 0);
@@ -1545,6 +1826,12 @@
         renderer.physicallyCorrectLights = false;
         raycaster = new THREE.Raycaster();
         pointer = new THREE.Vector2();
+
+        // === POST-PROCESADO + REFLEJOS PBR ===
+        envMap = createEnvironmentMap();
+        scene.environment = envMap;
+        setupComposer();
+
         buildExterior('arrival');
         $('back-button').style.visibility = 'hidden';
         $('home-button').style.visibility = 'hidden';
@@ -1564,6 +1851,10 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+      if (composer) {
+        composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+        composer.setSize(window.innerWidth, window.innerHeight);
+      }
     });
 
     window.addEventListener('DOMContentLoaded', init);
