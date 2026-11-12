@@ -35,20 +35,24 @@
     .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 36%, rgba(0,0,0,.24) 100%); }
     .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
 
-    /* Capa de fundido inicial: Blanco Puro -> Desvanecimiento a Negro */
-    @keyframes flashFadeOut {
-      0% { opacity: 1; background-color: #ffffff; }
-      30% { opacity: 1; background-color: #ffffff; }
-      100% { opacity: 0; background-color: #ffffff; pointer-events: none; }
+    /* Apertura inicial: blanco puro -> negro absoluto -> aparición paulatina del sendero */
+    @keyframes openingReveal {
+      0%   { opacity: 1; background-color: #ffffff; }
+      24%  { opacity: 1; background-color: #ffffff; }
+      52%  { opacity: 1; background-color: #000000; }
+      70%  { opacity: 1; background-color: #000000; }
+      100% { opacity: 0; background-color: #000000; }
     }
-
     #flash-overlay {
       position: fixed;
       inset: 0;
       z-index: 100;
+      opacity: 1;
       background: #ffffff;
       pointer-events: none;
-      animation: flashFadeOut 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    #flash-overlay.reveal {
+      animation: openingReveal 4.8s cubic-bezier(.7, 0, .2, 1) forwards;
     }
 
     /* Animación de construcción holográfica para la fachada */
@@ -66,57 +70,17 @@
       100% { opacity: 1; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 18px rgba(199,154,85,.3)) drop-shadow(0 0 32px rgba(114,201,216,.15)); }
     }
 
-    #intro-screen { 
-      position: fixed; 
-      inset: 0; 
-      z-index: 20; 
-      display: grid; 
-      place-items: center; 
-      padding: 28px; 
-      background: radial-gradient(ellipse at 50% 42%, #17243a 0%, #0a1220 44%, #03060c 100%); 
-      transition: opacity 1s ease, visibility 1s ease; 
-    }
-    #intro-screen.leaving { opacity: 0; visibility: hidden; pointer-events: none; }
-    
-    .intro-architecture { 
-      position: relative; 
-      width: min(920px, 94vw); 
-      min-height: min(720px, 88vh); 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: space-between; 
-      padding: clamp(28px, 5vw, 64px) 24px 38px; 
-      border: 1px solid rgba(199,154,85,.28); 
-      border-bottom: 0; 
-      border-radius: 48% 48% 0 0 / 23% 23% 0 0; 
-      background: linear-gradient(180deg, rgba(22,34,54,.76), rgba(4,8,15,.9)); 
-      box-shadow: inset 0 0 100px rgba(92,154,180,.08), 0 0 100px rgba(0,0,0,.6); 
-      overflow: hidden; 
-      opacity: 0;
-      animation: holoBuildUp 1.3s ease 0.4s forwards;
-    }
-    .intro-architecture::before { content: ""; position: absolute; inset: 15px 15px 0; border: 1px solid rgba(199,154,85,.2); border-bottom: 0; border-radius: 48% 48% 0 0 / 23% 23% 0 0; pointer-events: none; }
-    .intro-architecture::after { content: ""; position: absolute; left: 50%; top: 16%; width: min(55vw, 510px); height: min(55vw, 510px); transform: translateX(-50%); border: 1px solid rgba(114,201,216,.12); border-radius: 50%; box-shadow: 0 0 80px rgba(114,201,216,.06), inset 0 0 80px rgba(114,201,216,.04); pointer-events: none; }
-    
-    .intro-kicker { 
-      position: relative; 
-      z-index: 1; 
-      color: var(--cyan); 
-      letter-spacing: .28em; 
-      font-size: .68rem; 
-      text-transform: uppercase; 
-      text-align: center; 
-      line-height: 1.9; 
-    }
 
-    .intro-title { z-index: 1; max-width: 760px; margin: 28px 0 10px; text-align: center; font: 500 clamp(1.55rem, 4vw, 3.2rem)/1.22 var(--serif); letter-spacing: .055em; color: var(--gold-light); text-shadow: 0 6px 28px rgba(0,0,0,.7); }
-    .intro-subtitle { z-index: 1; max-width: 580px; text-align: center; color: #c3cbd5; font-size: clamp(.8rem, 1.5vw, .98rem); line-height: 1.8; letter-spacing: .04em; }
-    .intro-seal { position: relative; z-index: 1; width: clamp(118px, 15vw, 178px); height: clamp(124px, 16vw, 188px); margin: 10px 0 0; display: grid; place-items: center; }
-    .intro-seal img { display: block; width: 100%; height: 100%; object-fit: contain; opacity: 0; animation: emblemHoloPulse 1.3s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s forwards; }
-    .intro-button { position: relative; z-index: 1; margin-top: 34px; min-width: 230px; padding: 15px 26px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.18), rgba(199,154,85,.04)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
-    .intro-button:hover { background: rgba(199,154,85,.24); box-shadow: 0 0 32px rgba(199,154,85,.18); transform: translateY(-2px); }
-    .intro-foot { z-index: 1; margin-top: 24px; text-transform: uppercase; letter-spacing: .2em; font-size: .58rem; color: #778598; text-align: center; }
+    /* Botón contextual que aparece al llegar al portón del castillo */
+    .intro-button {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin: 0; min-width: 260px; padding: 14px 24px;
+      border: 1px solid var(--gold);
+      background: linear-gradient(135deg, rgba(199,154,85,.2), rgba(199,154,85,.045));
+      color: var(--gold-light); cursor: pointer; letter-spacing: .18em;
+      font-size: .75rem; text-transform: uppercase; transition: .3s ease;
+    }
+    .intro-button:hover { background: rgba(199,154,85,.27); box-shadow: 0 0 32px rgba(199,154,85,.2); transform: translateY(-2px); }
 
     /* Interfaz de navegación */
     #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 520px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
@@ -205,29 +169,6 @@
 
 
 
-    .welcome-gate { position: relative; z-index: 1; width: min(310px, 52vw); height: 130px; margin: 12px auto 0; perspective: 900px; border: 5px solid rgba(199,154,85,.8); border-bottom: 0; border-radius: 160px 160px 0 0; background: radial-gradient(ellipse at 50% 100%, rgba(114,201,216,.24), #02050a 75%); box-shadow: 0 0 28px rgba(199,154,85,.16), inset 0 0 34px rgba(114,201,216,.12); overflow: hidden; }
-    .welcome-door-leaf { position: absolute; bottom: 0; width: 50%; height: 100%; background: linear-gradient(90deg,#090f1c,#1a2a40 55%,#0a111e); border: 1px solid var(--gold); transform-style: preserve-3d; transition: transform 1.15s cubic-bezier(.22,.74,.18,1); box-shadow: inset 0 0 22px rgba(0,0,0,.6); }
-    .welcome-door-left { left: 0; transform-origin: left center; }
-    .welcome-door-right { right: 0; transform-origin: right center; }
-    .welcome-door-leaf::before { content:""; position:absolute; inset:12px 9px; border:1px solid rgba(199,154,85,.68); box-shadow: inset 0 0 15px rgba(199,154,85,.08); }
-    .welcome-door-leaf::after { content:""; position:absolute; top:50%; width:9px; height:9px; border:1px solid var(--cyan); border-radius:50%; background:#d4b477; box-shadow:0 0 12px var(--cyan); }
-    .welcome-door-left::after { right:9px; } .welcome-door-right::after { left:9px; }
-    .welcome-gate.open .welcome-door-left { transform: rotateY(-112deg); }
-    .welcome-gate.open .welcome-door-right { transform: rotateY(112deg); }
-    .welcome-gate-glow { position:absolute; inset:25% 28% 0; opacity:0; background:radial-gradient(ellipse at bottom,rgba(114,201,216,.6),transparent 72%); transition:opacity .8s ease .25s; }
-    .welcome-gate.open .welcome-gate-glow { opacity:1; }
-    #intro-screen.leaving { opacity:0; visibility:hidden; pointer-events:none; }
-    @media (max-height:760px) { .intro-architecture { min-height:94vh; padding-top:18px; padding-bottom:14px; } .intro-seal { width:92px; height:96px; margin:4px 0 0; } .intro-title { margin:8px 0 4px; } .welcome-gate { height:92px; margin-top:4px; } .intro-button { margin-top:12px; padding:11px 22px; } .intro-foot { margin-top:10px; } }
-
-
-    #intro-screen { padding: 12px; overflow-y: auto; }
-    .intro-architecture { min-height: min(780px, 94vh); max-height: 96vh; justify-content: center; gap: 8px; padding: clamp(18px, 3vw, 38px) 24px 24px; }
-    .intro-seal { width: clamp(92px, 11vw, 132px); height: clamp(96px, 12vw, 140px); margin: 4px 0; }
-    .intro-title { margin: 8px 0 4px; }
-    .intro-subtitle { line-height: 1.62; }
-    .welcome-gate { height: 100px; margin-top: 4px; flex: 0 0 auto; }
-    .intro-button { margin-top: 12px; }
-    .intro-foot { margin-top: 10px; }
 
     /* Acceso exterior y transición cinematográfica entre salas */
     #gate-cta { position: fixed; z-index: 18; left: 50%; bottom: 86px; transform: translate(-50%, 14px); width: min(560px, calc(100vw - 28px)); display: grid; place-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .55s ease, transform .55s ease, visibility .55s; }
@@ -275,8 +216,6 @@
       .library { flex: 1 1 auto; min-height: 0; padding: 12px 15px; }
       #playlist { flex: 1 1 auto; min-height: 0; max-height: none; }
       .audio-note { margin-top: 7px; font-size: .53rem; }
-      .intro-architecture { min-height: min(650px, 90vh); }
-      .intro-foot { line-height: 1.8; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
@@ -290,21 +229,6 @@
   <canvas id="world" aria-label="Recorrido tridimensional por la Galería de Arte Audiovisual del Ecosistema Quimera"></canvas>
   <div class="vignette"></div><div class="grain"></div>
 
-  <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
-    <div class="intro-architecture">
-      <div class="intro-kicker">· INSTITUTO QUIMERA ·<br>· INVESTIGACIÓN · DOCENCIA · SERVICIO · DIVULGACIÓN ·</div>
-      <div class="intro-seal"><img src="Emblema_QuimeraC3.webp" alt="Emblema del Instituto Quimera"></div>
-      <h1 class="intro-title">Galería de Arte Audiovisual</h1>
-      <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
-      <div class="welcome-gate" id="welcome-gate" aria-hidden="true">
-        <div class="welcome-door-leaf welcome-door-left"><span></span></div>
-        <div class="welcome-door-leaf welcome-door-right"><span></span></div>
-        <div class="welcome-gate-glow"></div>
-      </div>
-      <button class="intro-button" id="enter-castle">Atravesar el umbral</button>
-      <div class="intro-foot">Una experiencia inmersiva · Explora a tu propio ritmo</div>
-    </div>
-  </section>
 
   <section id="gate-cta" aria-label="Acceso a la Galería">
     <div class="gate-cta-card">
@@ -434,8 +358,7 @@
 
     const $ = (id) => document.getElementById(id);
     const canvas = $('world');
-    const intro = $('intro-screen');
-    const welcomeGate = $('welcome-gate');
+    const flashOverlay = $('flash-overlay');
     const gateCTA = $('gate-cta');
     const transitionCurtain = $('door-transition');
     const topbar = $('topbar');
@@ -448,7 +371,9 @@
 
     let scene, camera, renderer, world, raycaster, pointer;
     let interactables = [];
-    let currentZone = 'intro';
+    let currentZone = 'exterior';
+    let exteriorJourney = 'arrival';
+    let appReady = false;
     let activeCollection = null;
     let activeArtworkIndex = 0;
     let yaw = 0, pitch = 0;
@@ -777,17 +702,17 @@
         const hinge = new THREE.Group();
         hinge.position.set(side < 0 ? -width / 2 : width / 2, .08, .16);
         const leaf = new THREE.Mesh(new THREE.BoxGeometry(width / 2, height - .16, .22), leafMaterial);
-        leaf.position.set(side * width / 4, (height - .16) / 2, 0);
+        leaf.position.set(-side * width / 4, (height - .16) / 2, 0);
         leaf.castShadow = true;
         hinge.add(leaf);
         const inset = new THREE.Mesh(new THREE.BoxGeometry(width / 2 - .38, height - .72, .055), insetMaterial);
-        inset.position.set(side * width / 4, (height - .16) / 2, .125);
+        inset.position.set(-side * width / 4, (height - .16) / 2, .125);
         hinge.add(inset);
         const rail = new THREE.Mesh(new THREE.BoxGeometry(.045, height - .42, .06), gold);
-        rail.position.set(side * width / 4, (height - .16) / 2, .17);
+        rail.position.set(-side * width / 4, (height - .16) / 2, .17);
         hinge.add(rail);
         const cross = new THREE.Mesh(new THREE.BoxGeometry(width / 2 - .36, .045, .065), gold);
-        cross.position.set(side * width / 4, (height - .16) * .72, .17);
+        cross.position.set(-side * width / 4, (height - .16) * .72, .17);
         hinge.add(cross);
         const handle = new THREE.Mesh(new THREE.SphereGeometry(.085, 16, 12), gold);
         handle.position.set(-side * .15, (height - .16) * .48, .2);
@@ -834,13 +759,14 @@
       ctx.fillStyle = '#f0d8a6'; ctx.font = '600 92px Georgia, serif';
       ctx.fillText('GALERÍA DE ARTE AUDIOVISUAL', 1100, 345, 2020);
       ctx.shadowBlur = 0;
-      ctx.fillStyle = '#e0e5ec'; ctx.font = '34px Arial, sans-serif';
+      ctx.fillStyle = '#e0e5ec'; ctx.font = '500 38px Arial, sans-serif';
       ctx.fillText('Un espacio para recorrer las expresiones sonoras y visuales que acompañan', 1100, 470, 2020);
       ctx.fillText('la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.', 1100, 520, 2020);
-      ctx.fillStyle = '#8fd5e1'; ctx.font = '500 34px Arial, sans-serif';
+      ctx.fillStyle = '#8fd5e1'; ctx.font = '500 38px Arial, sans-serif';
       ctx.fillText('· UNA EXPERIENCIA INMERSIVA · EXPLORA A TU PROPIO RITMO ·', 1100, 700, 2020);
-      ctx.fillStyle = 'rgba(234,210,160,.65)'; ctx.font = '24px Arial, sans-serif';
-      ctx.fillText('INSTITUTO QUIMERA  ·  CIENCIA  ·  CONOCIMIENTO  ·  ARTE', 1100, 790);
+      const currentYear = new Date().getFullYear();
+      ctx.fillStyle = 'rgba(234,210,160,.78)'; ctx.font = '500 25px Arial, sans-serif';
+      ctx.fillText(`• © ${currentYear} Instituto Quimera. • Dr.C. Cesar Cerezo Camacho. • Todos los derechos reservados. •`, 1100, 790, 2080);
       const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; return tex;
     }
 
@@ -890,7 +816,54 @@
       exteriorLights.push(light);
     }
 
-    function buildExterior() {
+    const QUIMERA_PORTAL_URL = 'https://quimerac3.github.io/QuimeraC3-Q/';
+    const EXTERIOR_EMBLEM_Z = 66.2;
+
+    function addFloatingQuimeraEmblem() {
+      const floating = new THREE.Group();
+      floating.position.set(0, 3.15, EXTERIOR_EMBLEM_Z);
+
+      const emblem = makeEmblemPlane(3.8, 3.95);
+      emblem.position.set(0, 0, 0.035);
+      floating.add(emblem);
+
+      const haloMaterial = new THREE.MeshBasicMaterial({
+        color: 0xc79a55, transparent: true, opacity: .78, side: THREE.DoubleSide
+      });
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(2.28, .035, 10, 80), haloMaterial);
+      halo.position.z = .08;
+      floating.add(halo);
+
+      const innerHalo = new THREE.Mesh(
+        new THREE.TorusGeometry(2.02, .012, 8, 80),
+        new THREE.MeshBasicMaterial({ color: 0x72c9d8, transparent: true, opacity: .65, side: THREE.DoubleSide })
+      );
+      innerHalo.position.z = .1;
+      floating.add(innerHalo);
+
+      const glow = new THREE.PointLight(0xc79a55, 1.35, 18, 1.6);
+      glow.position.set(0, 0, 1.1);
+      floating.add(glow);
+
+      const hitArea = new THREE.Mesh(
+        new THREE.BoxGeometry(4.9, 5.1, 1.1),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide })
+      );
+      hitArea.position.z = .12;
+      hitArea.userData = {
+        action: 'quimeraLink',
+        data: { url: QUIMERA_PORTAL_URL },
+        title: 'Instituto Quimera',
+        portalGroup: floating
+      };
+      floating.add(hitArea);
+      interactables.push(hitArea);
+      world.add(floating);
+      animatedObjects.push({ object: floating, speed: .58, axis: 'y' });
+    }
+
+    function buildExterior(journey = 'arrival') {
+      exteriorJourney = journey;
       currentZone = 'exterior'; activeCollection = null; returnPortal = null; exteriorGatePortal = null;
       exteriorTorches.length = 0; exteriorLights.length = 0;
       $('touch-controls').classList.add('active');
@@ -933,12 +906,21 @@
       const grandSign = new THREE.Mesh(new THREE.PlaneGeometry(22.2,9.2),new THREE.MeshBasicMaterial({map:makeGrandEntranceTexture(), side:THREE.DoubleSide}));
       grandSign.position.set(0,19.05,-56.12); world.add(grandSign);
       const signLight = new THREE.PointLight(0xc79a55,1.5,28); signLight.position.set(0,18.5,-49); world.add(signLight);
+      addFloatingQuimeraEmblem();
       [-1,1].forEach(side=>{
         const beacon=new THREE.PointLight(0x72c9d8,.35,20); beacon.position.set(side*10,7,-50); world.add(beacon);
       });
-      setCamera(0,1.72,60,0,0);
-      zoneTitle.textContent = 'Sendero de acceso';
-      setCaption('Un sendero iluminado por antorchas conduce al castillo: aproximadamente <strong>cien pasos</strong> hasta la fachada. Avanza con <strong>W/A/S/D</strong> o las <strong>flechas</strong>; el entorno se iluminará conforme te acerques.');
+      if (journey === 'return') {
+        // Al salir del vestíbulo, el visitante aparece junto al portón y mira hacia el emblema del extremo opuesto.
+        setCamera(0, 1.72, -52.3, Math.PI, 0);
+      } else {
+        // Primera visita: el emblema queda deliberadamente a la espalda del visitante.
+        setCamera(0, 1.72, 60, 0, 0);
+      }
+      zoneTitle.textContent = journey === 'return' ? 'Regreso por el sendero' : 'Sendero de acceso';
+      setCaption(journey === 'return'
+        ? 'Has salido por el portón del castillo. Recorre el sendero hacia el <strong>Emblema del Instituto Quimera</strong>, que gira al otro extremo y abre el portal del Ecosistema.'
+        : 'El sendero emerge de la oscuridad. A tu espalda se encuentra el <strong>Emblema del Instituto Quimera</strong>, que abre el portal del Ecosistema. Frente a ti, aproximadamente <strong>cien pasos</strong> conducen al castillo.');
       $('back-button').style.visibility = 'hidden';
       $('home-button').style.visibility = 'hidden';
       topbar.classList.add('visible');
@@ -1193,6 +1175,10 @@
       else if (action === 'back') goBack();
       else if (action === 'openAudio') { playPortalSFX(); openAudioPlayer(); }
       else if (action === 'artwork') openArtwork(data.collection, data.index);
+      else if (action === 'quimeraLink') {
+        const url = data && data.url ? data.url : QUIMERA_PORTAL_URL;
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
     }
 
     function interactAt(clientX, clientY) {
@@ -1220,7 +1206,7 @@
 
       if (currentZone === 'exterior') {
         camera.position.x = THREE.MathUtils.clamp(camera.position.x,-7.2,7.2);
-        camera.position.z = THREE.MathUtils.clamp(camera.position.z,-55.7,60);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z, -55.7, exteriorJourney === 'return' ? 68.5 : 60);
       } else if (currentZone === 'collection') {
         camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.6, 7.6);
         camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
@@ -1253,7 +1239,7 @@
     }
 
     function buildZone(zone) {
-      if (zone === 'exterior') buildExterior();
+      if (zone === 'exterior') buildExterior('return');
       else if (zone === 'atrium') buildAtrium();
       else if (zone === 'audio') buildAudioWing();
       else if (zone === 'visualHub') buildVisualHub();
@@ -1266,18 +1252,6 @@
       const destination = () => buildZone(target);
       if (returnPortal && currentZone !== 'exterior') doorTransition(returnPortal,destination);
       else fadeTransition(destination);
-    }
-
-    function enterCastle() {
-      if (currentZone !== 'exterior' || transitionBusy || intro.classList.contains('leaving')) return;
-      initSFX(); playPortalSFX();
-      transitionBusy = true;
-      welcomeGate.classList.add('open');
-      setTimeout(() => {
-        intro.classList.add('leaving');
-        transitionBusy = false;
-        updateExteriorApproach();
-      }, 1120);
     }
 
     function enterGallery() {
@@ -1311,19 +1285,31 @@
 
     function updateExteriorApproach() {
       if (currentZone !== 'exterior' || !camera) { gateCTA.classList.remove('visible'); return; }
+      if (exteriorJourney === 'return') {
+        gateCTA.classList.remove('visible');
+        const emblemDistance = Math.abs(camera.position.z - EXTERIOR_EMBLEM_Z);
+        if (emblemDistance < 5.8) {
+          setCaption('Has llegado al <strong>Emblema del Instituto Quimera</strong>. Haz clic sobre él para visitar el portal principal del Ecosistema.');
+        } else {
+          setCaption('Desde el portón, recorre el sendero hacia el <strong>Emblema giratorio del Instituto Quimera</strong>. Avanza con <strong>W</strong> o <strong>↑</strong>; al llegar, haz clic sobre el emblema para abrir el Ecosistema.');
+        }
+        return;
+      }
       const distance = Math.abs(camera.position.z - (-56.65));
       if (distance < 11.5) {
         gateCTA.classList.add('visible');
         setCaption('Has llegado a la fachada del Instituto Quimera. Observa el emblema y el anuncio monumental; pulsa <strong>ATRAVESAR EL UMBRAL</strong> o haz clic en las puertas.');
       } else {
         gateCTA.classList.remove('visible');
-        setCaption('Un sendero iluminado por antorchas conduce al castillo: aproximadamente <strong>cien pasos</strong> hasta la fachada. Avanza con <strong>W/A/S/D</strong> o las <strong>flechas</strong>; el entorno se iluminará conforme te acerques.');
+        setCaption('El sendero emerge gradualmente de la oscuridad. Frente a ti, aproximadamente <strong>cien pasos</strong> conducen a la Galería de Arte. El <strong>Emblema giratorio</strong> a tu espalda abre el portal del Ecosistema Quimera.');
       }
     }
 
     function updateExteriorLighting(time) {
       if (currentZone !== 'exterior' || !camera) return;
-      const progress = THREE.MathUtils.clamp((60 - camera.position.z) / 116.65, 0, 1);
+      const progress = exteriorJourney === 'return'
+        ? THREE.MathUtils.clamp((camera.position.z + 52.3) / (EXTERIOR_EMBLEM_Z + 52.3), 0, 1)
+        : THREE.MathUtils.clamp((60 - camera.position.z) / 116.65, 0, 1);
       const hemi = world.children.find(o => o.isHemisphereLight);
       const key = world.children.find(o => o.isDirectionalLight);
       if (hemi) hemi.intensity = .24 + progress * .58;
@@ -1441,7 +1427,6 @@
       if (audio.src) showToast(`No se encontró el archivo: ${soundTracks[currentTrackIndex].file}`);
     });
 
-    $('enter-castle').addEventListener('click', enterCastle);
     $('enter-gallery').addEventListener('click', enterGallery);
     $('back-button').addEventListener('click', goBack);
     $('home-button').addEventListener('click', () => { zoneStack = ['exterior']; fadeTransition(buildAtrium); });
@@ -1478,8 +1463,8 @@
       const dy = event.clientY - pointerStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 4) pointerStart.moved = true;
       if (pointerStart.moved) {
-        yaw -= dx * .0032;
-        pitch = THREE.MathUtils.clamp(pitch - dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
+        yaw += dx * .0032;
+        pitch = THREE.MathUtils.clamp(pitch + dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
         camera.rotation.set(pitch, yaw, 0);
         pointerStart.x = event.clientX; pointerStart.y = event.clientY;
       }
@@ -1492,7 +1477,7 @@
 
     window.addEventListener('keydown', (event) => {
       initSFX();
-      if (!intro.classList.contains('leaving')) return;
+      if (!appReady) return;
       if (imageOverlay.classList.contains('open')) {
         if (event.key === 'Escape') closeArtwork();
         if (event.key === 'ArrowLeft') changeArtwork(-1);
@@ -1531,6 +1516,7 @@
     async function init() {
       if (!window.THREE) {
         $('webgl-fallback').classList.add('show');
+        flashOverlay.classList.add('reveal');
         return;
       }
       try {
@@ -1559,13 +1545,16 @@
         renderer.physicallyCorrectLights = false;
         raycaster = new THREE.Raycaster();
         pointer = new THREE.Vector2();
-        buildExterior();
+        buildExterior('arrival');
         $('back-button').style.visibility = 'hidden';
         $('home-button').style.visibility = 'hidden';
+        appReady = true;
         animate();
+        requestAnimationFrame(() => requestAnimationFrame(() => flashOverlay.classList.add('reveal')));
       } catch (error) {
         console.error(error);
         $('webgl-fallback').classList.add('show');
+        flashOverlay.classList.add('reveal');
       }
     }
 
