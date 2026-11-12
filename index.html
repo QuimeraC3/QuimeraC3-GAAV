@@ -203,6 +203,49 @@
     #webgl-fallback { display: none; position: fixed; z-index: 10; inset: 0; place-items: center; padding: 30px; text-align: center; background: #080e18; color: var(--white); }
     #webgl-fallback.show { display: grid; }
 
+
+
+    .welcome-gate { position: relative; z-index: 1; width: min(310px, 52vw); height: 130px; margin: 12px auto 0; perspective: 900px; border: 5px solid rgba(199,154,85,.8); border-bottom: 0; border-radius: 160px 160px 0 0; background: radial-gradient(ellipse at 50% 100%, rgba(114,201,216,.24), #02050a 75%); box-shadow: 0 0 28px rgba(199,154,85,.16), inset 0 0 34px rgba(114,201,216,.12); overflow: hidden; }
+    .welcome-door-leaf { position: absolute; bottom: 0; width: 50%; height: 100%; background: linear-gradient(90deg,#090f1c,#1a2a40 55%,#0a111e); border: 1px solid var(--gold); transform-style: preserve-3d; transition: transform 1.15s cubic-bezier(.22,.74,.18,1); box-shadow: inset 0 0 22px rgba(0,0,0,.6); }
+    .welcome-door-left { left: 0; transform-origin: left center; }
+    .welcome-door-right { right: 0; transform-origin: right center; }
+    .welcome-door-leaf::before { content:""; position:absolute; inset:12px 9px; border:1px solid rgba(199,154,85,.68); box-shadow: inset 0 0 15px rgba(199,154,85,.08); }
+    .welcome-door-leaf::after { content:""; position:absolute; top:50%; width:9px; height:9px; border:1px solid var(--cyan); border-radius:50%; background:#d4b477; box-shadow:0 0 12px var(--cyan); }
+    .welcome-door-left::after { right:9px; } .welcome-door-right::after { left:9px; }
+    .welcome-gate.open .welcome-door-left { transform: rotateY(-112deg); }
+    .welcome-gate.open .welcome-door-right { transform: rotateY(112deg); }
+    .welcome-gate-glow { position:absolute; inset:25% 28% 0; opacity:0; background:radial-gradient(ellipse at bottom,rgba(114,201,216,.6),transparent 72%); transition:opacity .8s ease .25s; }
+    .welcome-gate.open .welcome-gate-glow { opacity:1; }
+    #intro-screen.leaving { opacity:0; visibility:hidden; pointer-events:none; }
+    @media (max-height:760px) { .intro-architecture { min-height:94vh; padding-top:18px; padding-bottom:14px; } .intro-seal { width:92px; height:96px; margin:4px 0 0; } .intro-title { margin:8px 0 4px; } .welcome-gate { height:92px; margin-top:4px; } .intro-button { margin-top:12px; padding:11px 22px; } .intro-foot { margin-top:10px; } }
+
+
+    #intro-screen { padding: 12px; overflow-y: auto; }
+    .intro-architecture { min-height: min(780px, 94vh); max-height: 96vh; justify-content: center; gap: 8px; padding: clamp(18px, 3vw, 38px) 24px 24px; }
+    .intro-seal { width: clamp(92px, 11vw, 132px); height: clamp(96px, 12vw, 140px); margin: 4px 0; }
+    .intro-title { margin: 8px 0 4px; }
+    .intro-subtitle { line-height: 1.62; }
+    .welcome-gate { height: 100px; margin-top: 4px; flex: 0 0 auto; }
+    .intro-button { margin-top: 12px; }
+    .intro-foot { margin-top: 10px; }
+
+    /* Acceso exterior y transición cinematográfica entre salas */
+    #gate-cta { position: fixed; z-index: 18; left: 50%; bottom: 86px; transform: translate(-50%, 14px); width: min(560px, calc(100vw - 28px)); display: grid; place-items: center; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .55s ease, transform .55s ease, visibility .55s; }
+    #gate-cta.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); pointer-events: auto; }
+    .gate-cta-card { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; padding: 15px 18px 17px; border: 1px solid rgba(199,154,85,.68); background: linear-gradient(135deg, rgba(5,10,18,.94), rgba(13,21,33,.9)); box-shadow: 0 14px 50px rgba(0,0,0,.62), 0 0 34px rgba(199,154,85,.15); backdrop-filter: blur(12px); text-align: center; }
+    .gate-cta-card span { color: var(--cyan); font-size: .57rem; letter-spacing: .2em; line-height: 1.7; }
+    .gate-cta-card .intro-button { margin: 0; min-width: 260px; }
+    #door-transition { position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; background: radial-gradient(ellipse at center, rgba(7,12,20,.72), #010205 78%); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .46s ease, visibility .46s ease; }
+    #door-transition.active { opacity: .22; visibility: visible; }
+    #door-transition.blackout { opacity: 1; }
+    #door-transition p { margin: 0; color: var(--gold-light); font: 500 clamp(1rem, 2vw, 1.55rem) var(--serif); letter-spacing: .3em; text-align: center; text-shadow: 0 0 22px rgba(199,154,85,.35); }
+    #door-transition span { color: var(--cyan); font-size: .58rem; letter-spacing: .32em; }
+    .transition-mark { width: 76px; height: 76px; border: 1px solid rgba(199,154,85,.75); border-radius: 50%; box-shadow: 0 0 28px rgba(114,201,216,.16), inset 0 0 24px rgba(199,154,85,.15); position: relative; animation: thresholdPulse 1.5s ease-in-out infinite; }
+    .transition-mark::before, .transition-mark::after { content: ""; position: absolute; top: 50%; left: 50%; width: 1px; height: 45px; background: linear-gradient(transparent, var(--gold-light), transparent); transform: translate(-50%,-50%) rotate(45deg); }
+    .transition-mark::after { transform: translate(-50%,-50%) rotate(-45deg); }
+    @keyframes thresholdPulse { 0%,100% { transform: scale(.88); opacity: .55; } 50% { transform: scale(1.08); opacity: 1; } }
+    @media (max-width:760px) { #gate-cta { bottom: 112px; } .gate-cta-card { padding: 12px; } .gate-cta-card span { font-size: .5rem; } .gate-cta-card .intro-button { min-width: 220px; padding: 13px 18px; } }
+
     @media (max-width: 760px) {
       #topbar { top: 12px; width: calc(100vw - 24px); padding: 9px 11px; }
       #mini-player { top: 80px; left: 12px; width: min(390px, calc(100vw - 24px)); min-height: 86px; }
@@ -249,17 +292,31 @@
 
   <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
     <div class="intro-architecture">
-      <div class="intro-kicker">
-        · INSTITUTO QUIMERA ·<br>
-        · INVESTIGACIÓN · DOCENCIA · SERVICIO · DIVULGACIÓN ·
-      </div>
+      <div class="intro-kicker">· INSTITUTO QUIMERA ·<br>· INVESTIGACIÓN · DOCENCIA · SERVICIO · DIVULGACIÓN ·</div>
       <div class="intro-seal"><img src="Emblema_QuimeraC3.webp" alt="Emblema del Instituto Quimera"></div>
       <h1 class="intro-title">Galería de Arte Audiovisual</h1>
       <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
+      <div class="welcome-gate" id="welcome-gate" aria-hidden="true">
+        <div class="welcome-door-leaf welcome-door-left"><span></span></div>
+        <div class="welcome-door-leaf welcome-door-right"><span></span></div>
+        <div class="welcome-gate-glow"></div>
+      </div>
       <button class="intro-button" id="enter-castle">Atravesar el umbral</button>
       <div class="intro-foot">Una experiencia inmersiva · Explora a tu propio ritmo</div>
     </div>
   </section>
+
+  <section id="gate-cta" aria-label="Acceso a la Galería">
+    <div class="gate-cta-card">
+      <span>INSTITUTO QUIMERA · GALERÍA DE ARTE AUDIOVISUAL</span>
+      <button class="intro-button" id="enter-gallery">Atravesar el umbral</button>
+    </div>
+  </section>
+  <div id="door-transition" aria-hidden="true">
+    <div class="transition-mark"></div>
+    <p>EL UMBRAL SE ABRE</p>
+    <span>INSTITUTO QUIMERA</span>
+  </div>
 
   <header id="topbar" aria-live="polite">
     <div class="topbar-brand">
@@ -378,6 +435,9 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $('world');
     const intro = $('intro-screen');
+    const welcomeGate = $('welcome-gate');
+    const gateCTA = $('gate-cta');
+    const transitionCurtain = $('door-transition');
     const topbar = $('topbar');
     const zoneTitle = $('zone-title');
     const caption = $('scene-caption');
@@ -394,6 +454,12 @@
     let yaw = 0, pitch = 0;
     let dragging = false, pointerStart = null;
     let galleryLength = 24;
+    let returnPortal = null;
+    let exteriorGatePortal = null;
+    let transitionBusy = false;
+    let zoneStack = [];
+    const exteriorTorches = [];
+    const exteriorLights = [];
     let toastTimer = null;
     let textureLoader, clock, emblemBaseTexture = null;
     let emblemMaterialCache = new Map();
@@ -677,52 +743,205 @@
       return tex;
     }
 
-    function createPortal({ x, z, title, subtitle, action, data, accent = 0xc79a55, width = 2.35, height = 3.75, rotationY = 0 }) {
+    function createPortal({ x, z, title, subtitle, action, data, accent = 0xc79a55, width = 2.35, height = 3.75, rotationY = 0, showPlaque = true }) {
       const group = new THREE.Group();
       group.position.set(x, 0, z);
       group.rotation.y = rotationY;
-      const gold = material(accent, .32, .78, { emissive: accent, emissiveIntensity: .08 });
+      const gold = material(accent, .32, .78, { emissive: accent, emissiveIntensity: .12 });
       const dark = material(0x101a29, .55, .38);
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(width, height, .22), material(0x080e18, .32, .3));
-      panel.position.set(0, height / 2, 0);
-      panel.castShadow = true;
-      group.add(panel);
+      const frameDepth = .42;
+      // Umbral oscuro: el hueco permanece visible cuando las hojas comienzan a abrirse.
+      const recess = new THREE.Mesh(new THREE.BoxGeometry(width + .12, height + .1, .16), material(0x02050a, .28, .24));
+      recess.position.set(0, height / 2, -.055);
+      group.add(recess);
       [-1, 1].forEach((side) => {
-        const post = new THREE.Mesh(new THREE.BoxGeometry(.16, height + .35, .42), dark);
-        post.position.set(side * (width / 2 + .12), (height + .35) / 2, .04);
+        const post = new THREE.Mesh(new THREE.BoxGeometry(.18, height + .48, frameDepth), dark);
+        post.position.set(side * (width / 2 + .13), (height + .48) / 2, .02);
+        post.castShadow = true;
         group.add(post);
-        const inlay = new THREE.Mesh(new THREE.BoxGeometry(.035, height - .2, .035), gold);
-        inlay.position.set(side * (width / 2 + .12), height / 2, .27);
+        const inlay = new THREE.Mesh(new THREE.BoxGeometry(.04, height - .12, .045), gold);
+        inlay.position.set(side * (width / 2 + .13), height / 2, .25);
         group.add(inlay);
       });
-      const arch = new THREE.Mesh(new THREE.TorusGeometry(width / 2 + .12, .105, 12, 56, Math.PI), gold);
-      arch.position.set(0, height, .04);
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(width / 2 + .13, .11, 12, 56, Math.PI), gold);
+      arch.position.set(0, height, .02);
       group.add(arch);
-      const crown = new THREE.Mesh(new THREE.BoxGeometry(width + .46, .14, .48), gold);
-      crown.position.set(0, height + .02, .04);
+      const crown = new THREE.Mesh(new THREE.BoxGeometry(width + .48, .16, .5), gold);
+      crown.position.set(0, height + .05, .02);
       group.add(crown);
-      const insetMat = material(0x152237, .46, .42);
-      for (let i = 0; i < 3; i++) {
-        const inset = new THREE.Mesh(new THREE.BoxGeometry(width - .48, .72, .045), insetMat);
-        inset.position.set(0, .62 + i * 1.0, .145);
-        group.add(inset);
+
+      const leafMaterial = material(0x172235, .42, .48, { emissive: 0x07111f, emissiveIntensity: .18 });
+      const insetMaterial = material(0x26374a, .46, .42);
+      const doorLeaves = [];
+      [-1, 1].forEach((side) => {
+        const hinge = new THREE.Group();
+        hinge.position.set(side < 0 ? -width / 2 : width / 2, .08, .16);
+        const leaf = new THREE.Mesh(new THREE.BoxGeometry(width / 2, height - .16, .22), leafMaterial);
+        leaf.position.set(side * width / 4, (height - .16) / 2, 0);
+        leaf.castShadow = true;
+        hinge.add(leaf);
+        const inset = new THREE.Mesh(new THREE.BoxGeometry(width / 2 - .38, height - .72, .055), insetMaterial);
+        inset.position.set(side * width / 4, (height - .16) / 2, .125);
+        hinge.add(inset);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(.045, height - .42, .06), gold);
+        rail.position.set(side * width / 4, (height - .16) / 2, .17);
+        hinge.add(rail);
+        const cross = new THREE.Mesh(new THREE.BoxGeometry(width / 2 - .36, .045, .065), gold);
+        cross.position.set(side * width / 4, (height - .16) * .72, .17);
+        hinge.add(cross);
+        const handle = new THREE.Mesh(new THREE.SphereGeometry(.085, 16, 12), gold);
+        handle.position.set(-side * .15, (height - .16) * .48, .2);
+        hinge.add(handle);
+        group.add(hinge);
+        doorLeaves.push({ hinge, side });
+      });
+
+      if (showPlaque) {
+        const plaque = new THREE.Mesh(new THREE.PlaneGeometry(width + .9, .92), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(title, subtitle, '#' + accent.toString(16).padStart(6, '0')), transparent: false }));
+        plaque.position.set(0, height + .94, .12);
+        group.add(plaque);
       }
-      const handle = new THREE.Mesh(new THREE.SphereGeometry(.075, 16, 12), gold);
-      handle.position.set(width * .29, height * .46, .25);
-      group.add(handle);
-      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(width + .82, .98), new THREE.MeshBasicMaterial({ map: makePlaqueTexture(title, subtitle, '#' + accent.toString(16).padStart(6, '0')), transparent: false }));
-      plaque.position.set(0, height + 1.02, .12);
-      group.add(plaque);
-      const halo = new THREE.PointLight(accent, .65, 8);
-      halo.position.set(0, 3.1, 1.1);
+      const halo = new THREE.PointLight(accent, .72, 9);
+      halo.position.set(0, Math.min(3.2, height * .72), 1.15);
       group.add(halo);
-      const hit = new THREE.Mesh(new THREE.BoxGeometry(width + .82, height + 1.75, .95), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
-      hit.position.set(0, (height + .85) / 2, .2);
-      hit.userData = { action, data, title };
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(width + 1.05, height + (showPlaque ? 1.65 : .4), 1.1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(0, (height + (showPlaque ? .8 : 0)) / 2, .52);
+      hit.userData = { action, data, title, portalGroup: group };
       group.add(hit);
       interactables.push(hit);
+      group.userData.doorLeaves = doorLeaves;
       world.add(group);
       return group;
+    }
+
+    function makeGrandEntranceTexture() {
+      const c = document.createElement('canvas');
+      c.width = 2200; c.height = 920;
+      const ctx = c.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, c.width, c.height);
+      gradient.addColorStop(0, '#111d2e'); gradient.addColorStop(.5, '#070d17'); gradient.addColorStop(1, '#101727');
+      ctx.fillStyle = gradient; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#c79a55'; ctx.lineWidth = 12; ctx.strokeRect(22, 22, c.width - 44, c.height - 44);
+      ctx.strokeStyle = 'rgba(234,210,160,.55)'; ctx.lineWidth = 3; ctx.strokeRect(48, 48, c.width - 96, c.height - 96);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(199,154,85,.45)'; ctx.shadowBlur = 18;
+      ctx.fillStyle = '#ead2a0'; ctx.font = '600 72px Georgia, serif';
+      ctx.fillText('· INSTITUTO QUIMERA ·', 1100, 125);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#8fd5e1'; ctx.font = '500 39px Arial, sans-serif';
+      ctx.fillText('· INVESTIGACIÓN · DOCENCIA · SERVICIO · DIVULGACIÓN ·', 1100, 210);
+      ctx.shadowColor = 'rgba(199,154,85,.45)'; ctx.shadowBlur = 22;
+      ctx.fillStyle = '#f0d8a6'; ctx.font = '600 92px Georgia, serif';
+      ctx.fillText('GALERÍA DE ARTE AUDIOVISUAL', 1100, 345, 2020);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#e0e5ec'; ctx.font = '34px Arial, sans-serif';
+      ctx.fillText('Un espacio para recorrer las expresiones sonoras y visuales que acompañan', 1100, 470, 2020);
+      ctx.fillText('la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.', 1100, 520, 2020);
+      ctx.fillStyle = '#8fd5e1'; ctx.font = '500 34px Arial, sans-serif';
+      ctx.fillText('· UNA EXPERIENCIA INMERSIVA · EXPLORA A TU PROPIO RITMO ·', 1100, 700, 2020);
+      ctx.fillStyle = 'rgba(234,210,160,.65)'; ctx.font = '24px Arial, sans-serif';
+      ctx.fillText('INSTITUTO QUIMERA  ·  CIENCIA  ·  CONOCIMIENTO  ·  ARTE', 1100, 790);
+      const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; return tex;
+    }
+
+    function makeEmblemPlane(width, height) {
+      const tex = emblemBaseTexture ? emblemBaseTexture.clone() : null;
+      if (tex) tex.needsUpdate = true;
+      return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: tex, color: tex ? 0xffffff : 0x9a7b4f, transparent: true, opacity: .98, side: THREE.DoubleSide, depthWrite: false }));
+    }
+
+    function addReturnPortal(width, length, title) {
+      const height = 7.5, doorWidth = 4.25, doorHeight = 4.5;
+      const wallMat = material(0x0b1422, .9, .1);
+      const z = length / 2 - .24;
+      const sideWidth = (width - doorWidth) / 2;
+      [-1, 1].forEach((side) => {
+        const segment = new THREE.Mesh(new THREE.BoxGeometry(sideWidth, height, .46), wallMat);
+        segment.position.set(side * (doorWidth / 2 + sideWidth / 2), height / 2, z);
+        world.add(segment);
+      });
+      const lintel = new THREE.Mesh(new THREE.BoxGeometry(doorWidth, height - doorHeight, .46), wallMat);
+      lintel.position.set(0, doorHeight + (height - doorHeight) / 2, z);
+      world.add(lintel);
+      const threshold = new THREE.Mesh(new THREE.BoxGeometry(doorWidth, .16, .72), material(0x8b6939, .35, .72));
+      threshold.position.set(0, .08, z);
+      world.add(threshold);
+      return createPortal({ x: 0, z: z - .08, rotationY: Math.PI, title, subtitle: 'PASO ANTERIOR · REGRESAR', action: 'back', accent: 0x72c9d8, width: doorWidth, height: doorHeight, showPlaque: true });
+    }
+
+    function addExteriorTorch(x, z) {
+      const torch = new THREE.Group();
+      torch.position.set(x, 0, z);
+      const bronze = material(0x71512d, .42, .72);
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.075, .12, 1.72, 10), bronze);
+      shaft.position.y = 1.18; torch.add(shaft);
+      const bracket = new THREE.Mesh(new THREE.BoxGeometry(.28, .13, .32), bronze);
+      bracket.position.set(-Math.sign(x) * .12, 1.68, 0); torch.add(bracket);
+      const cup = new THREE.Mesh(new THREE.CylinderGeometry(.2, .11, .25, 12), bronze);
+      cup.position.y = 2.08; torch.add(cup);
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(.16, .56, 10), new THREE.MeshBasicMaterial({ color: 0xffa33c }));
+      flame.position.y = 2.48; torch.add(flame);
+      const glow = new THREE.Mesh(new THREE.SphereGeometry(.19, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffd28a, transparent: true, opacity: .72 }));
+      glow.position.y = 2.4; torch.add(glow);
+      world.add(torch);
+      const light = new THREE.PointLight(0xffa84d, .32, 13, 1.7);
+      light.position.set(x, 2.5, z); world.add(light);
+      exteriorTorches.push({ flame, glow, light, baseIntensity: .32, z });
+      exteriorLights.push(light);
+    }
+
+    function buildExterior() {
+      currentZone = 'exterior'; activeCollection = null; returnPortal = null; exteriorGatePortal = null;
+      exteriorTorches.length = 0; exteriorLights.length = 0;
+      $('touch-controls').classList.add('active');
+      gateCTA.classList.remove('visible');
+      newWorld(0x02050b);
+      const hemi = world.children.find(o => o.isHemisphereLight); if (hemi) hemi.intensity = .3;
+      const key = world.children.find(o => o.isDirectionalLight); if (key) key.intensity = .42;
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(58, 150), material(0x10151c, .94, .02));
+      ground.rotation.x = -Math.PI / 2; ground.position.set(0, -.08, -1); ground.receiveShadow = true; world.add(ground);
+      const path = new THREE.Mesh(new THREE.PlaneGeometry(8.2, 132), material(0x20242b, .52, .18));
+      path.rotation.x = -Math.PI / 2; path.position.set(0, .005, 1); path.receiveShadow = true; world.add(path);
+      const pathCenter = new THREE.Mesh(new THREE.PlaneGeometry(.11, 130), new THREE.MeshBasicMaterial({ color: 0xa9783b, transparent: true, opacity: .28 }));
+      pathCenter.rotation.x = -Math.PI / 2; pathCenter.position.set(0, .018, 1); world.add(pathCenter);
+      [-1,1].forEach(side => {
+        const border = new THREE.Mesh(new THREE.BoxGeometry(.13,.06,132), material(0x9c713d,.34,.7,{emissive:0x38220d,emissiveIntensity:.22}));
+        border.position.set(side*4.12,.035,1); world.add(border);
+      });
+      for (let z = 56; z >= -50; z -= 6.2) { addExteriorTorch(-5.6, z); addExteriorTorch(5.6, z); }
+
+      // Silueta monumental: torres, almenas y cuerpo del castillo.
+      const stone = material(0x252a31, .88, .2);
+      const stoneDark = material(0x141b25, .9, .12);
+      const towerGeo = new THREE.BoxGeometry(5.4, 21, 5.8);
+      [-14.2,14.2].forEach(x => {
+        const tower = new THREE.Mesh(towerGeo, stone); tower.position.set(x,10.5,-58); tower.castShadow = true; world.add(tower);
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(3.8,4.8,4), material(0x101722,.78,.28)); roof.position.set(x,23.4,-58); roof.rotation.y=Math.PI/4; world.add(roof);
+        for(let i=-1;i<=1;i++) { const slit=new THREE.Mesh(new THREE.BoxGeometry(.32,2.1,.12),new THREE.MeshBasicMaterial({color:0x8fc8d0,emissive:0x356b79,emissiveIntensity:.34})); slit.position.set(x+i*1.05,12.2,-55.02); world.add(slit); }
+      });
+      const wingLeft = new THREE.Mesh(new THREE.BoxGeometry(7.2,15,2.4),stoneDark); wingLeft.position.set(-10.7,7.5,-58); world.add(wingLeft);
+      const wingRight = new THREE.Mesh(new THREE.BoxGeometry(7.2,15,2.4),stoneDark); wingRight.position.set(10.7,7.5,-58); world.add(wingRight);
+      [-5.25,5.25].forEach(x=>{ const pier=new THREE.Mesh(new THREE.BoxGeometry(1.65,7.8,2.8),stone); pier.position.set(x,3.9,-58); pier.castShadow=true; world.add(pier); });
+      const gateLintel=new THREE.Mesh(new THREE.BoxGeometry(12.2,1.15,2.8),stone); gateLintel.position.set(0,7.15,-58); world.add(gateLintel);
+      const cornice = new THREE.Mesh(new THREE.BoxGeometry(24,1.05,3.0),stone); cornice.position.set(0,14.9,-58); world.add(cornice);
+      for(let i=-10;i<=10;i+=2.5){ const merlon=new THREE.Mesh(new THREE.BoxGeometry(1.05,1.2,2.8),stone); merlon.position.set(i,16,-58); world.add(merlon); }
+
+      exteriorGatePortal = createPortal({ x:0, z:-56.65, title:'ATRAVIESA EL UMBRAL', subtitle:'Instituto Quimera', action:'atrium', accent:0xc79a55, width:8.2, height:6.25, showPlaque:false });
+      const emblem = makeEmblemPlane(3.0,3.1); emblem.position.set(0,10.15,-56.2); world.add(emblem);
+      const thresholdPlaque = new THREE.Mesh(new THREE.PlaneGeometry(5.5,.72),new THREE.MeshBasicMaterial({map:makePlaqueTexture('ATRAVIESA EL UMBRAL','INSTITUTO QUIMERA','#c79a55')}));
+      thresholdPlaque.position.set(0,8.0,-56.18); world.add(thresholdPlaque);
+      const grandSign = new THREE.Mesh(new THREE.PlaneGeometry(22.2,9.2),new THREE.MeshBasicMaterial({map:makeGrandEntranceTexture(), side:THREE.DoubleSide}));
+      grandSign.position.set(0,19.05,-56.12); world.add(grandSign);
+      const signLight = new THREE.PointLight(0xc79a55,1.5,28); signLight.position.set(0,18.5,-49); world.add(signLight);
+      [-1,1].forEach(side=>{
+        const beacon=new THREE.PointLight(0x72c9d8,.35,20); beacon.position.set(side*10,7,-50); world.add(beacon);
+      });
+      setCamera(0,1.72,60,0,0);
+      zoneTitle.textContent = 'Sendero de acceso';
+      setCaption('Un sendero iluminado por antorchas conduce al castillo: aproximadamente <strong>cien pasos</strong> hasta la fachada. Avanza con <strong>W/A/S/D</strong> o las <strong>flechas</strong>; el entorno se iluminará conforme te acerques.');
+      $('back-button').style.visibility = 'hidden';
+      $('home-button').style.visibility = 'hidden';
+      topbar.classList.add('visible');
     }
 
     function setCamera(x, y, z, lookYaw = 0, lookPitch = 0) {
@@ -734,17 +953,19 @@
 
     function buildAtrium() {
       currentZone = 'atrium'; activeCollection = null;
-      $('touch-controls').classList.add('active');
+      $('touch-controls').classList.add('active'); gateCTA.classList.remove('visible');
       newWorld(0x080e18);
       addShell(21, 22, 8, true);
+      returnPortal = addReturnPortal(21,22,'Regresar al sendero');
       setCamera(0, 1.72, 6.8, 0, 0);
       const ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .035, 8, 96), material(0x8f6a3d, .32, .8, { emissive: 0x2a1708, emissiveIntensity: .22 }));
       ring.rotation.x = Math.PI / 2; ring.position.set(0, 7.82, -2); world.add(ring);
       createPortal({ x: -4.1, z: -10.72, title: 'Ala de Audio', subtitle: 'Banda Sonora', action: 'audio', accent: 0x72c9d8, width: 3.0, height: 4.2 });
       createPortal({ x: 4.1, z: -10.72, title: 'Ala Visual', subtitle: 'Ocho colecciones', action: 'visual', accent: 0xc79a55, width: 3.0, height: 4.2 });
       zoneTitle.textContent = 'Vestíbulo central';
-      setCaption('Desplázate usando <strong>W/A/S/D</strong> o las <strong>flechas</strong>. Arrastra el ratón para observar a tu alrededor. Acércate a una puerta y pulsa <strong>Enter</strong>.');
+      setCaption('Desplázate usando <strong>W/A/S/D</strong> o las <strong>flechas</strong>. Arrastra con el ratón para observar a tu alrededor. Las puertas del fondo abren las dos alas; la puerta a tu espalda devuelve al sendero.');
       $('back-button').style.visibility = 'hidden';
+      $('home-button').style.visibility = 'visible';
     }
 
     function createDoubleHelix(parent) {
@@ -785,6 +1006,7 @@
       $('touch-controls').classList.add('active');
       newWorld(0x07121c);
       addShell(17, 20, 8, true, { floorEmblemZ: 5.25 });
+      returnPortal = addReturnPortal(17,20,'Regresar al vestíbulo');
       setCamera(0, 1.72, 7.1, 0, 0);
       const stage = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.4, .22, 64), material(0x18283a, .38, .45));
       stage.position.set(0, .12, -2.4); stage.receiveShadow = true; world.add(stage);
@@ -826,6 +1048,7 @@
       $('touch-controls').classList.add('active');
       newWorld(0x100d0a);
       addShell(26, 32, 8, true);
+      returnPortal = addReturnPortal(26,32,'Regresar al vestíbulo');
       setCamera(0, 1.72, 11.2, 0, 0);
       const zPositions = [10.2, 3.4, -3.4, -10.2];
       collections.forEach((collection, index) => {
@@ -900,6 +1123,7 @@
       const bayWidth = (galleryLength - 2.2) / pillarCount;
       newWorld(0x080e18);
       addShell(20, galleryLength, 8, true, { pillarCount });
+      returnPortal = addReturnPortal(20,galleryLength,'Regresar a las ocho colecciones');
       setCamera(0, 1.72, galleryLength / 2 - 3.8, 0, 0);
       collection.images.forEach((filename, index) => {
         const side = index % 2 === 0 ? -1 : 1;
@@ -913,14 +1137,60 @@
       $('back-button').style.visibility = 'visible';
     }
 
-    function enterAudio() { playPortalSFX(); buildAudioWing(); }
-    function enterVisual() { playPortalSFX(); buildVisualHub(); }
+    function doorTransition(portal, destination) {
+      if (transitionBusy) return;
+      if (!portal || !portal.userData || !portal.userData.doorLeaves) { fadeTransition(destination); return; }
+      transitionBusy = true;
+      initSFX(); playPortalSFX();
+      const leaves = portal.userData.doorLeaves;
+      const startTime = performance.now();
+      const duration = 1420;
+      const cameraStart = camera.position.clone();
+      const doorPosition = new THREE.Vector3(); portal.getWorldPosition(doorPosition);
+      const doorNormal = new THREE.Vector3(); portal.getWorldDirection(doorNormal);
+      const cameraEnd = doorPosition.clone().addScaledVector(doorNormal, 1.25); cameraEnd.y = 1.72;
+      transitionCurtain.classList.remove('blackout');
+      transitionCurtain.classList.add('active');
+      function animateDoors(now) {
+        const raw = Math.min(1,(now-startTime)/duration);
+        const eased = 1 - Math.pow(1-raw,3);
+        leaves.forEach(({hinge,side}) => { hinge.rotation.y = side < 0 ? -1.22*eased : 1.22*eased; });
+        camera.position.lerpVectors(cameraStart,cameraEnd,Math.min(.62,eased*.62));
+        if (raw > .46) transitionCurtain.classList.add('blackout');
+        if (raw < .88) requestAnimationFrame(animateDoors);
+        else {
+          destination();
+          setTimeout(() => {
+            transitionCurtain.classList.remove('blackout');
+            transitionCurtain.classList.remove('active');
+            transitionBusy = false;
+          },520);
+        }
+      }
+      requestAnimationFrame(animateDoors);
+    }
 
-    function handleAction(action, data) {
-      if (!action) return;
-      if (action === 'audio') enterAudio();
-      else if (action === 'visual') enterVisual();
-      else if (action === 'collection') { playPortalSFX(); buildCollectionRoom(data); }
+    function fadeTransition(destination) {
+      if (transitionBusy) return;
+      transitionBusy = true;
+      transitionCurtain.classList.add('active','blackout');
+      setTimeout(() => {
+        destination();
+        setTimeout(() => { transitionCurtain.classList.remove('blackout','active'); transitionBusy = false; },520);
+      },460);
+    }
+
+    function enterAudio(portal) { doorTransition(portal, () => { zoneStack.push(currentZone); buildAudioWing(); }); }
+    function enterVisual(portal) { doorTransition(portal, () => { zoneStack.push(currentZone); buildVisualHub(); }); }
+    function enterCollection(collection, portal) { doorTransition(portal, () => { zoneStack.push(currentZone); buildCollectionRoom(collection); }); }
+
+    function handleAction(action, data, portal) {
+      if (!action || transitionBusy) return;
+      if (action === 'audio') enterAudio(portal);
+      else if (action === 'visual') enterVisual(portal);
+      else if (action === 'collection') enterCollection(data,portal);
+      else if (action === 'atrium') doorTransition(portal, () => { zoneStack.push(currentZone); buildAtrium(); });
+      else if (action === 'back') goBack();
       else if (action === 'openAudio') { playPortalSFX(); openAudioPlayer(); }
       else if (action === 'artwork') openArtwork(data.collection, data.index);
     }
@@ -933,12 +1203,12 @@
       const hits = raycaster.intersectObjects(interactables, false);
       if (hits.length && hits[0].object.userData.action) {
         const info = hits[0].object.userData;
-        handleAction(info.action, info.data);
+        handleAction(info.action, info.data, info.portalGroup);
       }
     }
 
     function moveInGallery(direction) {
-      if (!camera || !['atrium', 'audio', 'visualHub', 'collection'].includes(currentZone)) return;
+      if (!camera || !['exterior','atrium','audio','visualHub','collection'].includes(currentZone) || transitionBusy) return;
       playFootstepSFX();
       const forward = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
       const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
@@ -947,8 +1217,11 @@
       if (direction === 'back') camera.position.addScaledVector(forward, -step);
       if (direction === 'left') camera.position.addScaledVector(right, -step);
       if (direction === 'right') camera.position.addScaledVector(right, step);
-      
-      if (currentZone === 'collection') {
+
+      if (currentZone === 'exterior') {
+        camera.position.x = THREE.MathUtils.clamp(camera.position.x,-7.2,7.2);
+        camera.position.z = THREE.MathUtils.clamp(camera.position.z,-55.7,60);
+      } else if (currentZone === 'collection') {
         camera.position.x = THREE.MathUtils.clamp(camera.position.x, -7.6, 7.6);
         camera.position.z = THREE.MathUtils.clamp(camera.position.z, -galleryLength / 2 + 2, galleryLength / 2 - 2);
       } else if (currentZone === 'audio') {
@@ -961,10 +1234,11 @@
         camera.position.x = THREE.MathUtils.clamp(camera.position.x, -8.5, 8.5);
         camera.position.z = THREE.MathUtils.clamp(camera.position.z, -9.0, 9.0);
       }
+      updateExteriorApproach();
     }
 
     function interactNearest() {
-      if (!camera || !interactables.length) return;
+      if (!camera || !interactables.length || transitionBusy) return;
       let nearest = null;
       let nearestDistance = 6.2;
       const position = new THREE.Vector3();
@@ -974,22 +1248,41 @@
         const distance = camera.position.distanceTo(position);
         if (distance < nearestDistance) { nearestDistance = distance; nearest = object; }
       }
-      if (nearest) handleAction(nearest.userData.action, nearest.userData.data);
-      else showToast('Acércate un poco más a la puerta, obra o rockola para interactuar.');
+      if (nearest) handleAction(nearest.userData.action, nearest.userData.data, nearest.userData.portalGroup);
+      else showToast('Acércate a la puerta, obra o rockola para interactuar.');
+    }
+
+    function buildZone(zone) {
+      if (zone === 'exterior') buildExterior();
+      else if (zone === 'atrium') buildAtrium();
+      else if (zone === 'audio') buildAudioWing();
+      else if (zone === 'visualHub') buildVisualHub();
+      else if (zone === 'collection') buildCollectionRoom(activeCollection);
     }
 
     function goBack() {
-      playPortalSFX();
-      if (currentZone === 'audio' || currentZone === 'visualHub') buildAtrium();
-      else if (currentZone === 'collection') buildVisualHub();
+      if (transitionBusy) return;
+      const target = zoneStack.length ? zoneStack.pop() : 'atrium';
+      const destination = () => buildZone(target);
+      if (returnPortal && currentZone !== 'exterior') doorTransition(returnPortal,destination);
+      else fadeTransition(destination);
     }
 
     function enterCastle() {
-      initSFX();
-      playPortalSFX();
-      intro.classList.add('leaving');
-      topbar.classList.add('visible');
-      buildAtrium();
+      if (currentZone !== 'exterior' || transitionBusy || intro.classList.contains('leaving')) return;
+      initSFX(); playPortalSFX();
+      transitionBusy = true;
+      welcomeGate.classList.add('open');
+      setTimeout(() => {
+        intro.classList.add('leaving');
+        transitionBusy = false;
+        updateExteriorApproach();
+      }, 1120);
+    }
+
+    function enterGallery() {
+      if (currentZone !== 'exterior' || !exteriorGatePortal) return;
+      doorTransition(exteriorGatePortal, () => { zoneStack.push('exterior'); buildAtrium(); });
     }
 
     function openArtwork(collection, index) {
@@ -1014,6 +1307,35 @@
       image.src = encodeURI(filename);
       $('viewer-title').textContent = cleanArtworkName(filename);
       $('viewer-count').textContent = `${String(activeArtworkIndex + 1).padStart(2, '0')} / ${String(activeCollection.images.length).padStart(2, '0')}`;
+    }
+
+    function updateExteriorApproach() {
+      if (currentZone !== 'exterior' || !camera) { gateCTA.classList.remove('visible'); return; }
+      const distance = Math.abs(camera.position.z - (-56.65));
+      if (distance < 11.5) {
+        gateCTA.classList.add('visible');
+        setCaption('Has llegado a la fachada del Instituto Quimera. Observa el emblema y el anuncio monumental; pulsa <strong>ATRAVESAR EL UMBRAL</strong> o haz clic en las puertas.');
+      } else {
+        gateCTA.classList.remove('visible');
+        setCaption('Un sendero iluminado por antorchas conduce al castillo: aproximadamente <strong>cien pasos</strong> hasta la fachada. Avanza con <strong>W/A/S/D</strong> o las <strong>flechas</strong>; el entorno se iluminará conforme te acerques.');
+      }
+    }
+
+    function updateExteriorLighting(time) {
+      if (currentZone !== 'exterior' || !camera) return;
+      const progress = THREE.MathUtils.clamp((60 - camera.position.z) / 116.65, 0, 1);
+      const hemi = world.children.find(o => o.isHemisphereLight);
+      const key = world.children.find(o => o.isDirectionalLight);
+      if (hemi) hemi.intensity = .24 + progress * .58;
+      if (key) key.intensity = .28 + progress * .62;
+      exteriorTorches.forEach((torch,index) => {
+        const distance = Math.abs(torch.z - camera.position.z);
+        const proximity = Math.max(.12, 1 - distance / 34);
+        const flicker = .91 + Math.sin(time * 8.2 + index * 1.73) * .055 + Math.sin(time * 13.4 + index) * .025;
+        torch.light.intensity = torch.baseIntensity * (.38 + .72 * proximity) * flicker * (0.72 + progress * .55);
+        torch.flame.scale.y = .85 + flicker * .22;
+        torch.glow.material.opacity = .55 + flicker * .22;
+      });
     }
 
     function closeArtwork() { imageOverlay.classList.remove('open'); }
@@ -1120,8 +1442,9 @@
     });
 
     $('enter-castle').addEventListener('click', enterCastle);
+    $('enter-gallery').addEventListener('click', enterGallery);
     $('back-button').addEventListener('click', goBack);
-    $('home-button').addEventListener('click', () => { playPortalSFX(); buildAtrium(); });
+    $('home-button').addEventListener('click', () => { zoneStack = ['exterior']; fadeTransition(buildAtrium); });
     $('viewer-close').addEventListener('click', closeArtwork);
     $('viewer-prev').addEventListener('click', () => changeArtwork(-1));
     $('viewer-next').addEventListener('click', () => changeArtwork(1));
@@ -1155,8 +1478,8 @@
       const dy = event.clientY - pointerStart.y;
       if (Math.abs(dx) + Math.abs(dy) > 4) pointerStart.moved = true;
       if (pointerStart.moved) {
-        yaw += dx * .0032;
-        pitch = THREE.MathUtils.clamp(pitch + dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
+        yaw -= dx * .0032;
+        pitch = THREE.MathUtils.clamp(pitch - dy * .0024, -Math.PI / 3.2, Math.PI / 3.2);
         camera.rotation.set(pitch, yaw, 0);
         pointerStart.x = event.clientX; pointerStart.y = event.clientY;
       }
@@ -1169,6 +1492,7 @@
 
     window.addEventListener('keydown', (event) => {
       initSFX();
+      if (!intro.classList.contains('leaving')) return;
       if (imageOverlay.classList.contains('open')) {
         if (event.key === 'Escape') closeArtwork();
         if (event.key === 'ArrowLeft') changeArtwork(-1);
@@ -1183,7 +1507,7 @@
         else if (event.key === 'ArrowUp' || event.key === 'PageUp') { event.preventDefault(); $('playlist').scrollBy({ top: event.key === 'PageUp' ? -$('playlist').clientHeight * .82 : -86, behavior: 'smooth' }); }
         return;
       }
-      if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); goBack(); return; }
+      if (event.key === 'Escape' || event.key === 'Backspace') { event.preventDefault(); if (currentZone !== 'exterior') goBack(); return; }
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); interactNearest(); return; }
       const key = event.key.toLowerCase();
       if (['arrowup','w'].includes(key)) { event.preventDefault(); moveInGallery('forward'); }
@@ -1200,6 +1524,7 @@
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), .05);
       animatedObjects.forEach(({ object, speed, axis }) => { object.rotation[axis] += speed * delta; });
+      updateExteriorLighting(clock.elapsedTime);
       if (renderer && scene && camera) renderer.render(scene, camera);
     }
 
@@ -1234,8 +1559,9 @@
         renderer.physicallyCorrectLights = false;
         raycaster = new THREE.Raycaster();
         pointer = new THREE.Vector2();
-        buildAtrium();
+        buildExterior();
         $('back-button').style.visibility = 'hidden';
+        $('home-button').style.visibility = 'hidden';
         animate();
       } catch (error) {
         console.error(error);
