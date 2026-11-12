@@ -98,7 +98,18 @@
     }
     .intro-architecture::before { content: ""; position: absolute; inset: 15px 15px 0; border: 1px solid rgba(199,154,85,.2); border-bottom: 0; border-radius: 48% 48% 0 0 / 23% 23% 0 0; pointer-events: none; }
     .intro-architecture::after { content: ""; position: absolute; left: 50%; top: 16%; width: min(55vw, 510px); height: min(55vw, 510px); transform: translateX(-50%); border: 1px solid rgba(114,201,216,.12); border-radius: 50%; box-shadow: 0 0 80px rgba(114,201,216,.06), inset 0 0 80px rgba(114,201,216,.04); pointer-events: none; }
-    .intro-kicker { position: relative; z-index: 1; color: var(--cyan); letter-spacing: .34em; font-size: .68rem; text-transform: uppercase; text-align: center; }
+    
+    .intro-kicker { 
+      position: relative; 
+      z-index: 1; 
+      color: var(--cyan); 
+      letter-spacing: .28em; 
+      font-size: .68rem; 
+      text-transform: uppercase; 
+      text-align: center; 
+      line-height: 1.9; 
+    }
+
     .intro-title { z-index: 1; max-width: 760px; margin: 28px 0 10px; text-align: center; font: 500 clamp(1.55rem, 4vw, 3.2rem)/1.22 var(--serif); letter-spacing: .055em; color: var(--gold-light); text-shadow: 0 6px 28px rgba(0,0,0,.7); }
     .intro-subtitle { z-index: 1; max-width: 580px; text-align: center; color: #c3cbd5; font-size: clamp(.8rem, 1.5vw, .98rem); line-height: 1.8; letter-spacing: .04em; }
     .intro-seal { position: relative; z-index: 1; width: clamp(118px, 15vw, 178px); height: clamp(124px, 16vw, 188px); margin: 10px 0 0; display: grid; place-items: center; }
@@ -238,7 +249,10 @@
 
   <section id="intro-screen" aria-label="Bienvenida a la Galería de Arte Audiovisual">
     <div class="intro-architecture">
-      <div class="intro-kicker">Instituto Quimera · Investigación · Docencia · Servicio · Divulgación</div>
+      <div class="intro-kicker">
+        · INSTITUTO QUIMERA ·<br>
+        · INVESTIGACIÓN · DOCENCIA · SERVICIO · DIVULGACIÓN ·
+      </div>
       <div class="intro-seal"><img src="Emblema_QuimeraC3.webp" alt="Emblema del Instituto Quimera"></div>
       <h1 class="intro-title">Galería de Arte Audiovisual</h1>
       <p class="intro-subtitle">Un espacio para recorrer las expresiones sonoras y visuales que acompañan la identidad, la arquitectura y el pensamiento del Ecosistema Quimera.</p>
@@ -1208,6 +1222,7 @@
         camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, .1, 180);
         camera.position.set(0, 1.72, 6.8);
         camera.rotation.order = 'YXZ';
+        camera.rotation.set(pitch, yaw, 0);
         renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
         renderer.setSize(window.innerWidth, window.innerHeight);
