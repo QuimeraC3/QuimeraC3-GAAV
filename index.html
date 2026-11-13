@@ -18,6 +18,10 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSAOShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSAOPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -61,7 +65,7 @@
     .intro-button { display: inline-flex; align-items: center; justify-content: center; margin: 0; min-width: 260px; padding: 14px 24px; border: 1px solid var(--gold); background: linear-gradient(135deg, rgba(199,154,85,.2), rgba(199,154,85,.045)); color: var(--gold-light); cursor: pointer; letter-spacing: .18em; font-size: .75rem; text-transform: uppercase; transition: .3s ease; }
     .intro-button:hover { background: rgba(199,154,85,.27); box-shadow: 0 0 32px rgba(199,154,85,.2); transform: translateY(-2px); }
 
-    #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 520px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
+    #topbar { position: fixed; z-index: 5; top: 22px; right: 22px; left: auto; transform: none; width: min(660px, calc(100vw - 640px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 11px 16px; border: 1px solid rgba(199,154,85,.28); background: rgba(5,10,18,.68); backdrop-filter: blur(16px); box-shadow: 0 12px 40px rgba(0,0,0,.2); opacity: 0; visibility: hidden; transition: opacity .5s ease; }
     #topbar.visible { opacity: 1; visibility: visible; }
     .topbar-brand { min-width: 0; }
     .topbar-overline { display: block; margin-bottom: 3px; color: var(--cyan); font-size: .55rem; letter-spacing: .26em; text-transform: uppercase; }
@@ -71,7 +75,7 @@
     .quiet-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(114,201,216,.08); }
     #scene-caption { position: fixed; z-index: 4; bottom: 25px; left: 50%; transform: translateX(-50%); width: min(780px, calc(100vw - 36px)); text-align: center; color: rgba(255,255,255,.92); font-size: .76rem; letter-spacing: .055em; line-height: 1.7; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 3px 12px #000; -webkit-text-stroke: .35px #000; paint-order: stroke fill; pointer-events: none; }
     #scene-caption strong { color: var(--gold-light); font-weight: 700; -webkit-text-stroke: .45px #000; }
-    #mini-player { position: fixed; z-index: 9; top: 18px; left: 18px; width: min(470px, calc(100vw - 40px)); min-height: 106px; display: flex; align-items: center; gap: 13px; padding: 10px 13px 10px 10px; border: 1px solid rgba(199,154,85,.62); background: rgba(4,9,17,.92); backdrop-filter: blur(18px); box-shadow: 0 14px 48px rgba(0,0,0,.42), 0 0 26px rgba(114,201,216,.08); transition: opacity .25s, transform .25s; }
+    #mini-player { position: fixed; z-index: 9; top: 18px; left: 18px; width: min(570px, calc(100vw - 40px)); min-height: 106px; display: flex; align-items: center; gap: 11px; padding: 10px 13px 10px 10px; border: 1px solid rgba(199,154,85,.62); background: rgba(4,9,17,.94); backdrop-filter: blur(18px); box-shadow: 0 14px 48px rgba(0,0,0,.42), 0 0 26px rgba(114,201,216,.08); transition: opacity .25s, transform .25s; }
     #mini-player.hidden { opacity: 0; visibility: hidden; transform: translateY(-8px); pointer-events: none; }
     .mini-cover { width: 86px; height: 86px; flex: 0 0 86px; border: 1px solid rgba(114,201,216,.62); background-image: url("Quimera_Electrotango_1600x900.webp"); background-color: #101b2a; background-position: center; background-size: cover; box-shadow: 0 0 20px rgba(114,201,216,.16); }
     .mini-meta { min-width: 0; flex: 1; }
@@ -81,6 +85,24 @@
     .mini-control { width: 29px; height: 29px; border: 1px solid rgba(199,154,85,.45); background: transparent; color: var(--gold-light); cursor: pointer; }
     .mini-control:hover { background: rgba(199,154,85,.15); }
     #mini-hide { border: 0; background: transparent; color: #8390a0; cursor: pointer; font-size: 1rem; padding: 2px; }
+    .mini-spectrum-wrap { flex: 1 1 116px; min-width: 76px; height: 42px; display: flex; align-items: center; }
+    #mini-spectrum { width: 100%; height: 42px; display: block; }
+    .mini-controls { align-items: center; flex-wrap: nowrap; }
+    .mini-control.mode-control, .mini-control.lyric-control { width: 36px; font-size: .52rem; letter-spacing: -.02em; }
+    .mode-control.active { border-color: var(--cyan); color: var(--cyan); background: rgba(114,201,216,.1); }
+    .lyric-control.active { border-color: var(--gold-light); color: #fff; background: rgba(199,154,85,.18); }
+    .lyrics-panel { position: relative; isolation: isolate; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(-8px); transition: max-height .48s cubic-bezier(.22,.75,.2,1), opacity .35s ease, transform .48s ease; border-top: 1px solid rgba(199,154,85,.28); }
+    .lyrics-panel::before { content: ""; position: absolute; inset: 0; z-index: -2; background: url("Quimera_Electrotango_1600x900.webp") center/cover no-repeat; opacity: .30; }
+    .lyrics-panel::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(2,6,13,.72); }
+    .lyrics-panel.open { max-height: 174px; opacity: 1; transform: translateY(0); }
+    .mini-lyrics-panel { position: absolute; top: calc(100% + 1px); left: -1px; right: -1px; z-index: -1; border: 1px solid rgba(199,154,85,.48); border-top: 0; background: #07101c; box-shadow: 0 16px 35px rgba(0,0,0,.42); }
+    .mini-lyrics-panel.open { z-index: -1; }
+    .lyrics-panel-heading { padding: 8px 13px 4px; color: var(--cyan); font: 600 .55rem var(--sans); letter-spacing: .22em; }
+    .lyrics-lines { max-height: 138px; overflow: auto; padding: 2px 14px 12px; text-align: center; scrollbar-width: thin; scrollbar-color: rgba(199,154,85,.5) transparent; }
+    .lyric-line { min-height: 1.55em; padding: 2px 0; color: rgba(255,255,255,.62); font-size: .7rem; line-height: 1.5; -webkit-text-stroke: .25px #000; paint-order: stroke fill; transition: color .2s, opacity .2s, text-shadow .2s; }
+    .lyric-line.active { color: #fff; font-weight: 700; text-shadow: 0 0 4px #fff, 0 0 10px #72c9d8, 0 0 18px #72c9d8; animation: lyricLaser 1.7s ease-in-out infinite; }
+    .lyrics-placeholder { display: block; padding: 10px 0 12px; color: #b8c2d0; font-size: .65rem; -webkit-text-stroke: .25px #000; }
+    @keyframes lyricLaser { 0%,100% { opacity: .82; filter: brightness(1); } 50% { opacity: 1; filter: brightness(1.65); text-shadow: 0 0 5px #fff, 0 0 14px #9aeaff, 0 0 25px #4dc7ff; } }
     #touch-controls { position: fixed; z-index: 6; right: 18px; bottom: 75px; display: none; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(2, 42px); gap: 5px; }
     .touch-btn { border: 1px solid rgba(114,201,216,.55); background: rgba(4,10,18,.78); color: var(--cyan); border-radius: 2px; font-size: 1rem; }
     .touch-up { grid-column: 2; grid-row: 1; }
@@ -113,12 +135,19 @@
     .now-playing { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 0; overflow: hidden; padding: 24px 28px; border-right: 1px solid rgba(199,154,85,.18); text-align: center; }
     .record-art { position: relative; width: min(420px, 38vw); max-height: 42vh; aspect-ratio: 16 / 9; flex: 0 1 auto; margin: 0 auto 18px; border: 1px solid rgba(199,154,85,.68); background: linear-gradient(145deg, #18283e, #050910); box-shadow: 0 0 55px rgba(114,201,216,.16), 0 0 24px rgba(199,154,85,.08); display: grid; place-items: center; overflow: hidden; }
     #record-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 1; background: #050910; }
+    #album-spectrum { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; opacity: 1; mix-blend-mode: screen; }
+    .full-lyrics-panel { width: min(450px, 100%); margin-top: 13px; border: 1px solid rgba(199,154,85,.24); background: rgba(2,6,13,.3); }
+    .full-lyrics-panel.open { max-height: 190px; }
+    .full-lyrics-lines { max-height: 150px; }
+    .full-lyrics-lines .lyric-line { font-size: .94rem; line-height: 1.65; -webkit-text-stroke: .5px #000; }
+    .full-lyrics-lines .lyric-line.active { font-size: 1.05rem; }
     #current-track { max-width: 100%; margin: 0; color: var(--white); font: 500 1rem/1.5 var(--serif); }
     .track-state { margin: 7px 0 18px; color: var(--cyan); font-size: .6rem; letter-spacing: .19em; text-transform: uppercase; }
     .progress-row { display: flex; align-items: center; width: min(390px, 100%); gap: 10px; color: #8996a7; font: .64rem monospace; }
     #seek-bar { flex: 1; accent-color: var(--gold); cursor: pointer; }
     .audio-controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 18px; }
     .audio-control { width: 42px; height: 42px; border: 1px solid rgba(199,154,85,.48); background: rgba(199,154,85,.07); color: var(--gold-light); cursor: pointer; }
+    .audio-control.mode-control, .audio-control.lyric-control { width: 48px; font-size: .57rem; }
     .audio-control.primary { width: 54px; height: 54px; border-color: var(--gold); background: rgba(199,154,85,.2); font-size: 1.1rem; }
     .audio-control:hover { border-color: var(--cyan); color: var(--cyan); }
     .library { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 22px 24px 18px; }
@@ -159,9 +188,21 @@
     @keyframes thresholdPulse { 0%,100% { transform: scale(.88); opacity: .55; } 50% { transform: scale(1.08); opacity: 1; } }
     @media (max-width:760px) { #gate-cta { bottom: 112px; } .gate-cta-card { padding: 12px; } .gate-cta-card span { font-size: .5rem; } .gate-cta-card .intro-button { min-width: 220px; padding: 13px 18px; } }
 
+    @media (max-width: 900px) {
+      #topbar { top: 12px; left: 12px; right: 12px; width: auto; }
+      #mini-player { top: 78px; left: 12px; width: min(570px, calc(100vw - 24px)); }
+    }
     @media (max-width: 760px) {
       #topbar { top: 12px; width: calc(100vw - 24px); padding: 9px 11px; }
-      #mini-player { top: 80px; left: 12px; width: min(390px, calc(100vw - 24px)); min-height: 86px; }
+      #mini-player { top: 80px; left: 12px; width: min(520px, calc(100vw - 24px)); min-height: 86px; gap: 7px; padding: 7px; flex-wrap: wrap; }
+      .mini-spectrum-wrap { display: flex; flex: 1 0 calc(100% - 72px); min-width: 0; height: 24px; margin-left: 71px; order: 5; }
+      #mini-spectrum { height: 24px; }
+      .mini-cover { width: 64px; height: 64px; flex-basis: 64px; }
+      .mini-controls { gap: 3px; }
+      .mini-control { width: 26px; height: 28px; }
+      .mini-control.mode-control, .mini-control.lyric-control { width: 32px; font-size: .48rem; }
+      .mini-lyrics-panel { top: calc(100% + 1px); }
+      .lyrics-panel.open { max-height: 150px; }
       .mini-cover { width: 86px; height: 86px; flex-basis: 86px; }
       #scene-caption { bottom: 16px; font-size: .68rem; width: calc(100vw - 28px); }
       #touch-controls.active { display: grid; }
@@ -174,7 +215,7 @@
       .viewer-caption { padding: 0 70px; font-size: .57rem; }
       .audio-shell { height: 96vh; max-height: 96vh; overflow: hidden; }
       .audio-layout { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; max-height: none; overflow: hidden; }
-      .now-playing { flex: 0 0 auto; display: grid; grid-template-columns: minmax(104px, 34%) minmax(0,1fr); grid-template-rows: auto auto auto; column-gap: 15px; align-items: center; padding: 12px 15px; border-right: 0; border-bottom: 1px solid rgba(199,154,85,.18); text-align: left; }
+      .now-playing { flex: 0 0 auto; display: grid; grid-template-columns: minmax(104px, 34%) minmax(0,1fr); grid-template-rows: auto auto auto; column-gap: 15px; align-items: center; padding: 12px 15px; border-right: 0; border-bottom: 1px solid rgba(199,154,85,.18); text-align: left; overflow-y: auto; max-height: 52vh; }
       .record-art { grid-column: 1; grid-row: 1 / span 3; width: min(150px, 100%); max-height: 18vh; margin: 0; }
       #current-track { grid-column: 2; grid-row: 1; font-size: .82rem; }
       .track-state { grid-column: 2; grid-row: 2; margin: 4px 0 7px; font-size: .53rem; }
@@ -224,13 +265,25 @@
 
   <div id="mini-player" class="hidden" aria-label="Minirreproductor persistente">
     <div class="mini-cover" id="mini-cover"></div>
-    <div class="mini-meta"><div class="mini-label">Archivo sonoro Quimera</div><div id="mini-track-name">Selecciona una composición</div></div>
+    <div class="mini-meta">
+      <div class="mini-label">Archivo sonoro Quimera</div>
+      <div id="mini-track-name">Selecciona una composición</div>
+    </div>
+    <div class="mini-spectrum-wrap" aria-label="Analizador de espectro">
+      <canvas id="mini-spectrum" width="240" height="72"></canvas>
+    </div>
     <div class="mini-controls">
-      <button class="mini-control" id="mini-prev" aria-label="Pista anterior">‹</button>
-      <button class="mini-control" id="mini-play" aria-label="Reproducir o pausar">▶</button>
-      <button class="mini-control" id="mini-next" aria-label="Pista siguiente">›</button>
+      <button class="mini-control" id="mini-prev" aria-label="Pista anterior" title="Pista anterior">‹</button>
+      <button class="mini-control play-control" id="mini-play" aria-label="Reproducir o pausar">▶</button>
+      <button class="mini-control" id="mini-next" aria-label="Pista siguiente" title="Pista siguiente">›</button>
+      <button class="mini-control mode-control" id="mini-mode" aria-label="Cambiar modo de reproducción" title="Modo: Secuencial">SEQ</button>
+      <button class="mini-control lyric-control" id="mini-lyrics" aria-label="Mostrar letras sincronizadas" title="Mostrar letras">LRC</button>
     </div>
     <button id="mini-hide" aria-label="Ocultar minirreproductor" title="Ocultar">×</button>
+    <div class="lyrics-panel mini-lyrics-panel" id="mini-lyrics-panel" aria-hidden="true">
+      <div class="lyrics-panel-heading">LETRA SINCRONIZADA</div>
+      <div class="lyrics-lines" id="mini-lyrics-lines"><span class="lyrics-placeholder">Selecciona una composición con archivo LRC.</span></div>
+    </div>
   </div>
 
   <div id="scene-caption">Haz clic en una puerta u objeto para acceder. <strong>Arrastra</strong> para mirar alrededor.</div>
@@ -260,7 +313,10 @@
       </header>
       <div class="audio-layout">
         <div class="now-playing">
-          <div class="record-art"><img id="record-cover" src="Quimera_Electrotango_1600x900.webp" alt="Carátula del álbum Quimera Electrotango" onerror="this.style.display='none'"></div>
+          <div class="record-art">
+            <img id="record-cover" src="Quimera_Electrotango_1600x900.webp" alt="Carátula del álbum Quimera Electrotango" onerror="this.style.display='none'">
+            <canvas id="album-spectrum" width="640" height="160" aria-label="Analizador de espectro del álbum"></canvas>
+          </div>
           <h3 id="current-track">Selecciona una composición</h3>
           <div class="track-state" id="track-state">Archivo sonoro · En espera</div>
           <div class="progress-row"><span id="elapsed">00:00</span><input id="seek-bar" type="range" min="0" max="1000" value="0" aria-label="Posición de reproducción"><span id="duration">00:00</span></div>
@@ -268,6 +324,12 @@
             <button class="audio-control" id="audio-prev" aria-label="Pista anterior">Ⅱ‹</button>
             <button class="audio-control primary" id="audio-play" aria-label="Reproducir">▶</button>
             <button class="audio-control" id="audio-next" aria-label="Pista siguiente">›Ⅱ</button>
+            <button class="audio-control mode-control" id="audio-mode" aria-label="Cambiar modo de reproducción" title="Modo: Secuencial">SEQ</button>
+            <button class="audio-control lyric-control" id="audio-lyrics" aria-label="Mostrar letras sincronizadas" title="Mostrar letras">LRC</button>
+          </div>
+          <div class="lyrics-panel full-lyrics-panel" id="full-lyrics-panel" aria-hidden="true">
+            <div class="lyrics-panel-heading">LETRA SINCRONIZADA</div>
+            <div class="lyrics-lines full-lyrics-lines" id="full-lyrics-lines"><span class="lyrics-placeholder">Selecciona una composición con archivo LRC.</span></div>
           </div>
         </div>
         <div class="library">
@@ -363,7 +425,19 @@
     let composer = null;
     let envMap = null;
     let bloomPass = null;
+    let ssaoPass = null;
+    let bokehPass = null;
+    let colorGradePass = null;
     let emberSystem = null;
+    let dynamicCoinProbe = null;
+    let dynamicCoinTarget = null;
+    let dynamicCoinGroup = null;
+    let probeFrameCounter = 0;
+    let renderQualityScale = 1;
+    let performanceFrameCount = 0;
+    let performanceTimeTotal = 0;
+    let pbrMaps = null;
+    const shaderUniforms = [];
     let _glowTextureCache = null;
 
     let audioCtx = null;
@@ -433,6 +507,29 @@
     let currentTrackIndex = 0;
     let isPlaying = false;
     let seeking = false;
+
+    // Modos: secuencial (sin salto al terminar), aleatorio, repetir álbum, repetir pista.
+    const playbackModes = [
+      { id: 'sequence', label: 'Secuencial', short: 'SEQ' },
+      { id: 'shuffle', label: 'Aleatorio', short: 'SHF' },
+      { id: 'album', label: 'Repetir álbum', short: 'ALL' },
+      { id: 'single', label: 'Repetir pista', short: 'ONE' }
+    ];
+    let playbackModeIndex = 0;
+
+    // Letras sincronizadas LRC: un archivo por pista, mismo nombre base y extensión .lrc.
+    let lyricEntries = [];
+    let lyricActiveIndex = -1;
+    let lyricLoadToken = 0;
+    let lyricStatus = 'Selecciona una composición con archivo LRC.';
+    let miniLyricsOpen = false;
+    let fullLyricsOpen = false;
+
+    // Web Audio: la fuente HTMLMediaElement se conecta una sola vez al analizador real.
+    let audioSourceNode = null;
+    let audioAnalyser = null;
+    let audioFrequencyData = null;
+    let analyserReady = false;
 
     function showToast(message) {
       toast.textContent = message;
@@ -509,18 +606,80 @@
     }
 
     function setupComposer() {
+      if (!THREE.EffectComposer || !THREE.RenderPass) return;
       composer = new THREE.EffectComposer(renderer);
-      composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+      const renderScale = Math.min(window.devicePixelRatio || 1, 1.25) * renderQualityScale;
+      composer.setPixelRatio(renderScale);
       composer.setSize(window.innerWidth, window.innerHeight);
       composer.addPass(new THREE.RenderPass(scene, camera));
-      // Ajuste fino OPCIONAL activado: look "fantasía-medieval"
-      bloomPass = new THREE.UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        1.0,    // strength  · más neón
-        0.55,   // radius
-        0.6     // threshold · más elementos florecen
-      );
-      composer.addPass(bloomPass);
+
+      // SSAO real en espacio de pantalla: kernel moderado para conservar 60 FPS en equipos medios.
+      if (THREE.SSAOPass) {
+        try {
+          ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+          ssaoPass.kernelRadius = 10;
+          ssaoPass.minDistance = .002;
+          ssaoPass.maxDistance = .16;
+          composer.addPass(ssaoPass);
+        } catch (error) {
+          console.warn('SSAO no disponible; se continúa sin oclusión ambiental.', error);
+          ssaoPass = null;
+        }
+      }
+
+      // Profundidad de campo muy sutil; la cámara mantiene legibles las obras y los portales.
+      if (THREE.BokehPass) {
+        try {
+          bokehPass = new THREE.BokehPass(scene, camera, {
+            focus: 24.0, aperture: .000018, maxblur: .0028,
+            width: Math.max(1, Math.floor(window.innerWidth * renderScale)),
+            height: Math.max(1, Math.floor(window.innerHeight * renderScale))
+          });
+          composer.addPass(bokehPass);
+        } catch (error) {
+          console.warn('Depth of Field no disponible; se continúa sin BokehPass.', error);
+          bokehPass = null;
+        }
+      }
+
+      if (THREE.UnrealBloomPass) {
+        try {
+          bloomPass = new THREE.UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            .72, .42, .78
+          );
+          composer.addPass(bloomPass);
+        } catch (error) {
+          console.warn('Bloom no disponible; se continúa con el pipeline base.', error);
+          bloomPass = null;
+        }
+      }
+
+      // Corrección cromática final: contraste y separación cálida/fría discretos.
+      if (THREE.ShaderPass) {
+        const gradeShader = {
+          uniforms: {
+            tDiffuse: { value: null },
+            uContrast: { value: 1.035 },
+            uSaturation: { value: 1.045 },
+            uWarm: { value: new THREE.Vector3(1.025, 1.0, .982) }
+          },
+          vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+          fragmentShader: `
+            uniform sampler2D tDiffuse; uniform float uContrast; uniform float uSaturation;
+            uniform vec3 uWarm; varying vec2 vUv;
+            void main(){
+              vec4 c=texture2D(tDiffuse,vUv);
+              float l=dot(c.rgb,vec3(.2126,.7152,.0722));
+              vec3 graded=mix(vec3(l),c.rgb,uSaturation);
+              graded=(graded-.5)*uContrast+.5;
+              graded*=uWarm;
+              gl_FragColor=vec4(graded,c.a);
+            }`
+        };
+        colorGradePass = new THREE.ShaderPass(gradeShader);
+        composer.addPass(colorGradePass);
+      }
     }
 
     function createStarfield() {
@@ -578,83 +737,141 @@
     }
 
     function createGroundMist() {
-      const c = document.createElement('canvas');
-      c.width = 512; c.height = 512;
-      const ctx = c.getContext('2d');
-      for (let i = 0; i < 80; i++) {
-        const x = Math.random() * 512;
-        const y = Math.random() * 512;
-        const r = 40 + Math.random() * 110;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, `rgba(190,215,235,${0.05 + Math.random() * 0.07})`);
-        g.addColorStop(1, 'rgba(190,215,235,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(x - r, y - r, r * 2, r * 2);
-      }
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(3, 6);
-      const mat = new THREE.MeshBasicMaterial({
-        map: tex, transparent: true, opacity: 0.55,
-        blending: THREE.AdditiveBlending, depthWrite: false
+      const uniforms = { uTime: { value: 0 } };
+      const mat = new THREE.ShaderMaterial({
+        uniforms, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+        blending: THREE.NormalBlending,
+        vertexShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          void main() {
+            vUv = uv;
+            vec3 p = position;
+            p.x += sin(uTime * .08 + p.y * .16) * .12;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+          }`,
+        fragmentShader: `
+          varying vec2 vUv;
+          uniform float uTime;
+          float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
+          float noise(vec2 p) {
+            vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+            return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+                       mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+          }
+          void main() {
+            vec2 uv=vUv;
+            float n=noise(uv*vec2(7.0,12.0)+vec2(uTime*.025,-uTime*.018));
+            float edge=smoothstep(0.0,.18,uv.y)*(1.0-smoothstep(.78,1.0,uv.y));
+            float cloud=smoothstep(.34,.8,n)*edge;
+            float alpha=cloud*.18;
+            gl_FragColor=vec4(.48,.60,.68,alpha);
+          }`
       });
+      shaderUniforms.push(uniforms);
       const mist = new THREE.Mesh(new THREE.PlaneGeometry(58, 148), mat);
       mist.rotation.x = -Math.PI / 2;
-      mist.position.y = 0.45;
+      mist.position.y = .45;
       mist.position.z = -1;
       return mist;
     }
 
     function createEmbers() {
-      const count = 220;
+      const count = 260;
       const positions = new Float32Array(count * 3);
-      const velocity = new Float32Array(count * 3);
+      const seeds = new Float32Array(count * 3);
       for (let i = 0; i < count; i++) {
-        positions[i*3]   = (Math.random() - 0.5) * 20;
-        positions[i*3+1] = Math.random() * 16 + 0.5;
-        positions[i*3+2] = -60 + Math.random() * 122;
-        velocity[i*3]   = (Math.random() - 0.5) * 0.35;
-        velocity[i*3+1] = 0.3 + Math.random() * 0.7;
-        velocity[i*3+2] = (Math.random() - 0.5) * 0.3;
+        positions[i*3] = (Math.random() - .5) * 20;
+        positions[i*3+1] = Math.random() * 17;
+        positions[i*3+2] = -62 + Math.random() * 124;
+        seeds[i*3] = Math.random();
+        seeds[i*3+1] = Math.random();
+        seeds[i*3+2] = Math.random();
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const mat = new THREE.PointsMaterial({
-        color: 0xffaa44,
-        size: 0.32,
-        map: getGlowTexture('255,180,90'),
+      geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 3));
+      const uniforms = { uTime: { value: 0 }, uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 1.5) } };
+      const mat = new THREE.ShaderMaterial({
+        uniforms,
         transparent: true,
-        opacity: 0.9,
-        blending: THREE.AdditiveBlending,
         depthWrite: false,
-        sizeAttenuation: true
+        blending: THREE.AdditiveBlending,
+        vertexShader: `
+          uniform float uTime;
+          uniform float uPixelRatio;
+          attribute vec3 aSeed;
+          varying float vAlpha;
+          void main() {
+            vec3 p = position;
+            float rise = .38 + aSeed.y * .82;
+            p.y = mod(p.y + uTime * rise, 18.0) + .35;
+            p.x += sin(uTime * (.42 + aSeed.x) + aSeed.z * 6.283 + p.y * .22) * (.28 + aSeed.x * .42);
+            p.z += cos(uTime * (.31 + aSeed.z * .3) + aSeed.x * 6.283 + p.y * .17) * .34;
+            vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+            gl_PointSize = clamp((2.1 + aSeed.z * 3.6) * uPixelRatio * (42.0 / max(1.0, -mvPosition.z)), 1.0, 7.0);
+            vAlpha = .24 + aSeed.x * .72;
+          }`,
+        fragmentShader: `
+          varying float vAlpha;
+          void main() {
+            vec2 q = gl_PointCoord - .5;
+            float d = length(q);
+            float glow = 1.0 - smoothstep(.02, .5, d);
+            if (glow < .02) discard;
+            vec3 color = mix(vec3(1.0,.30,.06), vec3(1.0,.84,.48), smoothstep(.38,0.0,d));
+            gl_FragColor = vec4(color, glow * vAlpha);
+          }`
       });
+      shaderUniforms.push(uniforms);
       const points = new THREE.Points(geo, mat);
-      points.userData.velocity = velocity;
+      points.frustumCulled = false;
       return points;
     }
 
     function createDust(width, length, height) {
-      const count = 200;
+      const count = 240;
       const positions = new Float32Array(count * 3);
+      const seeds = new Float32Array(count * 3);
       for (let i = 0; i < count; i++) {
-        positions[i*3]   = (Math.random() - 0.5) * (width - 2);
-        positions[i*3+1] = 0.5 + Math.random() * (height - 1);
-        positions[i*3+2] = (Math.random() - 0.5) * (length - 2);
+        positions[i*3] = (Math.random() - .5) * (width - 2);
+        positions[i*3+1] = .5 + Math.random() * (height - 1);
+        positions[i*3+2] = (Math.random() - .5) * (length - 2);
+        seeds[i*3] = Math.random(); seeds[i*3+1] = Math.random(); seeds[i*3+2] = Math.random();
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const mat = new THREE.PointsMaterial({
-        color: 0xcfe4ec,
-        size: 0.055,
-        map: getGlowTexture('220,240,255'),
-        transparent: true,
-        opacity: 0.55,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        sizeAttenuation: true
+      geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 3));
+      const uniforms = { uTime: { value: 0 }, uPixelRatio: { value: Math.min(window.devicePixelRatio || 1, 1.5) } };
+      const mat = new THREE.ShaderMaterial({
+        uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+        vertexShader: `
+          uniform float uTime; uniform float uPixelRatio;
+          attribute vec3 aSeed; varying float vAlpha;
+          void main() {
+            vec3 p=position;
+            p.x += sin(uTime*.16+aSeed.x*6.283+p.y*.23)*.18;
+            p.y += sin(uTime*.11+aSeed.y*6.283+p.z*.17)*.12;
+            p.z += cos(uTime*.12+aSeed.z*6.283+p.x*.12)*.18;
+            vec4 mv=modelViewMatrix*vec4(p,1.0);
+            gl_Position=projectionMatrix*mv;
+            gl_PointSize=clamp((1.0+aSeed.z*1.6)*uPixelRatio*(24.0/max(1.0,-mv.z)),.7,3.2);
+            vAlpha=.18+aSeed.y*.36;
+          }`,
+        fragmentShader: `
+          varying float vAlpha;
+          void main() {
+            float d=length(gl_PointCoord-.5);
+            float a=(1.0-smoothstep(.05,.5,d))*vAlpha;
+            if(a<.015) discard;
+            gl_FragColor=vec4(.72,.84,.91,a);
+          }`
       });
-      return new THREE.Points(geo, mat);
+      shaderUniforms.push(uniforms);
+      const points = new THREE.Points(geo, mat);
+      points.frustumCulled = false;
+      return points;
     }
 
     function makeGlowSprite(color = 0xffaa44, scale = 1.2, opacity = 0.9) {
@@ -672,20 +889,9 @@
     }
 
     function updateEmbers(dt) {
-      if (!emberSystem || !emberSystem.parent) return;
-      const arr = emberSystem.geometry.attributes.position.array;
-      const vel = emberSystem.userData.velocity;
-      for (let i = 0; i < arr.length; i += 3) {
-        arr[i]   += vel[i]   * dt;
-        arr[i+1] += vel[i+1] * dt;
-        arr[i+2] += vel[i+2] * dt;
-        if (arr[i+1] > 17) {
-          arr[i]   = (Math.random() - 0.5) * 20;
-          arr[i+1] = 0.5;
-          arr[i+2] = -60 + Math.random() * 122;
-        }
-      }
-      emberSystem.geometry.attributes.position.needsUpdate = true;
+      // El movimiento de brasas/partículas se calcula en el vertex shader (GPU).
+      // La CPU solo actualiza el reloj compartido de shaders.
+      if (emberSystem && !emberSystem.parent) return;
     }
 
     /* ============================================================
@@ -699,16 +905,25 @@
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material) => {
             if (material.map) material.map.dispose();
+            ['roughnessMap','metalnessMap','bumpMap','normalMap'].forEach(key => {
+              if (material[key] && (!pbrMaps || !Object.values(pbrMaps).includes(material[key]))) material[key].dispose();
+            });
             material.dispose();
           });
         }
       });
       scene.remove(world);
       world = null;
+      if (dynamicCoinTarget) dynamicCoinTarget.dispose();
+      dynamicCoinTarget = null;
+      dynamicCoinProbe = null;
+      dynamicCoinGroup = null;
       emberSystem = null;
       interactables = [];
       animatedObjects.length = 0;
+      shaderUniforms.length = 0;
       emblemMaterialCache = new Map();
+      _glowTextureCache = null;
     }
 
     function newWorld(fog = 0x080e18) {
@@ -722,15 +937,113 @@
       const key = new THREE.DirectionalLight(0xffdfaa, 1.45);
       key.position.set(-6, 10, 8);
       key.castShadow = true;
-      key.shadow.mapSize.set(1024, 1024);
+      key.shadow.mapSize.set(2048, 2048);
+      key.shadow.camera.near = .5;
+      key.shadow.camera.far = 180;
+      key.shadow.camera.left = -42;
+      key.shadow.camera.right = 42;
+      key.shadow.camera.top = 34;
+      key.shadow.camera.bottom = -22;
+      key.shadow.bias = -.00018;
+      key.shadow.normalBias = .035;
+      key.shadow.radius = 3.5;
+      key.shadow.camera.updateProjectionMatrix();
       world.add(key);
       const cool = new THREE.PointLight(0x4eafc7, 1.55, 40);
       cool.position.set(5, 4.5, -3);
       world.add(cool);
     }
 
+    function createPBRDetailMaps() {
+      // Detail maps procedurales: microrelieve, variación de rugosidad y normales.
+      // Se generan una sola vez y se comparten entre materiales para reducir memoria.
+      const size = 256;
+      const roughCanvas = document.createElement('canvas');
+      const bumpCanvas = document.createElement('canvas');
+      const normalCanvas = document.createElement('canvas');
+      const metalCanvas = document.createElement('canvas');
+      [roughCanvas, bumpCanvas, normalCanvas, metalCanvas].forEach(c => { c.width = size; c.height = size; });
+      const roughCtx = roughCanvas.getContext('2d');
+      const bumpCtx = bumpCanvas.getContext('2d');
+      const normalCtx = normalCanvas.getContext('2d');
+      const metalCtx = metalCanvas.getContext('2d');
+      const roughData = roughCtx.createImageData(size, size);
+      const bumpData = bumpCtx.createImageData(size, size);
+      const metalData = metalCtx.createImageData(size, size);
+      const heights = new Float32Array(size * size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const i = y * size + x;
+          const n = Math.sin(x * .19 + Math.sin(y * .11) * 1.8) *
+                    Math.cos(y * .17 + Math.cos(x * .07) * 1.4);
+          const grain = Math.sin((x + y) * .73) * Math.cos((x - y) * .41);
+          const h = THREE.MathUtils.clamp(128 + n * 12 + grain * 5, 0, 255);
+          heights[i] = h;
+          const r = THREE.MathUtils.clamp(190 + n * 17 + grain * 9, 0, 255);
+          const j = i * 4;
+          roughData.data[j] = roughData.data[j + 1] = roughData.data[j + 2] = r;
+          roughData.data[j + 3] = 255;
+          bumpData.data[j] = bumpData.data[j + 1] = bumpData.data[j + 2] = h;
+          bumpData.data[j + 3] = 255;
+          const m = THREE.MathUtils.clamp(218 + Math.sin(x * .035 + y * .047) * 18 + grain * 6, 0, 255);
+          metalData.data[j] = metalData.data[j + 1] = metalData.data[j + 2] = m;
+          metalData.data[j + 3] = 255;
+        }
+      }
+      roughCtx.putImageData(roughData, 0, 0);
+      bumpCtx.putImageData(bumpData, 0, 0);
+      metalCtx.putImageData(metalData, 0, 0);
+      const normalData = normalCtx.createImageData(size, size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const xm = (x - 1 + size) % size, xp = (x + 1) % size;
+          const ym = (y - 1 + size) % size, yp = (y + 1) % size;
+          const dx = (heights[y * size + xp] - heights[y * size + xm]) / 255 * 1.15;
+          const dy = (heights[yp * size + x] - heights[ym * size + x]) / 255 * 1.15;
+          const nx = -dx, ny = -dy, nz = 1;
+          const mag = Math.hypot(nx, ny, nz) || 1;
+          const j = (y * size + x) * 4;
+          normalData.data[j] = (nx / mag * .5 + .5) * 255;
+          normalData.data[j + 1] = (ny / mag * .5 + .5) * 255;
+          normalData.data[j + 2] = (nz / mag * .5 + .5) * 255;
+          normalData.data[j + 3] = 255;
+        }
+      }
+      normalCtx.putImageData(normalData, 0, 0);
+      const makeTexture = (canvas, colorSpace = false) => {
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(2, 2);
+        tex.generateMipmaps = true;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.anisotropy = Math.min(8, renderer ? renderer.capabilities.getMaxAnisotropy() : 4);
+        if (colorSpace) tex.encoding = THREE.sRGBEncoding;
+        return tex;
+      };
+      pbrMaps = {
+        roughness: makeTexture(roughCanvas),
+        bump: makeTexture(bumpCanvas),
+        normal: makeTexture(normalCanvas),
+        metalness: makeTexture(metalCanvas)
+      };
+    }
+
     function material(color, roughness = .78, metalness = .08, extra = {}) {
-      return new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
+      const options = { ...extra };
+      const useDetail = options.useDetail !== false;
+      delete options.useDetail;
+      const detailMaps = useDetail && pbrMaps ? {
+        roughnessMap: pbrMaps.roughness,
+        metalnessMap: pbrMaps.metalness,
+        bumpMap: pbrMaps.bump,
+        normalMap: pbrMaps.normal,
+        bumpScale: metalness > .62 ? .009 : .022,
+        normalScale: new THREE.Vector2(.12, .12)
+      } : {};
+      return new THREE.MeshStandardMaterial({
+        color, roughness, metalness, ...detailMaps, ...options
+      });
     }
 
     function emblemMaterial(opacity = 1) {
@@ -1030,6 +1343,8 @@
       world.add(torch);
       const light = new THREE.PointLight(0xffa84d, .85, 16, 1.7);
       light.position.set(x, 2.5, z);
+      // Las llamas se ven siempre; solo las luces cercanas se activan para respetar límites GPU.
+      light.visible = false;
       world.add(light);
       exteriorTorches.push({
         flame, glow: flameGlow, innerGlow, light,
@@ -1041,37 +1356,200 @@
     const QUIMERA_PORTAL_URL = 'https://quimerac3.github.io/QuimeraC3-Q/';
     const EXTERIOR_EMBLEM_Z = 66.2;
 
+    function createEmblemReliefMaps() {
+      if (!emblemBaseTexture || !emblemBaseTexture.image) return null;
+      const source = emblemBaseTexture.image;
+      const size = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(source, 0, 0, size, size);
+      const image = ctx.getImageData(0, 0, size, size);
+      const height = new Float32Array(size * size);
+      for (let i = 0; i < size * size; i++) {
+        const j = i * 4;
+        const luminance = (image.data[j] * .2126 + image.data[j+1] * .7152 + image.data[j+2] * .0722) / 255;
+        height[i] = (image.data[j+3] / 255) * (.56 + luminance * .44);
+      }
+      const normalCanvas = document.createElement('canvas');
+      normalCanvas.width = normalCanvas.height = size;
+      const normalCtx = normalCanvas.getContext('2d');
+      const normalImage = normalCtx.createImageData(size, size);
+      const bumpCanvas = document.createElement('canvas');
+      bumpCanvas.width = bumpCanvas.height = size;
+      const bumpCtx = bumpCanvas.getContext('2d');
+      const bumpImage = bumpCtx.createImageData(size, size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const i = y * size + x;
+          const dx = (height[y*size + ((x+1)%size)] - height[y*size + ((x-1+size)%size)]) * 3.2;
+          const dy = (height[((y+1)%size)*size + x] - height[((y-1+size)%size)*size + x]) * 3.2;
+          let nx = -dx, ny = -dy, nz = 1;
+          const len = Math.hypot(nx, ny, nz) || 1;
+          const j = i * 4;
+          normalImage.data[j] = (nx/len*.5+.5)*255;
+          normalImage.data[j+1] = (ny/len*.5+.5)*255;
+          normalImage.data[j+2] = (nz/len*.5+.5)*255;
+          normalImage.data[j+3] = 255;
+          const h = Math.round(height[i] * 255);
+          bumpImage.data[j] = bumpImage.data[j+1] = bumpImage.data[j+2] = h;
+          bumpImage.data[j+3] = 255;
+        }
+      }
+      normalCtx.putImageData(normalImage, 0, 0);
+      bumpCtx.putImageData(bumpImage, 0, 0);
+      const normalMap = new THREE.CanvasTexture(normalCanvas);
+      const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+      normalMap.encoding = THREE.LinearEncoding;
+      bumpMap.encoding = THREE.LinearEncoding;
+      return { normalMap, bumpMap };
+    }
+
     function addFloatingQuimeraEmblem() {
+      // Medalla/moneda tridimensional: núcleo de metal, bisel doble y emblema en ambas caras.
       const floating = new THREE.Group();
       floating.position.set(0, 3.15, EXTERIOR_EMBLEM_Z);
+      dynamicCoinGroup = floating;
+      try {
+        dynamicCoinTarget = new THREE.WebGLCubeRenderTarget(128, {
+          format: THREE.RGBFormat,
+          generateMipmaps: true,
+          minFilter: THREE.LinearMipmapLinearFilter
+        });
+        dynamicCoinProbe = new THREE.CubeCamera(.1, 90, dynamicCoinTarget);
+        dynamicCoinProbe.position.copy(floating.position);
+        world.add(dynamicCoinProbe);
+      } catch (error) {
+        console.warn('No se pudo crear el reflejo dinámico de la moneda; se usará el entorno PBR estático.', error);
+        dynamicCoinTarget = null;
+        dynamicCoinProbe = null;
+      }
 
-      const emblem = makeEmblemPlane(3.8, 3.95);
-      emblem.position.set(0, 0, 0.035);
-      floating.add(emblem);
-
-      const haloMaterial = new THREE.MeshBasicMaterial({
-        color: 0xc79a55, transparent: true, opacity: .78, side: THREE.DoubleSide
+      const goldCore = new THREE.MeshPhysicalMaterial({
+        color: 0x9a7138, metalness: .94, roughness: .29,
+        clearcoat: .42, clearcoatRoughness: .24,
+        roughnessMap: pbrMaps ? pbrMaps.roughness : null,
+        metalnessMap: pbrMaps ? pbrMaps.metalness : null,
+        bumpMap: pbrMaps ? pbrMaps.bump : null,
+        bumpScale: .007,
+        envMap: dynamicCoinTarget ? dynamicCoinTarget.texture : null,
+        envMapIntensity: 1.45
       });
-      const halo = new THREE.Mesh(new THREE.TorusGeometry(2.28, .035, 10, 80), haloMaterial);
-      halo.position.z = .08;
+      const coin = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.92, 1.92, .34, 128, 2, false),
+        [goldCore, goldCore, goldCore]
+      );
+      coin.rotation.x = Math.PI / 2;
+      coin.castShadow = true;
+      coin.receiveShadow = true;
+      floating.add(coin);
+
+      const bevelFront = new THREE.Mesh(
+        new THREE.TorusGeometry(1.82, .095, 16, 128),
+        new THREE.MeshPhysicalMaterial({
+          color: 0xc99a4c, metalness: .98, roughness: .22, clearcoat: .6,
+          roughnessMap: pbrMaps ? pbrMaps.roughness : null,
+          metalnessMap: pbrMaps ? pbrMaps.metalness : null,
+          envMap: dynamicCoinTarget ? dynamicCoinTarget.texture : null, envMapIntensity: 1.5
+        })
+      );
+      bevelFront.position.z = .19;
+      floating.add(bevelFront);
+
+      const bevelBack = bevelFront.clone();
+      bevelBack.position.z = -.19;
+      bevelBack.rotation.y = Math.PI;
+      floating.add(bevelBack);
+
+      const innerRimMat = new THREE.MeshStandardMaterial({
+        color: 0x6f4b22, metalness: .92, roughness: .32,
+        emissive: 0x291807, emissiveIntensity: .16
+      });
+      const innerFront = new THREE.Mesh(new THREE.TorusGeometry(1.61, .025, 8, 112), innerRimMat);
+      innerFront.position.z = .205;
+      floating.add(innerFront);
+      const innerBack = innerFront.clone();
+      innerBack.position.z = -.205;
+      innerBack.rotation.y = Math.PI;
+      floating.add(innerBack);
+
+      const reliefMaps = createEmblemReliefMaps();
+      const frontTexture = emblemBaseTexture ? emblemBaseTexture.clone() : null;
+      const backTexture = emblemBaseTexture ? emblemBaseTexture.clone() : null;
+      [frontTexture, backTexture].forEach(tex => {
+        if (tex) {
+          tex.needsUpdate = true;
+          tex.encoding = THREE.sRGBEncoding;
+          tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        }
+      });
+      const faceMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        map: frontTexture,
+        normalMap: reliefMaps ? reliefMaps.normalMap : null,
+        bumpMap: reliefMaps ? reliefMaps.bumpMap : null,
+        normalScale: new THREE.Vector2(.16, .16),
+        bumpScale: .025,
+        metalness: .78,
+        roughness: .3,
+        clearcoat: .38,
+        clearcoatRoughness: .27,
+        envMap: dynamicCoinTarget ? dynamicCoinTarget.texture : null,
+        envMapIntensity: 1.35,
+        transparent: true,
+        alphaTest: .035,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        envMapIntensity: 1.25
+      });
+      const backMaterial = faceMaterial.clone();
+      backMaterial.map = backTexture;
+      const faceFront = new THREE.Mesh(new THREE.PlaneGeometry(3.35, 3.48), faceMaterial);
+      faceFront.position.z = .218;
+      faceFront.castShadow = true;
+      floating.add(faceFront);
+
+      const faceBack = new THREE.Mesh(new THREE.PlaneGeometry(3.35, 3.48), backMaterial);
+      faceBack.position.z = -.218;
+      faceBack.rotation.y = Math.PI;
+      faceBack.scale.x = -1;
+      faceBack.castShadow = true;
+      floating.add(faceBack);
+
+      // Pequeños remaches dispuestos en el anillo: instanciados para reducir draw calls.
+      const studGeometry = new THREE.SphereGeometry(.045, 10, 8);
+      const studMaterial = new THREE.MeshStandardMaterial({
+        color: 0xe2bd78, metalness: .96, roughness: .22,
+        envMap: dynamicCoinTarget ? dynamicCoinTarget.texture : null, envMapIntensity: 1.5
+      });
+      const studs = new THREE.InstancedMesh(studGeometry, studMaterial, 32);
+      const dummy = new THREE.Object3D();
+      for (let i = 0; i < 32; i++) {
+        const angle = i / 32 * Math.PI * 2;
+        dummy.position.set(Math.cos(angle) * 1.77, Math.sin(angle) * 1.77, .235);
+        dummy.scale.setScalar(1);
+        dummy.updateMatrix();
+        studs.setMatrixAt(i, dummy.matrix);
+      }
+      studs.instanceMatrix.needsUpdate = true;
+      floating.add(studs);
+
+      const halo = new THREE.Mesh(
+        new THREE.TorusGeometry(2.25, .025, 10, 128),
+        new THREE.MeshBasicMaterial({ color: 0xc79a55, transparent: true, opacity: .72 })
+      );
+      halo.position.z = .05;
       floating.add(halo);
 
-      const innerHalo = new THREE.Mesh(
-        new THREE.TorusGeometry(2.02, .012, 8, 80),
-        new THREE.MeshBasicMaterial({ color: 0x72c9d8, transparent: true, opacity: .65, side: THREE.DoubleSide })
-      );
-      innerHalo.position.z = .1;
-      floating.add(innerHalo);
-
-      const glow = new THREE.PointLight(0xc79a55, 1.35, 18, 1.6);
+      const glow = new THREE.PointLight(0xc79a55, 1.45, 20, 1.5);
       glow.position.set(0, 0, 1.1);
       floating.add(glow);
 
       const hitArea = new THREE.Mesh(
-        new THREE.BoxGeometry(4.9, 5.1, 1.1),
+        new THREE.BoxGeometry(4.9, 5.1, 1.25),
         new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide })
       );
-      hitArea.position.z = .12;
+      hitArea.position.z = .05;
       hitArea.userData = {
         action: 'quimeraLink',
         data: { url: QUIMERA_PORTAL_URL },
@@ -1081,7 +1559,27 @@
       floating.add(hitArea);
       interactables.push(hitArea);
       world.add(floating);
-      animatedObjects.push({ object: floating, speed: .58, axis: 'y' });
+      animatedObjects.push({ object: floating, speed: .48, axis: 'y' });
+      // Captura inicial del entorno real del sendero para reflejos en el bisel.
+      if (dynamicCoinProbe) {
+        floating.visible = false;
+        try {
+          dynamicCoinProbe.update(renderer, scene);
+        } catch (error) {
+          console.warn('La captura dinámica de la moneda falló; se usará el mapa de entorno global.', error);
+          floating.traverse(object => {
+            if (!object.material) return;
+            const materials = Array.isArray(object.material) ? object.material : [object.material];
+            materials.forEach(mat => { if ('envMap' in mat) { mat.envMap = null; mat.needsUpdate = true; } });
+          });
+          dynamicCoinTarget.dispose();
+          dynamicCoinTarget = null;
+          dynamicCoinProbe = null;
+          dynamicCoinGroup = null;
+        } finally {
+          floating.visible = true;
+        }
+      }
     }
 
     function buildExterior(journey = 'arrival') {
@@ -1590,6 +2088,7 @@
       if (key) key.intensity = .28 + progress * .62;
       exteriorTorches.forEach((torch,index) => {
         const distance = Math.abs(torch.z - camera.position.z);
+        torch.light.visible = distance < 34;
         const proximity = Math.max(.15, 1 - distance / 34);
         const flicker = .91 + Math.sin(time * 8.2 + index * 1.73) * .055 + Math.sin(time * 13.4 + index) * .025;
         torch.light.intensity = torch.baseIntensity * (.42 + .72 * proximity) * flicker * (0.72 + progress * .55);
@@ -1609,6 +2108,7 @@
 
     function renderPlaylist(filter = '') {
       const list = $('playlist');
+      const previousScrollTop = list.scrollTop;
       const query = filter.trim().toLocaleLowerCase('es');
       list.innerHTML = '';
       let visible = 0;
@@ -1630,12 +2130,217 @@
       if (!visible) {
         const empty = document.createElement('p'); empty.className = 'audio-note'; empty.textContent = 'No se encontraron pistas con ese término.'; list.appendChild(empty);
       }
+      list.scrollTop = previousScrollTop;
     }
 
     function formatTime(seconds) {
       if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
       const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60);
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function currentPlaybackMode() {
+      return playbackModes[playbackModeIndex];
+    }
+
+    function updatePlaybackModeUI() {
+      const mode = currentPlaybackMode();
+      [['mini-mode', 'mini'], ['audio-mode', 'audio']].forEach(([id]) => {
+        const button = $(id);
+        if (!button) return;
+        button.textContent = mode.short;
+        button.title = `Modo: ${mode.label}. Haz clic para cambiar.`;
+        button.setAttribute('aria-label', `Modo de reproducción: ${mode.label}. Cambiar modo`);
+        button.classList.toggle('active', mode.id !== 'sequence');
+        button.setAttribute('aria-pressed', String(mode.id !== 'sequence'));
+      });
+    }
+
+    function cyclePlaybackMode() {
+      playbackModeIndex = (playbackModeIndex + 1) % playbackModes.length;
+      updatePlaybackModeUI();
+      showToast(`Modo de reproducción: ${currentPlaybackMode().label}`);
+    }
+
+    function ensureAudioAnalyser() {
+      try {
+        initSFX();
+        if (!audioCtx) return;
+        if (!audioSourceNode) {
+          audioSourceNode = audioCtx.createMediaElementSource(audio);
+          audioAnalyser = audioCtx.createAnalyser();
+          audioAnalyser.fftSize = 512;
+          audioAnalyser.smoothingTimeConstant = .84;
+          audioAnalyser.minDecibels = -88;
+          audioAnalyser.maxDecibels = -16;
+          audioSourceNode.connect(audioAnalyser);
+          audioAnalyser.connect(audioCtx.destination);
+          audioFrequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+          analyserReady = true;
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (error) {
+        console.warn('El analizador de audio no pudo conectarse; la reproducción continúa sin visualización espectral.', error);
+        analyserReady = false;
+      }
+    }
+
+    function drawSpectrum(canvasId, alpha, barsCount) {
+      const canvasElement = $(canvasId);
+      if (!canvasElement) return;
+      const rect = canvasElement.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = Math.max(1, Math.round(rect.width * dpr));
+      const height = Math.max(1, Math.round(rect.height * dpr));
+      if (canvasElement.width !== width || canvasElement.height !== height) {
+        canvasElement.width = width;
+        canvasElement.height = height;
+      }
+      const ctx = canvasElement.getContext('2d');
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+      const gap = Math.max(1, Math.round(width * .006));
+      const count = Math.min(barsCount, Math.floor(width / 3));
+      const barWidth = Math.max(1, (width - (count - 1) * gap) / count);
+      const bins = audioFrequencyData;
+      for (let i = 0; i < count; i++) {
+        let energy = 0;
+        if (analyserReady && bins && isPlaying) {
+          const pos = Math.floor(Math.pow(i / Math.max(1, count - 1), 1.65) * (bins.length - 1));
+          energy = bins[pos] / 255;
+        }
+        const shaped = Math.pow(energy, .82);
+        const barHeight = Math.max(1.5 * dpr, shaped * height * .88);
+        const x = i * (barWidth + gap);
+        const y = (height - barHeight) / 2;
+        ctx.fillStyle = `rgba(255,255,255,${alpha * (.22 + shaped * .78)})`;
+        ctx.fillRect(x, y, barWidth, barHeight);
+      }
+    }
+
+    function updateAudioVisualizers() {
+      if (audioAnalyser && audioFrequencyData && isPlaying) {
+        audioAnalyser.getByteFrequencyData(audioFrequencyData);
+      }
+      drawSpectrum('mini-spectrum', .88, 34);
+      drawSpectrum('album-spectrum', .5, 72);
+    }
+
+    function parseLRC(text) {
+      const entries = [];
+      let offset = 0;
+      const offsetMatch = text.match(/^\[offset:([+-]?\d+)\]/im);
+      if (offsetMatch) offset = Number(offsetMatch[1]) / 1000;
+      const lines = text.replace(/\r/g, '').split('\n');
+      const timestampPattern = /\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g;
+      lines.forEach(line => {
+        const timestamps = [...line.matchAll(timestampPattern)];
+        if (!timestamps.length) return;
+        const lyric = line.replace(timestampPattern, '').trim();
+        if (!lyric) return;
+        timestamps.forEach(match => {
+          const fraction = match[3] ? Number(`0.${match[3]}`) : 0;
+          const seconds = Number(match[1]) * 60 + Number(match[2]) + fraction + offset;
+          entries.push({ time: Math.max(0, seconds), text: lyric });
+        });
+      });
+      entries.sort((a, b) => a.time - b.time);
+      return entries;
+    }
+
+    function renderLyricsLines(containerId) {
+      const container = $(containerId);
+      if (!container) return;
+      container.replaceChildren();
+      if (!lyricEntries.length) {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'lyrics-placeholder';
+        placeholder.textContent = lyricStatus;
+        container.appendChild(placeholder);
+        return;
+      }
+      const first = Math.max(0, lyricActiveIndex - 1);
+      const last = Math.min(lyricEntries.length - 1, Math.max(lyricActiveIndex + 2, 2));
+      for (let i = first; i <= last; i++) {
+        const line = document.createElement('div');
+        line.className = `lyric-line${i === lyricActiveIndex ? ' active' : ''}`;
+        line.textContent = lyricEntries[i].text;
+        container.appendChild(line);
+      }
+    }
+
+    function updateLyricsDisplays() {
+      renderLyricsLines('mini-lyrics-lines');
+      renderLyricsLines('full-lyrics-lines');
+    }
+
+    function updateSyncedLyrics() {
+      if (!lyricEntries.length) return;
+      const time = audio.currentTime || 0;
+      let nextIndex = -1;
+      for (let i = 0; i < lyricEntries.length; i++) {
+        if (lyricEntries[i].time <= time + .035) nextIndex = i;
+        else break;
+      }
+      if (nextIndex !== lyricActiveIndex) {
+        lyricActiveIndex = nextIndex;
+        updateLyricsDisplays();
+      }
+    }
+
+    function loadLyricsForTrack(track) {
+      const token = ++lyricLoadToken;
+      lyricEntries = [];
+      lyricActiveIndex = -1;
+      lyricStatus = 'Buscando archivo de letras sincronizadas…';
+      updateLyricsDisplays();
+      if (!track || !/\.mp3$/i.test(track.file)) {
+        lyricStatus = 'Esta pista no tiene un archivo LRC asociado.';
+        updateLyricsDisplays();
+        return;
+      }
+      const lrcPath = track.file.replace(/\.mp3$/i, '.lrc');
+      fetch(encodeURI(lrcPath), { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.text();
+        })
+        .then(text => {
+          if (token !== lyricLoadToken) return;
+          lyricEntries = parseLRC(text);
+          lyricActiveIndex = -1;
+          lyricStatus = lyricEntries.length
+            ? `${lyricEntries.length} líneas sincronizadas.`
+            : 'El archivo LRC no contiene marcas de tiempo válidas.';
+          updateLyricsDisplays();
+          updateSyncedLyrics();
+        })
+        .catch(error => {
+          if (token !== lyricLoadToken) return;
+          lyricEntries = [];
+          lyricStatus = `No se encontró ${lrcPath}.`;
+          updateLyricsDisplays();
+          console.info(`Archivo LRC no disponible: ${lrcPath}`, error);
+        });
+    }
+
+    function setLyricsPanel(kind, open) {
+      const isMini = kind === 'mini';
+      if (isMini) miniLyricsOpen = open;
+      else fullLyricsOpen = open;
+      const panel = $(isMini ? 'mini-lyrics-panel' : 'full-lyrics-panel');
+      const button = $(isMini ? 'mini-lyrics' : 'audio-lyrics');
+      panel.classList.toggle('open', open);
+      panel.setAttribute('aria-hidden', String(!open));
+      button.classList.toggle('active', open);
+      button.setAttribute('aria-pressed', String(open));
+      button.title = open ? 'Ocultar letras' : 'Mostrar letras sincronizadas';
+    }
+
+    function toggleLyrics(kind) {
+      if (kind === 'mini') setLyricsPanel('mini', !miniLyricsOpen);
+      else setLyricsPanel('full', !fullLyricsOpen);
     }
 
     function updateAudioUI() {
@@ -1648,17 +2353,23 @@
       $('mini-play').textContent = isPlaying ? 'Ⅱ' : '▶';
       $('mini-play').setAttribute('aria-label', isPlaying ? 'Pausar' : 'Reproducir');
       renderPlaylist($('track-search').value);
+      updatePlaybackModeUI();
     }
 
     async function selectTrack(index, autoplay) {
       currentTrackIndex = (index + soundTracks.length) % soundTracks.length;
+      miniPlayer.classList.remove('hidden');
       const track = soundTracks[currentTrackIndex];
       audio.pause();
-      audio.src = track.file;
+      audio.src = encodeURI(track.file);
       audio.load();
       isPlaying = false;
+      lyricEntries = [];
+      lyricActiveIndex = -1;
       updateAudioUI();
+      loadLyricsForTrack(track);
       if (autoplay) {
+        ensureAudioAnalyser();
         try {
           await audio.play();
         } catch (error) {
@@ -1672,31 +2383,62 @@
     async function togglePlayback() {
       if (!audio.src) { await selectTrack(currentTrackIndex, true); return; }
       if (audio.paused) {
+        ensureAudioAnalyser();
         try { await audio.play(); }
         catch (error) { showToast('El navegador no pudo iniciar la reproducción. Verifica el archivo de audio.'); }
       } else audio.pause();
     }
 
-    function nextTrack() { selectTrack((currentTrackIndex + 1) % soundTracks.length, true); }
+    function getNextTrackIndex(manual = false) {
+      const mode = currentPlaybackMode().id;
+      if (mode === 'shuffle' && soundTracks.length > 1) {
+        let next = currentTrackIndex;
+        while (next === currentTrackIndex) next = Math.floor(Math.random() * soundTracks.length);
+        return next;
+      }
+      if (mode === 'album') return (currentTrackIndex + 1) % soundTracks.length;
+      if (mode === 'single' && !manual) return currentTrackIndex;
+      return (currentTrackIndex + 1) % soundTracks.length;
+    }
+
+    function nextTrack() { selectTrack(getNextTrackIndex(true), true); }
     function previousTrack() { selectTrack((currentTrackIndex - 1 + soundTracks.length) % soundTracks.length, true); }
+
+    function handleTrackEnded() {
+      isPlaying = false;
+      const mode = currentPlaybackMode().id;
+      if (mode === 'single') {
+        audio.currentTime = 0;
+        ensureAudioAnalyser();
+        audio.play().catch(() => { isPlaying = false; updateAudioUI(); });
+        return;
+      }
+      if (mode === 'sequence' && currentTrackIndex === soundTracks.length - 1) {
+        updateAudioUI();
+        return;
+      }
+      selectTrack(getNextTrackIndex(false), true);
+    }
 
     function openAudioPlayer() {
       miniPlayer.classList.remove('hidden');
       audioOverlay.classList.add('open');
       renderPlaylist($('track-search').value);
       updateAudioUI();
+      updateLyricsDisplays();
     }
     function closeAudioPlayer() { audioOverlay.classList.remove('open'); }
 
     audio.addEventListener('play', () => { isPlaying = true; updateAudioUI(); });
     audio.addEventListener('pause', () => { isPlaying = false; updateAudioUI(); });
-    audio.addEventListener('ended', nextTrack);
+    audio.addEventListener('ended', handleTrackEnded);
     audio.addEventListener('timeupdate', () => {
       if (seeking) return;
       const duration = audio.duration || 0;
       $('elapsed').textContent = formatTime(audio.currentTime);
       $('duration').textContent = formatTime(duration);
       $('seek-bar').value = duration ? Math.round((audio.currentTime / duration) * 1000) : 0;
+      updateSyncedLyrics();
     });
     audio.addEventListener('loadedmetadata', () => { $('duration').textContent = formatTime(audio.duration); });
     audio.addEventListener('error', () => {
@@ -1717,6 +2459,10 @@
     $('mini-next').addEventListener('click', nextTrack);
     $('mini-play').addEventListener('click', togglePlayback);
     $('mini-hide').addEventListener('click', () => miniPlayer.classList.add('hidden'));
+    $('mini-mode').addEventListener('click', cyclePlaybackMode);
+    $('audio-mode').addEventListener('click', cyclePlaybackMode);
+    $('mini-lyrics').addEventListener('click', () => toggleLyrics('mini'));
+    $('audio-lyrics').addEventListener('click', () => toggleLyrics('full'));
     $('track-search').addEventListener('input', (event) => renderPlaylist(event.target.value));
     $('seek-bar').addEventListener('input', () => { seeking = true; });
     $('seek-bar').addEventListener('change', (event) => {
@@ -1781,12 +2527,60 @@
       button.addEventListener('click', () => moveInGallery(button.dataset.move));
     });
 
+    function adaptRenderQuality(delta) {
+      performanceFrameCount++;
+      performanceTimeTotal += delta * 1000;
+      if (performanceFrameCount < 120) return;
+      const averageMs = performanceTimeTotal / performanceFrameCount;
+      performanceFrameCount = 0;
+      performanceTimeTotal = 0;
+      const previous = renderQualityScale;
+      if (averageMs > 20 && renderQualityScale > .78) renderQualityScale = Math.max(.78, renderQualityScale - .06);
+      else if (averageMs < 14.5 && renderQualityScale < 1) renderQualityScale = Math.min(1, renderQualityScale + .03);
+      if (Math.abs(previous - renderQualityScale) > .001 && renderer && composer) {
+        const dpr = window.devicePixelRatio || 1;
+        renderer.setPixelRatio(Math.min(dpr, 1.5) * renderQualityScale);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        composer.setPixelRatio(Math.min(dpr, 1.25) * renderQualityScale);
+        composer.setSize(window.innerWidth, window.innerHeight);
+      }
+    }
+
     function animate() {
       requestAnimationFrame(animate);
       const delta = Math.min(clock.getDelta(), .05);
+      adaptRenderQuality(delta);
       animatedObjects.forEach(({ object, speed, axis }) => { object.rotation[axis] += speed * delta; });
       updateExteriorLighting(clock.elapsedTime);
+      probeFrameCounter++;
+      if (dynamicCoinProbe && dynamicCoinGroup && currentZone === 'exterior' && probeFrameCounter % 240 === 0) {
+        const coinGroup = dynamicCoinGroup;
+        const wasVisible = coinGroup.visible;
+        coinGroup.visible = false;
+        try {
+          dynamicCoinProbe.position.copy(coinGroup.position);
+          dynamicCoinProbe.update(renderer, scene);
+        } catch (error) {
+          console.warn('Se desactivó la actualización de reflejos dinámicos.', error);
+          coinGroup.traverse(object => {
+            if (!object.material) return;
+            const materials = Array.isArray(object.material) ? object.material : [object.material];
+            materials.forEach(mat => { if ('envMap' in mat) { mat.envMap = null; mat.needsUpdate = true; } });
+          });
+          if (dynamicCoinTarget) dynamicCoinTarget.dispose();
+          dynamicCoinTarget = null;
+          dynamicCoinProbe = null;
+          dynamicCoinGroup = null;
+        } finally {
+          coinGroup.visible = wasVisible;
+        }
+      }
+      shaderUniforms.forEach((uniformSet) => {
+        if (uniformSet.uTime) uniformSet.uTime.value = clock.elapsedTime;
+        if (uniformSet.uPixelRatio) uniformSet.uPixelRatio.value = Math.min(window.devicePixelRatio || 1, 1.5);
+      });
       updateEmbers(delta);
+      updateAudioVisualizers();
       if (renderer && scene && camera) {
         if (composer) composer.render();
         else renderer.render(scene, camera);
@@ -1815,10 +2609,11 @@
         camera.rotation.order = 'YXZ';
         camera.rotation.set(pitch, yaw, 0);
         renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.autoUpdate = true;
         renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.15;
@@ -1827,11 +2622,15 @@
         pointer = new THREE.Vector2();
 
         // === POST-PROCESADO + REFLEJOS PBR ===
+        createPBRDetailMaps();
         envMap = createEnvironmentMap();
         scene.environment = envMap;
         setupComposer();
 
         buildExterior('arrival');
+        updatePlaybackModeUI();
+        setLyricsPanel('mini', false);
+        setLyricsPanel('full', false);
         $('back-button').style.visibility = 'hidden';
         $('home-button').style.visibility = 'hidden';
         appReady = true;
@@ -1849,9 +2648,9 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5) * renderQualityScale);
       if (composer) {
-        composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.8));
+        composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25) * renderQualityScale);
         composer.setSize(window.innerWidth, window.innerHeight);
       }
     });
